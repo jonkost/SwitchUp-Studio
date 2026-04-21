@@ -6580,12 +6580,6 @@ body {
   visibility: visible;
 }
 
-#key-type-row .key-mode-sep,
-#key-type-row .key-mode-sep::before {
-  background: none !important;
-  box-shadow: none !important;
-}
-
 #hotkey-splash {
   top: calc(100% + 14px) !important;
   width: min(720px, 92vw) !important;

@@ -701,18 +701,18 @@
 }
 
 .me-memory-slot.me-memory-slot-target-store {
-	border-color: rgba(245,166,35,0.68);
-	color: #ffd48a;
+	color: #f5a623 !important;
+	font-weight: 800 !important;
 }
 
 .me-memory-slot.me-memory-slot-target-recall {
-	border-color: rgba(10,132,255,0.68);
-	color: #9cccff;
+	color: #f5a623 !important;
+	font-weight: 800 !important;
 }
 
 .me-memory-slot.me-memory-slot-filled::after {
-	content: '';
-	display: block;
+	content: none;
+	display: none;
 	width: 4px;
 	height: 4px;
 	border-radius: 999px;
@@ -1636,11 +1636,11 @@
 		}
 
 		.mv-large.pgm-box .mv-label {
-			background: #cc0000;
+			background: rgba(204,0,0,0.60);
 		}
 
 		.mv-large.pvw-box .mv-label {
-			background: #00aa00;
+			background: rgba(0,170,0,0.60);
 		}
 
 		.mv-source-name {
@@ -7267,12 +7267,12 @@ body {
 }
 
 .mv-large.pgm-box .mv-label {
-  background: var(--vs-red-deep) !important;
+  background: rgba(204,0,0,0.60) !important;
   color: #fff !important;
 }
 
 .mv-large.pvw-box .mv-label {
-  background: var(--vs-green-deep) !important;
+  background: rgba(0,170,0,0.60) !important;
   color: #fff !important;
 }
 
@@ -8929,11 +8929,13 @@ body {
   font-family: 'Inter', sans-serif !important;
 }
 .dve-slider-val, .dve-crop-val, .dve-w-val {
-  font-family: 'Share Tech Mono', 'Courier New', monospace !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;
 }
 .dve-pos-readout {
-  font-family: 'Share Tech Mono', 'Courier New', monospace !important;
-  font-size: 10px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
 }
 .dve-dpad-center {
   font-family: 'Inter', sans-serif !important;
@@ -9675,4 +9677,41 @@ body {
 #dve-slot.dve-slot-configured .dve-slot-meta,
 #dve-slot.dve-slot-configured .dve-slot-name {
   color: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* ── Memory slot armed indicator — orange number only ── */
+.me-memory-btn.me-memory-slot.me-memory-slot-target-store,
+.me-memory-btn.me-memory-slot.me-memory-slot-target-recall {
+  color: #f5a623 !important;
+  font-weight: 800 !important;
+  border-color: inherit !important;
+  background: inherit !important;
+  box-shadow: none !important;
+}
+
+/* ── Banner toggle — hide PGM/PVW labels ── */
+.banners-hidden .mv-label {
+  display: none !important;
+}
+
+/* ── DVE inline type-in inputs ── */
+.dve-inline-input {
+  width: 44px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+  color: #f5a623;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  padding: 1px 3px;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.dve-inline-input::-webkit-outer-spin-button,
+.dve-inline-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.dve-inline-input-pos {
+  width: 36px;
+  font-size: 11px;
 }

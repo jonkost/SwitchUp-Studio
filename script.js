@@ -366,6 +366,7 @@
     dveMoreWindowOpen: false,
     dveUndoStack: [],
     actionUndoStack: [],
+    bannersVisible: true,
   };
 
 
@@ -571,6 +572,7 @@
     menuResetAction: $('menu-action-reset'),
     menuUndoDveAction: $('menu-action-undo-dve'),
     menuResetDveAction: $('menu-action-reset-dve'),
+    menuBannersAction: $('menu-action-banners'),
     meMemoryStoreButtons: {
       ME_PP: $('me-pp-store'),
       ME1: $('me-1-store'),
@@ -2087,7 +2089,7 @@
     const dsk = targetBus.dskState[snapshot.activeDSK];
     dsk.dveX = clamp(parseInt(snapshot.dveX, 10) || 50, 0, 100);
     dsk.dveY = clamp(parseInt(snapshot.dveY, 10) || 50, 0, 100);
-    dsk.dveSize = clamp(parseInt(snapshot.dveSize, 10) || DEFAULT_DVE_SIZE, 15, 100);
+    dsk.dveSize = clamp(parseInt(snapshot.dveSize, 10) || DEFAULT_DVE_SIZE, 1, 100);
     dsk.dveBorderEnabled = !!snapshot.dveBorderEnabled;
     dsk.dveBorderWidth = clamp(parseInt(snapshot.dveBorderWidth, 10) || DEFAULT_DVE_BORDER_WIDTH, 1, 16);
     dsk.dveBorderColor = snapshot.dveBorderColor || DEFAULT_DVE_BORDER_COLOR;
@@ -2133,8 +2135,11 @@
     const isConfigured = !!state.activeDveEnabled;
     dom.dveSlot.classList.toggle('dve-slot-configured', isConfigured);
     if (dom.dveSlotMeta) {
+      const cropH = dsk.dveCropH || DEFAULT_DVE_CROP_H;
+      const cropV = dsk.dveCropV || DEFAULT_DVE_CROP_V;
+      const cropPart = (cropH > 0 || cropV > 0) ? `  ·  H:${cropH}  V:${cropV}` : '';
       dom.dveSlotMeta.textContent = isConfigured
-        ? `X:${dsk.dveX}  Y:${dsk.dveY}  ·  ${dsk.dveSize}%`
+        ? `X:${dsk.dveX}  Y:${dsk.dveY}  ·  ${dsk.dveSize}%${cropPart}`
         : 'Not configured';
     }
     if (dom.dveEdBadge) {
@@ -2161,8 +2166,8 @@
   function syncEditorSliders() {
     const dsk = currentDsk();
 
-    // Scale: map dveSize (15-100) to percentage of track (pct = (val-15)/(100-15)*100)
-    const scalePct = Math.round(((dsk.dveSize - 15) / 85) * 100);
+    // Scale: dveSize 0-100 maps directly to track pct
+    const scalePct = clamp(dsk.dveSize, 0, 100);
     dveSetTrack('scale', scalePct);
     const scaleValEl = document.getElementById('dve-ed-scale-val');
     if (scaleValEl) scaleValEl.innerHTML = `${dsk.dveSize}<span class="u">%</span>`;
@@ -2318,14 +2323,24 @@
     updateDVESlot();
   }
 
+  function nudgeToNextStop(current, forward) {
+    const stops = [0, 25, 50, 75, 100];
+    if (forward) {
+      const next = stops.find(s => s > current + 1);
+      return next !== undefined ? next : current;
+    }
+    const below = stops.filter(s => s < current - 1);
+    return below.length ? below[below.length - 1] : current;
+  }
+
   function nudgeDVE(direction) {
     const dsk = currentDsk();
     pushDVEUndoState();
 
-    if (direction === 'up') dsk.dveY = Math.max(0, dsk.dveY - NUDGE_STEP);
-    if (direction === 'down') dsk.dveY = Math.min(100, dsk.dveY + NUDGE_STEP);
-    if (direction === 'left') dsk.dveX = Math.max(0, dsk.dveX - NUDGE_STEP);
-    if (direction === 'right') dsk.dveX = Math.min(100, dsk.dveX + NUDGE_STEP);
+    if (direction === 'up') dsk.dveY = nudgeToNextStop(dsk.dveY, false);
+    if (direction === 'down') dsk.dveY = nudgeToNextStop(dsk.dveY, true);
+    if (direction === 'left') dsk.dveX = nudgeToNextStop(dsk.dveX, false);
+    if (direction === 'right') dsk.dveX = nudgeToNextStop(dsk.dveX, true);
     if (direction === 'center') {
       dsk.dveX = 50;
       dsk.dveY = 50;
@@ -2354,12 +2369,11 @@
   }
 
   function setDVESize(value) {
-    const size = parseInt(value, 10);
+    const size = clamp(parseInt(value, 10) || 0, 1, 100);
     if (size === currentDsk().dveSize) return;
     pushDVEUndoState();
     currentDsk().dveSize = size;
-    const scalePct = Math.round(((size - 15) / 85) * 100);
-    dveSetTrack('scale', scalePct);
+    dveSetTrack('scale', size);
     const scaleEl = document.getElementById('dve-ed-scale-val');
     if (scaleEl) scaleEl.innerHTML = `${size}<span class="u">%</span>`;
     updateDVESlot();
@@ -2421,8 +2435,8 @@
   }
 
   function adjustDVESize(delta) {
-    const min = parseInt(dom.dveSizeSlider.min, 10) || 15;
-    const max = parseInt(dom.dveSizeSlider.max, 10) || 100;
+    const min = 1;
+    const max = 100;
     const nextSize = Math.max(min, Math.min(max, currentDsk().dveSize + delta));
     if (nextSize === currentDsk().dveSize) return;
     dom.dveSizeSlider.value = nextSize;
@@ -2565,7 +2579,11 @@
     const borderMarkup = borderEnabled
       ? `<div aria-hidden="true" style="position:absolute;inset:0;clip-path:${cropInset};-webkit-clip-path:${cropInset};box-sizing:border-box;border:${borderWidth}px solid ${borderColor};pointer-events:none;"></div>`
       : '';
-    return `</div>${borderMarkup}</div></div>`;
+    const hasCrop = parseFloat(insetX) > 0 || parseFloat(insetY) > 0;
+    const cropBorderMarkup = hasCrop
+      ? `<div aria-hidden="true" style="position:absolute;top:${insetY}%;left:${insetX}%;right:${insetX}%;bottom:${insetY}%;border:2px dashed rgba(255,200,0,0.75);pointer-events:none;z-index:10;box-sizing:border-box;"></div>`
+      : '';
+    return `</div>${borderMarkup}${cropBorderMarkup}</div></div>`;
   }
 
   function applyLumaKey(data) {
@@ -2726,6 +2744,12 @@
     updateUtilityMenuActions();
   }
 
+  function toggleBannerVisibility() {
+    state.bannersVisible = !state.bannersVisible;
+    document.body.classList.toggle('banners-hidden', !state.bannersVisible);
+    updateUtilityMenuActions();
+  }
+
   function toggleShortcutHintState() {
     pushActionUndoState();
     setShortcutHintState(!state.shortcutHintsVisible);
@@ -2809,6 +2833,11 @@
       dom.menuResetAction.disabled = resetDisabled;
       setPressed(dom.menuResetAction, false);
     }
+
+    if (dom.menuBannersAction) {
+      setMenuActionCopy(dom.menuBannersAction, state.bannersVisible ? 'Hide PGM/PVW Labels' : 'Show PGM/PVW Labels', state.bannersVisible ? 'Hide the PROGRAM and PREVIEW banners from the multiviewer' : 'Show the PROGRAM and PREVIEW banners on the multiviewer', '', { toggle: true, on: !state.bannersVisible });
+      setPressed(dom.menuBannersAction, !state.bannersVisible);
+    }
   }
 
   function dismissHotkeySplash() {
@@ -2869,6 +2898,10 @@
         if (state.quizMode) return;
         dismissHotkeySplash();
         resetFreeplay();
+        break;
+      case 'banners':
+        dismissHotkeySplash();
+        toggleBannerVisibility();
         break;
       default:
         break;
@@ -2992,6 +3025,13 @@
   function resetFreeplay() {
     if (state.quizMode) return;
     pushActionUndoState();
+    state.macroSlots = Array.from({ length: MACRO_SLOT_COUNT }, () => null);
+    persistMacroSlots();
+    state.meMemorySlots = {
+      ME_PP: Array.from({ length: ME_MEMORY_SLOT_COUNT }, () => null),
+      ME1: Array.from({ length: ME_MEMORY_SLOT_COUNT }, () => null),
+    };
+    state.meMemoryMode = null;
     resetSwitcherState();
     scheduleLayout();
   }
@@ -4156,6 +4196,7 @@ function bindQuizDialogFocusLoop() {
       [dom.menuUndoDveAction, 'undo-dve'],
       [dom.menuResetDveAction, 'reset-dve'],
       [dom.menuResetAction, 'reset'],
+      [dom.menuBannersAction, 'banners'],
     ].forEach(([button, action]) => {
       if (!button) return;
       button.addEventListener('click', (event) => {
@@ -4324,6 +4365,81 @@ function bindQuizDialogFocusLoop() {
       });
     });
 
+    // Click-to-type value inputs for DVE
+    function makeDveValueEditable(elId, min, max, onSet) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.style.cursor = 'text';
+      el.title = 'Click to type a value';
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (el.querySelector('input')) return;
+        const cur = parseInt(el.textContent, 10) || 0;
+        const inp = document.createElement('input');
+        inp.type = 'number';
+        inp.min = min;
+        inp.max = max;
+        inp.value = cur;
+        inp.className = 'dve-inline-input';
+        el.innerHTML = '';
+        el.appendChild(inp);
+        inp.focus();
+        inp.select();
+        const commit = () => {
+          const v = clamp(parseInt(inp.value, 10) || cur, min, max);
+          onSet(v);
+        };
+        inp.addEventListener('blur', commit);
+        inp.addEventListener('keydown', (ke) => {
+          ke.stopPropagation();
+          if (ke.key === 'Enter') { commit(); inp.blur(); }
+          if (ke.key === 'Escape') { onSet(cur); inp.blur(); }
+        });
+      });
+    }
+
+    makeDveValueEditable('dve-ed-scale-val', 1, 100, setDVESize);
+    makeDveValueEditable('dve-crop-h-val', 0, 100, setDVECropH);
+    makeDveValueEditable('dve-crop-v-val', 0, 100, setDVECropV);
+
+    // Pos X / Y type-in via pos readout
+    const posReadout = document.getElementById('dve-pos-readout');
+    if (posReadout) {
+      posReadout.style.cursor = 'text';
+      posReadout.title = 'Click to type X Y values';
+      posReadout.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (posReadout.querySelector('input')) return;
+        const dsk = currentDsk();
+        posReadout.innerHTML = '';
+        const mkInp = (lbl, val, onSet) => {
+          const wrap = document.createElement('span');
+          wrap.style.cssText = 'display:inline-flex;align-items:center;gap:2px;';
+          const l = document.createElement('span');
+          l.className = 'cl';
+          l.textContent = lbl;
+          const inp = document.createElement('input');
+          inp.type = 'number';
+          inp.min = 0;
+          inp.max = 100;
+          inp.value = val;
+          inp.className = 'dve-inline-input dve-inline-input-pos';
+          inp.addEventListener('keydown', (ke) => {
+            ke.stopPropagation();
+            if (ke.key === 'Enter') { onSet(clamp(parseInt(inp.value, 10) || val, 0, 100)); }
+            if (ke.key === 'Escape') { updateDVEEditorCoords(); }
+          });
+          inp.addEventListener('blur', () => { onSet(clamp(parseInt(inp.value, 10) || val, 0, 100)); });
+          wrap.appendChild(l);
+          wrap.appendChild(inp);
+          return wrap;
+        };
+        posReadout.appendChild(mkInp('X', dsk.dveX, v => { currentDsk().dveX = v; updateDVECoordLabel(); updateDSKOverlays(); }));
+        posReadout.appendChild(document.createTextNode('\u00a0'));
+        posReadout.appendChild(mkInp('Y', dsk.dveY, v => { currentDsk().dveY = v; updateDVECoordLabel(); updateDSKOverlays(); }));
+      });
+    }
+
     // Custom drag sliders
     function setupDveSlider(sliderName, onValue) {
       const wrap = document.querySelector(`[data-dve-slider="${sliderName}"]`);
@@ -4345,17 +4461,24 @@ function bindQuizDialogFocusLoop() {
       window.addEventListener('touchend', () => { dragging = false; });
     }
 
-    // Scale: pct 0-100 maps to dveSize 15-100
+    // Scale: pct 0-100 maps directly to dveSize 1-100
     setupDveSlider('scale', pct => {
-      const size = Math.round(15 + (pct / 100) * 85);
+      const size = Math.max(1, Math.round(pct));
       const scaleEl = document.getElementById('dve-ed-scale-val');
       if (scaleEl) scaleEl.innerHTML = `${size}<span class="u">%</span>`;
       if (currentDsk().dveSize !== size) { currentDsk().dveSize = size; updateDVESlot(); updateDSKOverlays(); }
     });
 
-    // Crop H: pct 0-100 maps directly
+    function snapCropToStop(raw) {
+      const stops = [0, 25, 50, 75, 100];
+      const SNAP = 5;
+      for (const s of stops) { if (Math.abs(raw - s) <= SNAP) return s; }
+      return Math.round(raw);
+    }
+
+    // Crop H: pct 0-100 maps directly, snaps to stops
     setupDveSlider('crop-h', pct => {
-      const v = Math.round(pct);
+      const v = snapCropToStop(pct);
       const el = document.getElementById('dve-crop-h-val');
       if (el) el.innerHTML = `${v}<span class="u">%</span>`;
       if ((currentDsk().dveCropH || 0) !== v) { currentDsk().dveCropH = v; updateDSKOverlays(); }
@@ -4363,7 +4486,7 @@ function bindQuizDialogFocusLoop() {
 
     // Crop V
     setupDveSlider('crop-v', pct => {
-      const v = Math.round(pct);
+      const v = snapCropToStop(pct);
       const el = document.getElementById('dve-crop-v-val');
       if (el) el.innerHTML = `${v}<span class="u">%</span>`;
       if ((currentDsk().dveCropV || 0) !== v) { currentDsk().dveCropV = v; updateDSKOverlays(); }
@@ -4455,6 +4578,7 @@ function bindQuizDialogFocusLoop() {
     assignMediaTransitionToSlot,
     armMediaTransitionSlot,
     setMode,
+    toggleBannerVisibility,
     submitQuizName,
     backToNameEntry,
     selectQuizLevel,

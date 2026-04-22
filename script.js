@@ -45,9 +45,9 @@
   const ME1_SOURCE_INDEX = SOURCES.indexOf('ME1');
   const SURFACE_DISPLAY_NAMES = Object.freeze({ ME_PP: 'ME P/P', ME1: 'ME 1' });
   const MACRO_SLOT_COUNT = 4;
-  const MACRO_STORAGE_KEY = 'virtual_switcher_macro_slots_v642';
+  const MACRO_STORAGE_KEY = 'switchup_studio_macro_slots_v6517';
   const ME_MEMORY_SLOT_COUNT = 4;
-  const LEGACY_MACRO_STORAGE_KEYS = Object.freeze(['virtual_switcher_macro_slots_v641', 'virtual_switcher_macro_slots_v6218', 'virtual_switcher_macro_slots_v6217']);
+  const LEGACY_MACRO_STORAGE_KEYS = Object.freeze(['virtual_switcher_macro_slots_v642', 'virtual_switcher_macro_slots_v641', 'virtual_switcher_macro_slots_v6218', 'virtual_switcher_macro_slots_v6217']);
 
   const SOURCE_IMAGES = Object.freeze({
     'CAM 1': 'assets/cam-1.png',
@@ -3843,7 +3843,7 @@ const RUN_THE_SHOW = {
       : `${state.quizScore}/${total}`;
 
     const formData = {
-      _subject: `Virtual Switcher — ${state.practiceQuiz ? 'Practice ' : ''}${level} — ${state.quizName}${state.quizClass ? ` — ${state.quizClass}` : ''} — ${scoreText}`,
+      _subject: `SwitchUp Studio — ${state.practiceQuiz ? 'Practice ' : ''}${level} — ${state.quizName}${state.quizClass ? ` — ${state.quizClass}` : ''} — ${scoreText}`,
       student_name: state.quizName,
       class_name: state.quizClass || 'Not provided',
       quiz_level: level,

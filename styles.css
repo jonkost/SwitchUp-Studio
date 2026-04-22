@@ -1,4 +1,4 @@
-/* Extracted from virtual_switcher_v3_7.html for easier maintenance */
+/* SwitchUp Studio — stylesheet */
 
 		@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -2914,6 +2914,60 @@
 	font-size: 11px;
 	line-height: 1.4;
 	color: #767c88;
+}
+
+.menu-license-body {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.menu-license-title {
+	font-family: 'Inter', sans-serif;
+	font-size: 12px;
+	font-weight: 700;
+	color: #c8cdd8;
+	letter-spacing: 0.02em;
+}
+
+.menu-license-copy {
+	font-family: 'Inter', sans-serif;
+	font-size: 11px;
+	line-height: 1.55;
+	color: #767c88;
+}
+
+.menu-license-terms {
+	margin: 0;
+	padding-left: 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	font-family: 'Inter', sans-serif;
+	font-size: 11px;
+	line-height: 1.5;
+	color: #767c88;
+}
+
+.menu-license-terms strong {
+	color: #9ba3b0;
+	font-weight: 600;
+}
+
+.menu-license-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-family: 'Inter', sans-serif;
+	font-size: 11px;
+	font-weight: 600;
+	color: rgba(255, 188, 59, 0.8);
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+
+.menu-license-link:hover {
+	color: rgba(255, 188, 59, 1);
 }
 
 .menu-action-list {
@@ -5986,8 +6040,15 @@ body {
 }
 
 #welcome-title {
-  letter-spacing: 0.18em;
-  font-size: clamp(28px, 4vw, 44px);
+  font-size: clamp(38px, 5.5vw, 62px);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  background: linear-gradient(160deg, #ffffff 20%, rgba(255, 188, 59, 0.9) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 28px rgba(255, 188, 59, 0.25));
 }
 
 #welcome-sub {
@@ -6579,6 +6640,7 @@ body {
   opacity: 1;
   visibility: visible;
 }
+
 
 #hotkey-splash {
   top: calc(100% + 14px) !important;

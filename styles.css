@@ -1002,8 +1002,8 @@
 		}
 
 		/* ============ QUIZ NAME INPUT ============ */
-		#quiz-name-overlay {
-		#lesson-name-overlay {
+		#quiz-name-overlay,
+				#lesson-name-overlay {
 			display: none;
 			position: fixed;
 			top: 0;
@@ -1017,13 +1017,13 @@
 			padding: 20px;
 		}
 
-		#quiz-name-overlay.show {
-		#lesson-name-overlay.show {
+		#quiz-name-overlay.show,
+				#lesson-name-overlay.show {
 			display: flex;
 		}
 
-		#quiz-name-dialog {
-		#lesson-name-dialog {
+		#quiz-name-dialog,
+				#lesson-name-dialog {
 			background: #18181c;
 			border: 2px solid #555;
 			border-radius: 10px;
@@ -1035,8 +1035,8 @@
 			outline: none;
 		}
 
-		#quiz-name-input {
-		#lesson-name-input {
+		#quiz-name-input,
+				#lesson-name-input {
 			width: 100%;
 			padding: 14px;
 			font-family: 'Inter', sans-serif;
@@ -1050,20 +1050,20 @@
 			margin-bottom: 16px;
 		}
 
-		#quiz-name-input:focus {
-		#lesson-name-input:focus {
+		#quiz-name-input:focus,
+				#lesson-name-input:focus {
 			border-color: #f5a623;
 			box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.3);
 		}
 
-		#quiz-name-input.input-error {
-		#lesson-name-input.input-error {
+		#quiz-name-input.input-error,
+				#lesson-name-input.input-error {
 			border-color: #cc0000;
 			box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.2);
 		}
 
-		#quiz-name-input::placeholder {
-		#lesson-name-input::placeholder {
+		#quiz-name-input::placeholder,
+				#lesson-name-input::placeholder {
 			color: #888;
 		}
 
@@ -1096,8 +1096,8 @@
 			outline-offset: 2px !important;
 		}
 
-		#quiz-class-input {
-		#lesson-class-input {
+		#quiz-class-input,
+				#lesson-class-input {
 			width: 100%;
 			padding: 14px;
 			font-family: 'Inter', sans-serif;
@@ -1111,14 +1111,14 @@
 			margin-bottom: 16px;
 		}
 
-		#quiz-class-input:focus {
-		#lesson-class-input:focus {
+		#quiz-class-input:focus,
+				#lesson-class-input:focus {
 			border-color: #f5a623;
 			box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.3);
 		}
 
-		#quiz-class-input::placeholder {
-		#lesson-class-input::placeholder {
+		#quiz-class-input::placeholder,
+				#lesson-class-input::placeholder {
 			color: #888;
 		}
 
@@ -1137,8 +1137,8 @@
 			padding: 10px;
 		}
 
-		#quiz-name-btn {
-		#lesson-name-btn {
+		#quiz-name-btn,
+				#lesson-name-btn {
 			font-family: 'Inter', sans-serif;
 			font-size: 16px;
 			font-weight: 700;
@@ -1155,19 +1155,19 @@
 			transition: all 0.2s;
 		}
 
-		#quiz-name-btn:hover {
-		#lesson-name-btn:hover {
+		#quiz-name-btn:hover,
+				#lesson-name-btn:hover {
 			background: #e02020;
 		}
 
-		#quiz-name-btn:focus-visible {
-		#lesson-name-btn:focus-visible {
+		#quiz-name-btn:focus-visible,
+				#lesson-name-btn:focus-visible {
 			outline: 3px solid #ffffff;
 			outline-offset: 3px;
 		}
 
-		#quiz-name-back-btn {
-		#lesson-name-back-btn {
+		#quiz-name-back-btn,
+				#lesson-name-back-btn {
 			font-family: 'Inter', sans-serif;
 			font-size: 14px;
 			font-weight: 500;
@@ -1182,8 +1182,8 @@
 			min-height: 48px;
 		}
 
-		#quiz-name-back-btn:hover {
-		#lesson-name-back-btn:hover {
+		#quiz-name-back-btn:hover,
+				#lesson-name-back-btn:hover {
 			color: #cccccc;
 			border-color: #666;
 			background: #1a1a20;
@@ -5747,7 +5747,7 @@ textarea {
 
 #quiz-name-input.input-error,
 #lesson-name-input.input-error,
-#quiz-class-input.input-error {
+#quiz-class-input.input-error,
 #lesson-class-input.input-error {
   border-color: #cc0000 !important;
   box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.2) !important;
@@ -6044,7 +6044,7 @@ body {
 
 #wrapper { gap: 10px; }
 
-#multiviewer, #panel, #mode-bar, #quiz-bar, #lesson-bar, #macro-quick-bar, #welcome-dialog, #quiz-name-dialog, #quiz-level-dialog, #lesson-select-dialog, #quiz-results-dialog, #hotkey-splash, #media-modal-dialog {
+#multiviewer, #panel, #mode-bar, #quiz-bar, #lesson-bar, #macro-quick-bar, #welcome-dialog, #quiz-name-dialog, #quiz-level-dialog, #lesson-select-dialog, #quiz-results-dialog, #hotkey-splash, #media-modal-dialog,
 #multiviewer, #panel, #mode-bar, #quiz-bar, #lesson-bar, #macro-quick-bar, #welcome-dialog, #lesson-name-dialog, #quiz-level-dialog, #lesson-select-dialog, #quiz-results-dialog, #hotkey-splash, #media-modal-dialog {
   border-color: var(--ui-border) !important;
   box-shadow: var(--ui-shadow-sm);
@@ -6088,17 +6088,13 @@ body {
   border-radius: 14px;
 }
 
-#menu-btn, .mode-btn, .macro-slot-btn, .macro-quick-btn, .menu-action-btn, .me-memory-btn, .surface-btn, .media-nav-btn, .media-bank-picker-btn, .media-assign-btn, #quiz-name-btn, #quiz-name-back-btn, .quiz-action-btn, .level-btn, .src-btn, .trans-btn, .tie-btn, .dsk-btn, .dve-page-btn, .dve-reset-btn, .dve-more-close, .row-action-btn {
-#menu-btn, .mode-btn, .macro-slot-btn, .macro-quick-btn, .menu-action-btn, .me-memory-btn, .surface-btn, .media-nav-btn, .media-bank-picker-btn, .media-assign-btn, #quiz-name-btn, #lesson-name-back-btn, .quiz-action-btn, .level-btn, .src-btn, .trans-btn, .tie-btn, .dsk-btn, .dve-page-btn, .dve-reset-btn, .dve-more-close, .row-action-btn {
-#menu-btn, .mode-btn, .macro-slot-btn, .macro-quick-btn, .menu-action-btn, .me-memory-btn, .surface-btn, .media-nav-btn, .media-bank-picker-btn, .media-assign-btn, #lesson-name-btn, #quiz-name-back-btn, .quiz-action-btn, .level-btn, .src-btn, .trans-btn, .tie-btn, .dsk-btn, .dve-page-btn, .dve-reset-btn, .dve-more-close, .row-action-btn {
+#menu-btn, .mode-btn, .macro-slot-btn, .macro-quick-btn, .menu-action-btn, .me-memory-btn, .surface-btn, .media-nav-btn, .media-bank-picker-btn, .media-assign-btn, #quiz-name-btn, #quiz-name-back-btn, .quiz-action-btn, .level-btn, .src-btn, .trans-btn, .tie-btn, .dsk-btn, .dve-page-btn, .dve-reset-btn, .dve-more-close, .row-action-btn,
 #menu-btn, .mode-btn, .macro-slot-btn, .macro-quick-btn, .menu-action-btn, .me-memory-btn, .surface-btn, .media-nav-btn, .media-bank-picker-btn, .media-assign-btn, #lesson-name-btn, #lesson-name-back-btn, .quiz-action-btn, .level-btn, .src-btn, .trans-btn, .tie-btn, .dsk-btn, .dve-page-btn, .dve-reset-btn, .dve-more-close, .row-action-btn {
   border-radius: 12px !important;
   transition: transform .18s var(--ui-ease), background .18s var(--ui-ease), border-color .18s var(--ui-ease), color .18s var(--ui-ease), box-shadow .18s var(--ui-ease) !important;
 }
 
-.mode-btn, .me-memory-btn, .macro-slot-btn, .macro-quick-btn, .menu-action-btn, .surface-btn, .media-nav-btn, .media-bank-picker-btn, .media-assign-btn, #quiz-name-btn, #quiz-name-back-btn, .quiz-action-btn, .level-btn, .row-action-btn, .dve-page-btn, .dve-reset-btn, .dve-more-close {
-.mode-btn, .me-memory-btn, .macro-slot-btn, .macro-quick-btn, .menu-action-btn, .surface-btn, .media-nav-btn, .media-bank-picker-btn, .media-assign-btn, #quiz-name-btn, #lesson-name-back-btn, .quiz-action-btn, .level-btn, .row-action-btn, .dve-page-btn, .dve-reset-btn, .dve-more-close {
-.mode-btn, .me-memory-btn, .macro-slot-btn, .macro-quick-btn, .menu-action-btn, .surface-btn, .media-nav-btn, .media-bank-picker-btn, .media-assign-btn, #lesson-name-btn, #quiz-name-back-btn, .quiz-action-btn, .level-btn, .row-action-btn, .dve-page-btn, .dve-reset-btn, .dve-more-close {
+.mode-btn, .me-memory-btn, .macro-slot-btn, .macro-quick-btn, .menu-action-btn, .surface-btn, .media-nav-btn, .media-bank-picker-btn, .media-assign-btn, #quiz-name-btn, #quiz-name-back-btn, .quiz-action-btn, .level-btn, .row-action-btn, .dve-page-btn, .dve-reset-btn, .dve-more-close,
 .mode-btn, .me-memory-btn, .macro-slot-btn, .macro-quick-btn, .menu-action-btn, .surface-btn, .media-nav-btn, .media-bank-picker-btn, .media-assign-btn, #lesson-name-btn, #lesson-name-back-btn, .quiz-action-btn, .level-btn, .row-action-btn, .dve-page-btn, .dve-reset-btn, .dve-more-close {
   background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025)) !important;
   border: 1px solid var(--ui-border) !important;
@@ -6106,9 +6102,7 @@ body {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
-.mode-btn:hover, .me-memory-btn:hover, .macro-slot-btn:hover, .macro-quick-btn:hover, .menu-action-btn:hover, .surface-btn:hover, .media-nav-btn:hover, .media-bank-picker-btn:hover, .media-assign-btn:hover, #quiz-name-btn:hover, #quiz-name-back-btn:hover, .quiz-action-btn:hover, .level-btn:hover, .src-btn:hover, .trans-btn:hover, .tie-btn:hover, .dsk-btn:hover, .dve-page-btn:hover, .dve-reset-btn:hover, .dve-more-close:hover, .row-action-btn:hover, #menu-btn:hover {
-.mode-btn:hover, .me-memory-btn:hover, .macro-slot-btn:hover, .macro-quick-btn:hover, .menu-action-btn:hover, .surface-btn:hover, .media-nav-btn:hover, .media-bank-picker-btn:hover, .media-assign-btn:hover, #quiz-name-btn:hover, #lesson-name-back-btn:hover, .quiz-action-btn:hover, .level-btn:hover, .src-btn:hover, .trans-btn:hover, .tie-btn:hover, .dsk-btn:hover, .dve-page-btn:hover, .dve-reset-btn:hover, .dve-more-close:hover, .row-action-btn:hover, #menu-btn:hover {
-.mode-btn:hover, .me-memory-btn:hover, .macro-slot-btn:hover, .macro-quick-btn:hover, .menu-action-btn:hover, .surface-btn:hover, .media-nav-btn:hover, .media-bank-picker-btn:hover, .media-assign-btn:hover, #lesson-name-btn:hover, #quiz-name-back-btn:hover, .quiz-action-btn:hover, .level-btn:hover, .src-btn:hover, .trans-btn:hover, .tie-btn:hover, .dsk-btn:hover, .dve-page-btn:hover, .dve-reset-btn:hover, .dve-more-close:hover, .row-action-btn:hover, #menu-btn:hover {
+.mode-btn:hover, .me-memory-btn:hover, .macro-slot-btn:hover, .macro-quick-btn:hover, .menu-action-btn:hover, .surface-btn:hover, .media-nav-btn:hover, .media-bank-picker-btn:hover, .media-assign-btn:hover, #quiz-name-btn:hover, #quiz-name-back-btn:hover, .quiz-action-btn:hover, .level-btn:hover, .src-btn:hover, .trans-btn:hover, .tie-btn:hover, .dsk-btn:hover, .dve-page-btn:hover, .dve-reset-btn:hover, .dve-more-close:hover, .row-action-btn:hover, #menu-btn:hover,
 .mode-btn:hover, .me-memory-btn:hover, .macro-slot-btn:hover, .macro-quick-btn:hover, .menu-action-btn:hover, .surface-btn:hover, .media-nav-btn:hover, .media-bank-picker-btn:hover, .media-assign-btn:hover, #lesson-name-btn:hover, #lesson-name-back-btn:hover, .quiz-action-btn:hover, .level-btn:hover, .src-btn:hover, .trans-btn:hover, .tie-btn:hover, .dsk-btn:hover, .dve-page-btn:hover, .dve-reset-btn:hover, .dve-more-close:hover, .row-action-btn:hover, #menu-btn:hover {
   transform: translateY(-1px);
   border-color: var(--ui-border-strong) !important;
@@ -6164,7 +6158,7 @@ body {
 #dve-toggle::before, #media-bank-btn::before { display: none !important; }
 #dve-toggle, #media-bank-btn, #btn-cut, #btn-auto { justify-content: center; }
 
-.mode-btn.mode-active, .surface-btn.surface-btn-active, .media-bank-picker-btn.media-bank-picker-btn-active, #quiz-name-btn, .quiz-check-btn, .level-btn.selected-level, .menu-action-btn[aria-pressed="true"] {
+.mode-btn.mode-active, .surface-btn.surface-btn-active, .media-bank-picker-btn.media-bank-picker-btn-active, #quiz-name-btn, .quiz-check-btn, .level-btn.selected-level, .menu-action-btn[aria-pressed="true"],
 .mode-btn.mode-active, .surface-btn.surface-btn-active, .media-bank-picker-btn.media-bank-picker-btn-active, #lesson-name-btn, .quiz-check-btn, .level-btn.selected-level, .menu-action-btn[aria-pressed="true"] {
   background: linear-gradient(180deg, #f4f7ff 0%, #dfe7f7 100%) !important;
   color: #0b1018 !important;
@@ -6193,7 +6187,7 @@ body {
   border-color: rgba(255,255,255,0.7);
 }
 
-#quiz-name-dialog, #quiz-level-dialog {
+#quiz-name-dialog, #quiz-level-dialog,
 #lesson-name-dialog, #quiz-level-dialog {
   width: min(560px, 94vw);
   border-radius: 24px;
@@ -6212,7 +6206,7 @@ body {
 }
 
 #quiz-name-form { gap: 12px; }
-#quiz-name-dialog input {
+#quiz-name-dialog input,
 #lesson-name-dialog input {
   min-height: 48px;
   border-radius: 12px;
@@ -7394,7 +7388,7 @@ body {
 
 #quiz-name-input,
 #lesson-name-input,
-#quiz-class-input {
+#quiz-class-input,
 #lesson-class-input {
   border-radius: 14px !important;
   border: 1px solid rgba(255,255,255,0.10) !important;
@@ -7406,7 +7400,7 @@ body {
 
 #quiz-name-input::placeholder,
 #lesson-name-input::placeholder,
-#quiz-class-input::placeholder {
+#quiz-class-input::placeholder,
 #lesson-class-input::placeholder {
   color: #8792a5 !important;
 }
@@ -7837,7 +7831,7 @@ body {
 #lesson-name-btn,
 #quiz-name-btn:hover,
 #lesson-name-btn:hover,
-#quiz-name-btn:focus-visible {
+#quiz-name-btn:focus-visible,
 #lesson-name-btn:focus-visible {
   color: #11161d !important;
 }
@@ -9085,7 +9079,7 @@ body {
 }
 
 /* ── 3. QUIZ DIALOG — larger, fixed padding, CONTINUE always visible ── */
-#quiz-name-dialog, #quiz-level-dialog {
+#quiz-name-dialog, #quiz-level-dialog,
 #lesson-name-dialog, #quiz-level-dialog {
   width: min(640px, 96vw) !important;
   max-width: 640px !important;
@@ -9114,7 +9108,7 @@ body {
   color: var(--ds-ink-muted) !important;
   margin-bottom: -6px !important;
 }
-#quiz-name-dialog input, #quiz-name-dialog input:focus {
+#quiz-name-dialog input, #quiz-name-dialog input:focus,
 #lesson-name-dialog input, #lesson-name-dialog input:focus {
   min-height: 52px !important;
   font-size: 17px !important;
@@ -9145,7 +9139,7 @@ body {
   gap: 10px !important;
   margin-top: 6px !important;
 }
-#quiz-name-btn {
+#quiz-name-btn,
 #lesson-name-btn {
   min-height: 52px !important;
   border-radius: 12px !important;
@@ -9158,12 +9152,12 @@ body {
   visibility: visible !important;
 }
 /* The "disabled" state should show as dimmed, not hidden */
-#quiz-name-btn:disabled {
+#quiz-name-btn:disabled,
 #lesson-name-btn:disabled {
   opacity: 0.45 !important;
   cursor: not-allowed !important;
 }
-#quiz-name-back-btn {
+#quiz-name-back-btn,
 #lesson-name-back-btn {
   min-height: 52px !important;
   border-radius: 12px !important;
@@ -9374,7 +9368,7 @@ body {
 }
 
 /* Remove negative label margin that caused label/input overlap */
-#quiz-name-dialog .dialog-label {
+#quiz-name-dialog .dialog-label,
 #lesson-name-dialog .dialog-label {
   margin-bottom: 0 !important;
   text-align: center !important;
@@ -9383,25 +9377,25 @@ body {
 /* Remove old per-input bottom margins (redundant with flex gap) */
 #quiz-name-input,
 #lesson-name-input,
-#quiz-class-input {
+#quiz-class-input,
 #lesson-class-input {
   margin-bottom: 0 !important;
 }
 
 /* Center dialog heading and description */
-#quiz-name-dialog {
+#quiz-name-dialog,
 #lesson-name-dialog {
   text-align: center !important;
 }
-#quiz-name-dialog .dialog-heading {
+#quiz-name-dialog .dialog-heading,
 #lesson-name-dialog .dialog-heading {
   text-align: center !important;
 }
-#quiz-name-dialog .dialog-copy {
+#quiz-name-dialog .dialog-copy,
 #lesson-name-dialog .dialog-copy {
   text-align: center !important;
 }
-#quiz-name-dialog .dialog-note {
+#quiz-name-dialog .dialog-note,
 #lesson-name-dialog .dialog-note {
   text-align: center !important;
 }
@@ -9437,13 +9431,13 @@ body {
 }
 
 /* CONTINUE button — program green, stays visible on hover */
-#quiz-name-btn {
+#quiz-name-btn,
 #lesson-name-btn {
   background: linear-gradient(180deg, var(--vs-green) 0%, var(--vs-green-deep) 100%) !important;
   color: #fff !important;
   border-color: rgba(82, 232, 121, 0.55) !important;
 }
-#quiz-name-btn:hover {
+#quiz-name-btn:hover,
 #lesson-name-btn:hover {
   background: linear-gradient(180deg, #2fd45a 0%, #1e9e44 100%) !important;
   color: #fff !important;
@@ -9485,7 +9479,7 @@ body {
 }
 
 /* ── Note text below Practice Quiz: plain, no box ── */
-#quiz-name-dialog .dialog-note {
+#quiz-name-dialog .dialog-note,
 #lesson-name-dialog .dialog-note {
   background: transparent !important;
   border: none !important;
@@ -9498,7 +9492,7 @@ body {
 }
 
 /* ── 2. CONTINUE — full-width, stacked layout ── */
-#quiz-name-dialog .dialog-actions {
+#quiz-name-dialog .dialog-actions,
 #lesson-name-dialog .dialog-actions {
   grid-template-columns: 1fr !important;
   gap: 8px !important;
@@ -9695,7 +9689,7 @@ body {
 }
 
 /* ── Quiz CONTINUE button — text centered ── */
-#quiz-name-btn {
+#quiz-name-btn,
 #lesson-name-btn {
   justify-content: center !important;
   text-align: center !important;

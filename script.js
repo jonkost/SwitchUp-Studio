@@ -633,7 +633,6 @@
     quizNameInput: $('quiz-name-input'),
     quizClassInput: $('quiz-class-input'),
     quizPracticeToggle: $('quiz-practice-toggle'),
-    lessonPracticeToggle: $('lesson-practice-toggle'),
     quizLevelOverlay: $('quiz-level-overlay'),
     quizLevelDialog: $('quiz-level-dialog'),
     quizResultsOverlay: $('quiz-results-overlay'),
@@ -4357,18 +4356,6 @@ function bindQuizDialogFocusLoop() {
       });
     }
 
-    if (dom.lessonPracticeToggle) {
-      dom.lessonPracticeToggle.addEventListener('click', () => {
-        const nextPressed = dom.lessonPracticeToggle.getAttribute('aria-pressed') !== 'true';
-        dom.lessonPracticeToggle.setAttribute('aria-pressed', String(nextPressed));
-        dom.lessonPracticeToggle.classList.toggle('is-active', nextPressed);
-        // clear any input errors when toggling to practice
-        const ni = document.getElementById('lesson-name-input');
-        const ci = document.getElementById('lesson-class-input');
-        if (ni) ni.classList.remove('input-error');
-        if (ci) ci.classList.remove('input-error');
-      });
-    }
 
     // ── DVE editor shell wiring ─────────────────────────────────
 
@@ -5082,31 +5069,20 @@ function bindQuizDialogFocusLoop() {
 
   // Called when user submits name from the upfront form (shown on LESSONS click)
   function submitLessonName() {
-    const nameEl = document.getElementById('lesson-name-input');
+    const nameEl  = document.getElementById('lesson-name-input');
     const classEl = document.getElementById('lesson-class-input');
-    const practiceMode = !!(dom.lessonPracticeToggle && dom.lessonPracticeToggle.getAttribute('aria-pressed') === 'true');
+    const name = nameEl  ? nameEl.value.trim()  : '';
+    const cls  = classEl ? classEl.value.trim() : '';
 
-    if (!practiceMode) {
-      // Require both fields for tracked lessons
-      const name = nameEl ? nameEl.value.trim() : '';
-      const cls  = classEl ? classEl.value.trim() : '';
-      if (!name) { if (nameEl) nameEl.classList.add('input-error'); nameEl && nameEl.focus(); return; }
-      if (!cls)  { if (classEl) classEl.classList.add('input-error'); classEl && classEl.focus(); return; }
-      lessonState.studentName  = name;
-      lessonState.studentClass = cls;
-      lessonState.submitResults = true;
-    } else {
-      lessonState.studentName  = nameEl ? nameEl.value.trim() : '';
-      lessonState.studentClass = classEl ? classEl.value.trim() : '';
-      lessonState.submitResults = false;
-    }
-
+    // Both fields filled → track and submit results; either blank → practice only
+    lessonState.studentName   = name;
+    lessonState.studentClass  = cls;
+    lessonState.submitResults = !!(name && cls);
     lessonState.nameCollected = true;
 
     const ol = document.getElementById('lesson-name-overlay');
     if (ol) ol.classList.remove('show');
 
-    // Show lesson select next
     const select = document.getElementById('lesson-select-overlay');
     if (select) select.classList.add('show');
   }

@@ -209,10 +209,8 @@
 				<div id="lesson-name-heading" class="dialog-heading">GUIDED LESSONS</div>
 				<div id="lesson-name-desc" class="dialog-copy">Enter your name and class so your instructor receives your results. Leave blank to practice without submitting.</div>
 				<div id="lesson-name-form" class="dialog-form" role="group" aria-label="Student information">
-					<label for="lesson-name-input" class="dialog-label">Your Name</label>
-					<input type="text" id="lesson-name-input" name="lessonStudentName" placeholder="e.g. Jane Smith" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" enterkeyhint="next" />
-					<label for="lesson-class-input" class="dialog-label">Class</label>
-					<input type="text" id="lesson-class-input" name="lessonCourseSection" placeholder="e.g. AVT / Section A" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done" data-lpignore="true" data-form-type="other" />
+					<input type="text" id="lesson-name-input" name="lessonStudentName" placeholder="Your Name" aria-label="Your name" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" enterkeyhint="next" />
+					<input type="text" id="lesson-class-input" name="lessonCourseSection" placeholder="Class / Section" aria-label="Class or section" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done" data-lpignore="true" data-form-type="other" />
 					<div class="dialog-actions">
 						<button type="button" id="lesson-name-btn" onclick="submitLessonName()">CONTINUE</button>
 						<button type="button" id="lesson-name-back-btn" onclick="exitLessonMode()">← BACK TO FREEPLAY</button>

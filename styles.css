@@ -9361,10 +9361,11 @@ body {
 /* ── Quiz dialog cleanup ── */
 
 /* Fix form layout: flex column so gap works properly */
-#quiz-name-form {
+#quiz-name-form,
+#lesson-name-form {
   display: flex !important;
   flex-direction: column !important;
-  gap: 14px !important;
+  gap: 18px !important;
   margin-top: 16px !important;
 }
 

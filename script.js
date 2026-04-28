@@ -565,6 +565,7 @@
     hotkeySplashCloseButton: $('hotkey-splash-close'),
     utilityMenu: $('utility-menu'),
     menuFullscreenAction: $('menu-action-fullscreen'),
+    menuLessonsAction: $('menu-action-lessons'),
     menuModeAction: $('menu-action-mode'),
     menuSurfaceAction: $('menu-action-surface'),
     menuMediaAction: $('menu-action-media'),
@@ -632,6 +633,7 @@
     quizNameInput: $('quiz-name-input'),
     quizClassInput: $('quiz-class-input'),
     quizPracticeToggle: $('quiz-practice-toggle'),
+    lessonPracticeToggle: $('lesson-practice-toggle'),
     quizLevelOverlay: $('quiz-level-overlay'),
     quizLevelDialog: $('quiz-level-dialog'),
     quizResultsOverlay: $('quiz-results-overlay'),
@@ -1760,6 +1762,7 @@
     state.pgmIndex = index;
     updateMainBusUI();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function selectPvw(index) {
@@ -1768,6 +1771,7 @@
     state.pvwIndex = index;
     updateMainBusUI();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function swapProgramAndPreview() {
@@ -1944,6 +1948,7 @@
     updateMainBusUI();
     updateDSKUI();
     maybeResolveRunTheShow(true);
+    lessonCheckInteraction();
   }
 
   function nextPaint() {
@@ -2030,6 +2035,7 @@
       resetDissolveLayers();
       updateMainBusUI();
       updateDSKUI();
+      lessonCheckInteraction();
     }
   }
 
@@ -2787,6 +2793,11 @@
       setPressed(dom.menuFullscreenAction, fullscreenActive);
     }
 
+    if (dom.menuLessonsAction) {
+      setMenuActionCopy(dom.menuLessonsAction, 'Open Lessons', 'Step-by-step guided training with Watch and Drive modes');
+      setPressed(dom.menuLessonsAction, false);
+    }
+
     if (dom.menuModeAction) {
       setMenuActionCopy(dom.menuModeAction, state.quizMode ? 'Return to Freeplay' : 'Open Quiz Mode', state.quizMode ? 'Leave the active quiz workflow' : 'Switch from practice mode into scoring', '', { toggle: true, on: state.quizMode });
       setPressed(dom.menuModeAction, state.quizMode);
@@ -2863,6 +2874,10 @@
       case 'fullscreen':
         toggleFullscreen();
         dismissHotkeySplash();
+        break;
+      case 'lessons':
+        dismissHotkeySplash();
+        enterLessonMode();
         break;
       case 'mode':
         dismissHotkeySplash();
@@ -4189,6 +4204,7 @@ function bindQuizDialogFocusLoop() {
 
     [
       [dom.menuFullscreenAction, 'fullscreen'],
+      [dom.menuLessonsAction, 'lessons'],
       [dom.menuModeAction, 'mode'],
       [dom.menuSurfaceAction, 'surface'],
       [dom.menuMediaAction, 'media'],
@@ -4338,6 +4354,19 @@ function bindQuizDialogFocusLoop() {
         setPracticeQuizToggle(nextPressed);
         dom.quizNameInput.classList.remove('input-error');
         dom.quizClassInput.classList.remove('input-error');
+      });
+    }
+
+    if (dom.lessonPracticeToggle) {
+      dom.lessonPracticeToggle.addEventListener('click', () => {
+        const nextPressed = dom.lessonPracticeToggle.getAttribute('aria-pressed') !== 'true';
+        dom.lessonPracticeToggle.setAttribute('aria-pressed', String(nextPressed));
+        dom.lessonPracticeToggle.classList.toggle('is-active', nextPressed);
+        // clear any input errors when toggling to practice
+        const ni = document.getElementById('lesson-name-input');
+        const ci = document.getElementById('lesson-class-input');
+        if (ni) ni.classList.remove('input-error');
+        if (ci) ci.classList.remove('input-error');
       });
     }
 
@@ -4533,6 +4562,768 @@ function bindQuizDialogFocusLoop() {
     bindEvents();
   }
 
+  // ============================================================
+  //  LESSON ENGINE — SwitchUp Studio
+  // ============================================================
+
+  const LESSON_STEPS = {
+    1: [
+
+      // ── WATCH — Interface overview ──────────────────────────────
+
+      {
+        id: 'welcome',
+        watchOnly: true,
+        instruction: 'Welcome to Lesson 1. You\'ll learn the switcher layout, how to ready sources, cut and dissolve between cameras, use hotkeys to work faster, and take the show to black.',
+        highlight: [],
+        delay: 5500,
+      },
+      {
+        id: 'multiviewer',
+        watchOnly: true,
+        instruction: 'At the top is the MULTIVIEWER. PREVIEW (green border) is what\'s ready next. PROGRAM (red border) is what\'s live on air right now. Nothing goes to air until you take action.',
+        highlight: ['multiviewer'],
+        delay: 5500,
+      },
+      {
+        id: 'thumbnails',
+        watchOnly: true,
+        instruction: 'Below the multiviewer are source thumbnails — CAM 1, CAM 2, CAM 3, CPU, GFX, M1, M2, ME1, BLK, and BARS. These give you a visual reference of every source available to the switcher.',
+        highlight: ['mv-grid'],
+        delay: 5000,
+      },
+
+      // ── WATCH — PVW and PGM live demo ──────────────────────────
+
+      {
+        id: 'pvw-explained',
+        watchOnly: true,
+        instruction: 'The PREVIEW row (PVW) is where you select your next shot. Watch — CAM 1 is being readied in Preview. The green highlight shows what\'s on deck.',
+        highlight: ['pvw-row'],
+        delay: 5000,
+        demo: () => { selectPvw(0); },
+      },
+      {
+        id: 'pgm-explained',
+        watchOnly: true,
+        instruction: 'The PROGRAM row (PGM) shows what is live right now — highlighted in red. Watch — CAM 1 cuts from Preview to Program. The switcher is live.',
+        highlight: ['pgm-row'],
+        delay: 5000,
+        demo: () => { doCut(); },
+      },
+
+      // ── WATCH — CUT live demo ───────────────────────────────────
+
+      {
+        id: 'cut-explained',
+        watchOnly: true,
+        instruction: 'CUT is an instant switch — no blend, just a hard take. Watch: CAM 2 is readied in Preview, then CUT takes it live immediately.',
+        highlight: ['btn-cut'],
+        delay: 6000,
+        demo: () => {
+          selectPvw(1);
+          setTimeout(() => { doCut(); }, 1800);
+        },
+      },
+
+      // ── WATCH — AUTO live demo ──────────────────────────────────
+
+      {
+        id: 'auto-explained',
+        watchOnly: true,
+        instruction: 'AUTO performs a smooth dissolve between sources. Watch: CAM 3 is readied in Preview, then AUTO blends it onto Program. Use this for elegant transitions.',
+        highlight: ['btn-auto'],
+        delay: 6500,
+        demo: () => {
+          selectPvw(2);
+          setTimeout(() => { doDissolve(); }, 1800);
+        },
+      },
+
+      // ── WATCH — Hotkeys ─────────────────────────────────────────
+
+      {
+        id: 'hotkeys-intro',
+        watchOnly: true,
+        instruction: 'Pro operators use keyboard hotkeys to work without reaching for the mouse. SwitchUp Studio has shortcuts for every major action — learn them and your speed doubles.',
+        highlight: [],
+        delay: 5000,
+      },
+      {
+        id: 'hotkey-cut-auto',
+        watchOnly: true,
+        instruction: 'The two most important hotkeys: press  <  (left angle bracket) to CUT instantly. Press  >  (right angle bracket) to AUTO dissolve. These are your bread-and-butter moves.',
+        highlight: ['btn-cut', 'btn-auto'],
+        delay: 6000,
+      },
+      {
+        id: 'hotkey-surface',
+        watchOnly: true,
+        instruction: 'Press  M  to switch between the ME P/P bus and ME 1 bus. The Surface panel shows which mix bus you\'re controlling at any time.',
+        highlight: ['surface-mepp', 'surface-me1'],
+        delay: 5500,
+      },
+      {
+        id: 'hotkey-dve-media',
+        watchOnly: true,
+        instruction: 'Press  D  to toggle the DVE (picture-in-picture). Press  B  to open the Media Bank for loading graphics. Use  ⌘Z  to undo your last action.',
+        highlight: ['dve-toggle', 'media-bank-btn'],
+        delay: 5500,
+      },
+
+      // ── WATCH — Going to black live demo ────────────────────────
+
+      {
+        id: 'black-intro',
+        watchOnly: true,
+        instruction: 'Every show starts and ends on BLACK. Select BLK in the Preview row before fading up at the top of the show — or when wrapping. Watch — BLK is being readied in Preview.',
+        highlight: ['pvw-btn-8'],
+        delay: 5500,
+        demo: () => { selectPvw(8); },
+      },
+      {
+        id: 'black-dissolve',
+        watchOnly: true,
+        instruction: 'Watch — dissolving to BLACK fades the show clean. This is your show-ender. AUTO or the > hotkey does the job. Drive mode is next — your turn to take the wheel.',
+        highlight: ['btn-auto'],
+        delay: 6000,
+        demo: () => { setTimeout(() => { doDissolve(); }, 1200); },
+      },
+
+      // ── DRIVE — Student operates the switcher ───────────────────
+
+      {
+        id: 'drive-intro-cam1-pvw',
+        instruction: 'DRIVE MODE — you\'re in control. Start by readying CAM 1 on Preview. Select CAM 1 in the PVW row.',
+        highlight: ['pvw-btn-0'],
+        check: () => state.pvwIndex === 0,
+        hint: 'Look at the PREVIEW row and tap CAM 1.',
+      },
+      {
+        id: 'drive-cut-cam1',
+        instruction: 'CAM 1 is on Preview. Take it live with a CUT. Press the CUT button — or use the  <  hotkey on your keyboard.',
+        highlight: ['btn-cut'],
+        check: () => state.pgmIndex === 0,
+        hint: 'Press the CUT button, or hit the < key on your keyboard.',
+      },
+      {
+        id: 'drive-cam2-pvw',
+        instruction: 'Good cut! Now ready CAM 2 on Preview for your next shot.',
+        highlight: ['pvw-btn-1'],
+        check: () => state.pvwIndex === 1,
+        hint: 'Select CAM 2 in the Preview row.',
+      },
+      {
+        id: 'drive-dissolve-cam2',
+        instruction: 'CAM 2 is on Preview. Dissolve to it smoothly using AUTO — or press the  >  hotkey.',
+        highlight: ['btn-auto'],
+        check: () => state.pgmIndex === 1,
+        hint: 'Press AUTO, or hit the > key on your keyboard.',
+      },
+      {
+        id: 'drive-cam3-pvw',
+        instruction: 'Nice dissolve. Now ready CAM 3 on Preview.',
+        highlight: ['pvw-btn-2'],
+        check: () => state.pvwIndex === 2,
+        hint: 'Select CAM 3 in the Preview row.',
+      },
+      {
+        id: 'drive-cut-cam3',
+        instruction: 'CUT to CAM 3. Hard take — no dissolve. CUT button or  <  key.',
+        highlight: ['btn-cut'],
+        check: () => state.pgmIndex === 2,
+        hint: 'Press CUT, or hit the < key.',
+      },
+      {
+        id: 'drive-blk-pvw',
+        instruction: 'Time to wrap the segment. Ready BLACK on Preview — select BLK in the PVW row.',
+        highlight: ['pvw-btn-8'],
+        check: () => state.pvwIndex === 8,
+        hint: 'Select BLK in the Preview row.',
+      },
+      {
+        id: 'drive-dissolve-blk',
+        instruction: 'Fade to black. Use AUTO — or the  >  hotkey — to dissolve the show to black.',
+        highlight: ['btn-auto'],
+        check: () => state.pgmIndex === 8,
+        hint: 'Press AUTO or hit > to fade to black.',
+      },
+      {
+        id: 'complete',
+        watchOnly: true,
+        instruction: '🎉 Lesson 1 complete! You know the layout, CUT and AUTO transitions, the key hotkeys, and how to fade to black. You\'re ready to run a show.',
+        highlight: [],
+        delay: 0,
+      },
+    ],
+  };
+
+  const lessonState = {
+    active: false,
+    lessonId: null,
+    stepIndex: 0,
+    watchMode: true,
+    watchTimer: null,
+    steps: [],
+    overlayVisible: false,
+    // Progress tracking
+    watchCompleted: false,   // true once user has finished Watch
+    driveStarted: false,     // true once Drive mode has been entered at least once
+    nameCollected: false,    // true once name overlay was submitted/skipped (session-wide)
+    lessonStartTime: null,   // Date.now() when lesson begins (Watch start)
+    driveStartTime: null,    // Date.now() when Drive begins (for per-step timing)
+    submitResults: false,    // true if student filled in name (wants to submit)
+    studentName: '',
+    studentClass: '',
+    stepLog: [],             // [{ id, attempts, timeMs }] per drive step
+    _driveStepStart: null,   // timestamp of current drive step start
+    _driveMistakes: {},      // { stepId: count }
+    _advancing: false,       // true while waiting for the 600ms advance delay
+  };
+
+  function getLessonSteps(id) {
+    return LESSON_STEPS[id] || [];
+  }
+
+  function currentLessonStep() {
+    return lessonState.steps[lessonState.stepIndex] || null;
+  }
+
+  function lessonHighlightElements(ids) {
+    document.querySelectorAll('.lesson-highlight').forEach((el) => {
+      el.classList.remove('lesson-highlight');
+    });
+    if (!ids || !ids.length) return;
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('lesson-highlight');
+      if (id === 'pvw-row' || id === 'pgm-row') {
+        const row = document.getElementById(id);
+        if (row) row.classList.add('lesson-highlight-row');
+      }
+    });
+  }
+
+  function lessonClearHighlights() {
+    document.querySelectorAll('.lesson-highlight, .lesson-highlight-row').forEach((el) => {
+      el.classList.remove('lesson-highlight', 'lesson-highlight-row');
+    });
+  }
+
+  function lessonWiggle(el) {
+    if (!el) return;
+    el.classList.remove('lesson-wiggle');
+    void el.offsetWidth;
+    el.classList.add('lesson-wiggle');
+    el.addEventListener('animationend', () => el.classList.remove('lesson-wiggle'), { once: true });
+  }
+
+  function updateLessonBar() {
+    const step = currentLessonStep();
+    const bar = document.getElementById('lesson-bar');
+    const instruction = document.getElementById('lesson-instruction');
+    const progress = document.getElementById('lesson-progress');
+    const nextBtn = document.getElementById('lesson-next-btn');
+    const hintBtn = document.getElementById('lesson-hint-btn');
+    const watchBtn = document.getElementById('lesson-watch-btn');
+    const driveBtn = document.getElementById('lesson-drive-btn');
+
+    if (!bar || !step) return;
+
+    const total = lessonState.steps.length;
+    const current = lessonState.stepIndex + 1;
+    const isComplete = step.id === 'complete';
+
+    instruction.textContent = step.instruction;
+    progress.textContent = `STEP ${current} OF ${total}`;
+
+    // Bar colour classes
+    bar.classList.toggle('lesson-drive-mode', !lessonState.watchMode);
+    bar.classList.toggle('lesson-complete-step', isComplete);
+
+    // Submode toggle state
+    if (watchBtn) {
+      watchBtn.classList.toggle('lesson-submode-active', lessonState.watchMode);
+      watchBtn.setAttribute('aria-pressed', String(lessonState.watchMode));
+    }
+    if (driveBtn) {
+      driveBtn.classList.toggle('lesson-submode-active', !lessonState.watchMode);
+      driveBtn.setAttribute('aria-pressed', String(!lessonState.watchMode));
+    }
+
+    // Drive button: dim/lock it until Watch is complete
+    if (driveBtn) {
+      driveBtn.disabled = !lessonState.watchCompleted;
+      driveBtn.style.opacity = lessonState.watchCompleted ? '' : '0.35';
+      driveBtn.title = lessonState.watchCompleted ? '' : 'Complete Watch mode first';
+    }
+
+    // Action buttons
+    if (isComplete) {
+      nextBtn.textContent = '🎉 FINISH';
+      nextBtn.style.display = 'inline-flex';
+      hintBtn.style.display = 'none';
+    } else if (lessonState.watchMode && step.watchOnly) {
+      nextBtn.textContent = 'NEXT ›';
+      nextBtn.style.display = 'inline-flex';
+      hintBtn.style.display = 'none';
+    } else if (!lessonState.watchMode && !step.watchOnly) {
+      nextBtn.style.display = 'none';
+      hintBtn.style.display = step.hint ? 'inline-flex' : 'none';
+    } else {
+      nextBtn.textContent = 'NEXT ›';
+      nextBtn.style.display = 'inline-flex';
+      hintBtn.style.display = 'none';
+    }
+
+    lessonHighlightElements(step.highlight || []);
+  }
+
+  function clearLessonTimer() {
+    if (lessonState.watchTimer) {
+      clearTimeout(lessonState.watchTimer);
+      lessonState.watchTimer = null;
+    }
+  }
+
+  function scheduleWatchAutoAdvance() {
+    clearLessonTimer();
+    const step = currentLessonStep();
+    if (!step || !lessonState.watchMode || !step.watchOnly) return;
+
+    // Fire the demo action after a short pause so the instruction is read first.
+    // No auto-advance — user controls pace with NEXT.
+    if (typeof step.demo === 'function') {
+      lessonState.watchTimer = setTimeout(() => {
+        if (lessonState.active && lessonState.watchMode) step.demo();
+      }, 1200);
+    }
+  }
+
+  function lessonNextStep() {
+    clearLessonTimer();
+    const step = currentLessonStep();
+    if (!step) return;
+
+    if (step.id === 'complete') {
+      endLesson();
+      return;
+    }
+
+    // Check if this is the last Watch step — gate to Drive
+    const nextIndex = lessonState.stepIndex + 1;
+    const nextStep = lessonState.steps[nextIndex];
+    if (
+      lessonState.watchMode &&
+      step.watchOnly &&
+      nextStep &&
+      !nextStep.watchOnly
+    ) {
+      // Watch is done — mark complete and show the Watch→Drive transition
+      lessonState.watchCompleted = true;
+      showWatchTransition();
+      return;
+    }
+
+    lessonState.stepIndex += 1;
+
+    if (lessonState.stepIndex >= lessonState.steps.length) {
+      endLesson();
+      return;
+    }
+
+    updateLessonBar();
+
+    if (lessonState.watchMode) {
+      scheduleWatchAutoAdvance();
+    }
+  }
+
+  function showWatchTransition() {
+    clearLessonTimer();
+    lessonClearHighlights();
+
+    const bar = document.getElementById('lesson-bar');
+    const instruction = document.getElementById('lesson-instruction');
+    const nextBtn = document.getElementById('lesson-next-btn');
+    const hintBtn = document.getElementById('lesson-hint-btn');
+    const driveBtn = document.getElementById('lesson-drive-btn');
+
+    if (instruction) instruction.textContent = '✅ Watch complete! Now switch to DRIVE mode to practice hands-on.';
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (hintBtn) hintBtn.style.display = 'none';
+
+    // Pulse the DRIVE button to draw attention
+    if (driveBtn) {
+      driveBtn.disabled = false;
+      driveBtn.style.opacity = '';
+      driveBtn.title = '';
+      driveBtn.classList.add('lesson-highlight');
+      // Remove pulse after a few seconds
+      setTimeout(() => driveBtn.classList.remove('lesson-highlight'), 4000);
+    }
+
+    if (bar) {
+      bar.classList.remove('lesson-feedback-correct', 'lesson-feedback-wrong');
+      void bar.offsetWidth;
+      bar.classList.add('lesson-feedback-correct');
+      bar.addEventListener('animationend', () => bar.classList.remove('lesson-feedback-correct'), { once: true });
+    }
+  }
+
+  function lessonCheckInteraction() {
+    if (!lessonState.active || lessonState.watchMode) return;
+    if (lessonState._advancing) return;  // already waiting to advance
+    const step = currentLessonStep();
+    if (!step || step.watchOnly) return;
+    if (!step.check) return;
+
+    if (step.check()) {
+      // ✅ Correct — lock out further checks until stepIndex updates
+      lessonState._advancing = true;
+      showLessonFeedback(true);
+
+      // Log this step
+      const now = Date.now();
+      const elapsed = lessonState._driveStepStart ? now - lessonState._driveStepStart : 0;
+      lessonState.stepLog.push({
+        id: step.id,
+        instruction: step.instruction,
+        attempts: 1 + (lessonState._driveMistakes[step.id] || 0),
+        mistakes: lessonState._driveMistakes[step.id] || 0,
+        timeMs: elapsed,
+      });
+      lessonState._driveStepStart = now;
+
+      setTimeout(() => {
+        lessonState._advancing = false;
+        lessonState.stepIndex += 1;
+        while (
+          lessonState.stepIndex < lessonState.steps.length &&
+          lessonState.steps[lessonState.stepIndex].watchOnly
+        ) {
+          lessonState.stepIndex += 1;
+        }
+        if (lessonState.stepIndex >= lessonState.steps.length) {
+          completeLessonDrive();
+        } else {
+          updateLessonBar();
+        }
+      }, 600);
+    } else {
+      // ❌ Wrong — track mistake
+      if (!lessonState._driveMistakes[step.id]) lessonState._driveMistakes[step.id] = 0;
+      lessonState._driveMistakes[step.id] += 1;
+      showLessonFeedback(false);
+      lessonWiggle(document.getElementById('lesson-bar'));
+    }
+  }
+
+  function showLessonFeedback(correct) {
+    const bar = document.getElementById('lesson-bar');
+    if (!bar) return;
+    bar.classList.remove('lesson-feedback-correct', 'lesson-feedback-wrong');
+    void bar.offsetWidth;
+    bar.classList.add(correct ? 'lesson-feedback-correct' : 'lesson-feedback-wrong');
+    bar.addEventListener('animationend', () => {
+      bar.classList.remove('lesson-feedback-correct', 'lesson-feedback-wrong');
+    }, { once: true });
+  }
+
+  function lessonShowHint() {
+    const step = currentLessonStep();
+    if (!step || !step.hint) return;
+    const instruction = document.getElementById('lesson-instruction');
+    if (instruction) {
+      instruction.textContent = `💡 ${step.hint}`;
+    }
+    (step.highlight || []).forEach((id) => {
+      lessonWiggle(document.getElementById(id));
+    });
+  }
+
+  function setLessonSubMode(watchMode) {
+    // Drive is locked until Watch is complete
+    if (!watchMode && !lessonState.watchCompleted) return;
+
+    clearLessonTimer();
+
+    if (watchMode) {
+      lessonState.watchMode = true;
+      lessonState.stepIndex = 0;
+      updateLessonBar();
+      scheduleWatchAutoAdvance();
+    } else {
+      // Name already collected at lesson entry — go straight to Drive
+      if (!lessonState.driveStarted) lessonState.driveStarted = true;
+      _startDriveMode();
+    }
+  }
+
+  function _startDriveMode() {
+    lessonState.watchMode = false;
+    lessonState.driveStartTime = Date.now();
+    lessonState._driveStepStart = Date.now();
+    lessonState._driveMistakes = {};
+    lessonState._advancing = false;
+
+    // Jump to first non-watchOnly step
+    lessonState.stepIndex = 0;
+    while (
+      lessonState.stepIndex < lessonState.steps.length &&
+      lessonState.steps[lessonState.stepIndex].watchOnly
+    ) {
+      lessonState.stepIndex += 1;
+    }
+
+    resetSwitcherState();
+    updateLessonBar();
+  }
+
+  // Called when user submits name from the upfront form (shown on LESSONS click)
+  function submitLessonName() {
+    const nameEl = document.getElementById('lesson-name-input');
+    const classEl = document.getElementById('lesson-class-input');
+    const practiceMode = !!(dom.lessonPracticeToggle && dom.lessonPracticeToggle.getAttribute('aria-pressed') === 'true');
+
+    if (!practiceMode) {
+      // Require both fields for tracked lessons
+      const name = nameEl ? nameEl.value.trim() : '';
+      const cls  = classEl ? classEl.value.trim() : '';
+      if (!name) { if (nameEl) nameEl.classList.add('input-error'); nameEl && nameEl.focus(); return; }
+      if (!cls)  { if (classEl) classEl.classList.add('input-error'); classEl && classEl.focus(); return; }
+      lessonState.studentName  = name;
+      lessonState.studentClass = cls;
+      lessonState.submitResults = true;
+    } else {
+      lessonState.studentName  = nameEl ? nameEl.value.trim() : '';
+      lessonState.studentClass = classEl ? classEl.value.trim() : '';
+      lessonState.submitResults = false;
+    }
+
+    lessonState.nameCollected = true;
+
+    const ol = document.getElementById('lesson-name-overlay');
+    if (ol) ol.classList.remove('show');
+
+    // Show lesson select next
+    const select = document.getElementById('lesson-select-overlay');
+    if (select) select.classList.add('show');
+  }
+
+  function completeLessonDrive() {
+    clearLessonTimer();
+    lessonClearHighlights();
+    lessonState.active = false;
+
+    const bar = document.getElementById('lesson-bar');
+    if (bar) bar.classList.remove('lesson-visible');
+
+    showLessonResults();
+  }
+
+  function showLessonResults() {
+    const totalMs = lessonState.lessonStartTime ? Date.now() - lessonState.lessonStartTime : 0;
+    const totalSec = Math.round(totalMs / 1000);
+    const totalMistakes = Object.values(lessonState._driveMistakes).reduce((a, b) => a + b, 0);
+    const lessonName = lessonState.lessonId === 1 ? 'Lesson 1 — Introduction' : `Lesson ${lessonState.lessonId}`;
+
+    // Subtitle
+    const sub = document.getElementById('lesson-results-subtitle');
+    if (sub) {
+      sub.textContent = lessonState.studentName
+        ? `Great work, ${lessonState.studentName}!`
+        : 'Drive complete — great work!';
+    }
+
+    // Stats row
+    const stats = document.getElementById('lesson-results-stats');
+    if (stats) {
+      stats.innerHTML = `
+        <div class="lesson-results-stat">
+          <span class="lesson-results-stat-val">${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, '0')}</span>
+          <span class="lesson-results-stat-label">Time</span>
+        </div>
+        <div class="lesson-results-stat">
+          <span class="lesson-results-stat-val">${lessonState.stepLog.length}</span>
+          <span class="lesson-results-stat-label">Steps</span>
+        </div>
+        <div class="lesson-results-stat">
+          <span class="lesson-results-stat-val">${totalMistakes}</span>
+          <span class="lesson-results-stat-label">Mistakes</span>
+        </div>
+      `;
+    }
+
+    // Breakdown table
+    const breakdown = document.getElementById('lesson-results-breakdown');
+    if (breakdown && lessonState.stepLog.length) {
+      const rows = lessonState.stepLog.map((s) => {
+        const tSec = Math.round(s.timeMs / 1000);
+        const ok = s.mistakes === 0;
+        return `<div class="lesson-results-row ${ok ? '' : 'lesson-results-row-miss'}">
+          <span class="lesson-results-row-label">${s.instruction}</span>
+          <span class="lesson-results-row-meta">${ok ? '✅' : `❌ ${s.mistakes}`}  ${tSec}s</span>
+        </div>`;
+      }).join('');
+      breakdown.innerHTML = rows;
+    }
+
+    const sentMsg = document.getElementById('lesson-results-sent-msg');
+    if (sentMsg) sentMsg.style.display = 'none';
+
+    const ol = document.getElementById('lesson-results-overlay');
+    if (ol) {
+      ol.classList.add('show');
+      const dlg = document.getElementById('lesson-results-dialog');
+      if (dlg) dlg.focus();
+    }
+
+    // Auto-submit if student provided their name (same pattern as quiz)
+    if (lessonState.submitResults) lessonEmailResults();
+  }
+
+  function lessonEmailResults() {
+    const totalMs = lessonState.lessonStartTime ? Date.now() - lessonState.lessonStartTime : 0;
+    const totalSec = Math.round(totalMs / 1000);
+    const totalMistakes = Object.values(lessonState._driveMistakes).reduce((a, b) => a + b, 0);
+    const lessonName = lessonState.lessonId === 1 ? 'Lesson 1 — Introduction' : `Lesson ${lessonState.lessonId}`;
+    const mm = Math.floor(totalSec / 60);
+    const ss = String(totalSec % 60).padStart(2, '0');
+
+    const breakdown = lessonState.stepLog.map((s) => {
+      const tSec = Math.round(s.timeMs / 1000);
+      return `${s.instruction}: ${s.mistakes} mistake(s), ${tSec}s`;
+    }).join('\n');
+
+    const body = {
+      _subject: `SwitchUp Lesson Results — ${lessonState.studentName || 'Student'} — ${lessonName}`,
+      student_name: lessonState.studentName || 'Anonymous',
+      class_name: lessonState.studentClass || '—',
+      lesson: lessonName,
+      time: `${mm}:${ss}`,
+      total_mistakes: String(totalMistakes),
+      steps_completed: String(lessonState.stepLog.length),
+      breakdown,
+    };
+
+    fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(body),
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error('Network error');
+        const sentMsg = document.getElementById('lesson-results-sent-msg');
+        if (sentMsg) {
+          sentMsg.textContent = '✅ Results sent to instructor';
+          sentMsg.style.display = 'block';
+        }
+      })
+      .catch(() => {
+        const sentMsg = document.getElementById('lesson-results-sent-msg');
+        if (sentMsg) {
+          sentMsg.textContent = '⚠️ Could not send results — check your connection';
+          sentMsg.style.display = 'block';
+          sentMsg.style.color = '#ff6b6b';
+        }
+      });
+  }
+
+  function retryLessonDrive() {
+    // Close results, reset drive state, re-enter Drive mode
+    const ol = document.getElementById('lesson-results-overlay');
+    if (ol) ol.classList.remove('show');
+
+    lessonState.stepLog = [];
+    lessonState._driveMistakes = {};
+    lessonState.lessonStartTime = Date.now(); // restart total timer on retry
+    lessonState.driveStartTime = null;
+
+    const bar = document.getElementById('lesson-bar');
+    if (bar) bar.classList.add('lesson-visible');
+
+    lessonState.active = true;
+    _startDriveMode();
+  }
+
+  function startLesson(lessonId) {
+    clearLessonTimer();
+    lessonState.lessonId = lessonId;
+    lessonState.steps = getLessonSteps(lessonId);
+    lessonState.stepIndex = 0;
+    lessonState.watchMode = true;
+    lessonState.active = true;
+    // Reset lesson-specific flags (keep name/class from session-wide collection)
+    lessonState.watchCompleted = false;
+    lessonState.driveStarted = false;
+    lessonState.stepLog = [];
+    lessonState._driveMistakes = {};
+    lessonState.lessonStartTime = Date.now();   // total time includes Watch
+    lessonState.driveStartTime = null;
+    lessonState._driveStepStart = null;
+
+    const overlay = document.getElementById('lesson-select-overlay');
+    if (overlay) overlay.classList.remove('show');
+
+    const bar = document.getElementById('lesson-bar');
+    if (bar) bar.classList.add('lesson-visible');
+
+    resetSwitcherState();
+    updateLessonBar();
+    scheduleWatchAutoAdvance();
+  }
+
+  function endLesson() {
+    clearLessonTimer();
+    lessonClearHighlights();
+    lessonState.active = false;
+
+    const bar = document.getElementById('lesson-bar');
+    if (bar) bar.classList.remove('lesson-visible');
+
+    setMode('freeplay');
+  }
+
+  function enterLessonMode() {
+    // First time this session: collect student info before showing lesson list
+    if (!lessonState.nameCollected) {
+      const ol = document.getElementById('lesson-name-overlay');
+      if (ol) {
+        ol.classList.add('show');
+        setTimeout(() => {
+          const inp = document.getElementById('lesson-name-input');
+          if (inp) inp.focus();
+        }, 50);
+      }
+    } else {
+      const overlay = document.getElementById('lesson-select-overlay');
+      if (overlay) overlay.classList.add('show');
+    }
+  }
+
+  function exitLessonMode() {
+    clearLessonTimer();
+    lessonClearHighlights();
+    lessonState.active = false;
+
+    ['lesson-bar'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('lesson-visible');
+    });
+
+    ['lesson-select-overlay', 'lesson-name-overlay', 'lesson-results-overlay'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('show');
+    });
+
+    setMode('freeplay');
+  }
+
+  // ============================================================
+  // END LESSON ENGINE
+  // ============================================================
+
   Object.assign(window, {
     selectPgm,
     selectPvw,
@@ -4585,6 +5376,15 @@ function bindQuizDialogFocusLoop() {
     startQuiz,
     checkAnswer,
     skipQuestion,
+    enterLessonMode,
+    exitLessonMode,
+    startLesson,
+    endLesson,
+    lessonNextStep,
+    lessonShowHint,
+    setLessonSubMode,
+    submitLessonName,
+    retryLessonDrive,
   });
 
   init();

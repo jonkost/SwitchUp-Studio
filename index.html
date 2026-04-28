@@ -38,6 +38,7 @@
 		<!-- MODE TOGGLE -->
 		<div id="mode-bar" role="toolbar" aria-label="Switcher mode controls">
 			<button class="mode-btn mode-active" id="mode-freeplay" onclick="setMode('freeplay')" aria-pressed="true">FREEPLAY</button>
+			<button class="mode-btn" id="mode-lessons" onclick="enterLessonMode()" aria-pressed="false">LESSONS</button>
 			<button class="mode-btn" id="mode-quiz" onclick="setMode('quiz')" aria-pressed="false">QUIZ MODE</button>
 			<button class="mode-btn mode-active" id="freeplay-reset-btn" onclick="resetFreeplay()" aria-label="Reset freeplay switcher state">RESET</button>
 			<div id="utility-menu">
@@ -71,6 +72,7 @@
 							<div class="menu-group-copy">Mode changes and reset</div>
 						</div>
 						<div class="menu-action-list">
+							<button class="menu-action-btn" id="menu-action-lessons" type="button"></button>
 							<button class="menu-action-btn" id="menu-action-mode" type="button"></button>
 							<button class="menu-action-btn" id="menu-action-undo-dve" type="button"></button>
 							<button class="menu-action-btn" id="menu-action-reset-dve" type="button"></button>
@@ -181,6 +183,43 @@
 				<button class="quiz-action-btn" id="quiz-start-btn" onclick="startQuiz()">START</button>
 				<button class="quiz-action-btn quiz-check-btn" id="quiz-check-btn" onclick="checkAnswer()" hidden>CHECK</button>
 				<button class="quiz-action-btn" id="quiz-skip-btn" onclick="skipQuestion()" hidden>SKIP</button>
+			</div>
+		</div>
+
+		<!-- LESSON BAR (hidden until lesson active) -->
+		<div id="lesson-bar" role="region" aria-label="Lesson controls">
+			<div id="lesson-status">
+				<span id="lesson-progress" aria-label="Lesson progress">Step 1 of 14</span>
+				<div id="lesson-submode-toggle" role="group" aria-label="Lesson sub-mode">
+					<button class="lesson-submode-btn lesson-submode-active" id="lesson-watch-btn" onclick="setLessonSubMode(true)" aria-pressed="true">WATCH</button>
+					<button class="lesson-submode-btn" id="lesson-drive-btn" onclick="setLessonSubMode(false)" aria-pressed="false">DRIVE</button>
+				</div>
+				<button class="quiz-action-btn lesson-exit-btn" onclick="exitLessonMode()" aria-label="Exit lesson">← EXIT LESSON</button>
+			</div>
+			<div id="lesson-instruction" aria-live="polite" aria-atomic="true">Welcome to lessons.</div>
+			<div id="lesson-actions">
+				<button class="quiz-action-btn lesson-hint-btn" id="lesson-hint-btn" onclick="lessonShowHint()" style="display:none">💡 HINT</button>
+				<button class="quiz-action-btn lesson-next-btn" id="lesson-next-btn" onclick="lessonNextStep()">NEXT ›</button>
+			</div>
+		</div>
+
+		<!-- LESSON NAME INPUT (shown when user enters Lessons) -->
+		<div id="lesson-name-overlay" class="dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="lesson-name-heading" aria-describedby="lesson-name-desc">
+			<div id="lesson-name-dialog" class="dialog-card" tabindex="-1">
+				<div id="lesson-name-heading" class="dialog-heading">GUIDED LESSONS</div>
+				<div id="lesson-name-desc" class="dialog-copy">For tracked lessons, enter both name and class. Practice mode lets you continue without filling in either field and does not submit results.</div>
+				<div id="lesson-name-form" class="dialog-form" role="group" aria-label="Student information">
+					<label for="lesson-name-input" class="dialog-label">Your Name</label>
+					<input type="text" id="lesson-name-input" name="lessonStudentName" placeholder="e.g. Jane Smith" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" enterkeyhint="next" />
+					<label for="lesson-class-input" class="dialog-label">Class</label>
+					<input type="text" id="lesson-class-input" name="lessonCourseSection" placeholder="e.g. AVT / Section A" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done" data-lpignore="true" data-form-type="other" />
+					<button type="button" class="dialog-toggle-btn" id="lesson-practice-toggle" aria-pressed="false">PRACTICE MODE — DO NOT SUBMIT RESULTS</button>
+					<div class="dialog-note" id="lesson-name-note">Practice mode can start immediately. For tracked lessons, both fields are required.</div>
+					<div class="dialog-actions">
+						<button type="button" id="lesson-name-btn" onclick="submitLessonName()">CONTINUE</button>
+						<button type="button" id="lesson-name-back-btn" onclick="exitLessonMode()">← BACK TO FREEPLAY</button>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -590,6 +629,49 @@
 
 			</div><!-- end panel-right -->
 
+		</div>
+
+		<!-- LESSON SELECT OVERLAY -->
+		<div id="lesson-select-overlay" role="dialog" aria-modal="true" aria-labelledby="lesson-select-heading">
+			<div id="lesson-select-dialog" tabindex="-1">
+				<div id="lesson-select-heading">GUIDED LESSONS</div>
+				<div class="level-group">
+					<div class="level-group-label">LESSONS</div>
+					<div class="level-group-desc">Step-by-step guided training with Watch and Drive modes. Watch plays through the concept automatically — Drive puts you in control.</div>
+					<button class="level-btn level-btn-lesson" onclick="startLesson(1)">
+						<span class="level-btn-title">Lesson 1 — Introduction</span>
+						<span class="level-btn-sub">Readying, cutting, transitioning, and going to black</span>
+					</button>
+					<button class="level-btn level-btn-lesson-locked" disabled>
+						<span class="level-btn-title">Lesson 2 — Keying &amp; Graphics</span>
+						<span class="level-btn-sub">Coming soon — keying, lower thirds, DVEs</span>
+					</button>
+					<button class="level-btn level-btn-lesson-locked" disabled>
+						<span class="level-btn-title">Lesson 3 — M/Es &amp; DSK Ties</span>
+						<span class="level-btn-sub">Coming soon — Mix/Effects and DSK ties</span>
+					</button>
+					<button class="level-btn level-btn-lesson-locked" disabled>
+						<span class="level-btn-title">Lesson 4 — Advanced &amp; Review</span>
+						<span class="level-btn-sub">Coming soon — precomps, M/E switching, full review</span>
+					</button>
+				</div>
+				<button id="lesson-select-back-btn" onclick="exitLessonMode()">← BACK TO FREEPLAY</button>
+			</div>
+		</div>
+
+		<!-- LESSON RESULTS OVERLAY (shown after Drive mode completes) -->
+		<div id="lesson-results-overlay" class="dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="lesson-results-heading">
+			<div id="lesson-results-dialog" class="dialog-card" tabindex="-1">
+				<div id="lesson-results-heading" class="dialog-heading">LESSON COMPLETE</div>
+				<div id="lesson-results-subtitle" class="dialog-copy"></div>
+				<div id="lesson-results-stats" class="lesson-results-stats"></div>
+				<div id="lesson-results-breakdown" class="lesson-results-breakdown"></div>
+				<div id="lesson-results-sent-msg" class="lesson-results-sent-msg" style="display:none"></div>
+				<div class="dialog-actions">
+					<button type="button" id="lesson-results-freeplay-btn" onclick="exitLessonMode()">← BACK TO FREEPLAY</button>
+					<button type="button" id="lesson-results-retry-btn" onclick="retryLessonDrive()">↺ RETRY DRIVE</button>
+				</div>
+			</div>
 		</div>
 
 	</div>

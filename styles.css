@@ -6206,6 +6206,7 @@ body {
 }
 
 #quiz-name-form { gap: 12px; }
+#lesson-name-form { gap: 16px; margin-top: 8px; }
 #quiz-name-dialog input,
 #lesson-name-dialog input {
   min-height: 48px;

@@ -2334,24 +2334,16 @@
     updateDVESlot();
   }
 
-  function nudgeToNextStop(current, forward) {
-    const stops = [0, 25, 50, 75, 100];
-    if (forward) {
-      const next = stops.find(s => s > current + 1);
-      return next !== undefined ? next : current;
-    }
-    const below = stops.filter(s => s < current - 1);
-    return below.length ? below[below.length - 1] : current;
-  }
+  const DVE_NUDGE_STEP = 5;
 
   function nudgeDVE(direction) {
     const dsk = currentDsk();
     pushDVEUndoState();
 
-    if (direction === 'up') dsk.dveY = nudgeToNextStop(dsk.dveY, false);
-    if (direction === 'down') dsk.dveY = nudgeToNextStop(dsk.dveY, true);
-    if (direction === 'left') dsk.dveX = nudgeToNextStop(dsk.dveX, false);
-    if (direction === 'right') dsk.dveX = nudgeToNextStop(dsk.dveX, true);
+    if (direction === 'up')    dsk.dveY = clamp(dsk.dveY - DVE_NUDGE_STEP, 0, 100);
+    if (direction === 'down')  dsk.dveY = clamp(dsk.dveY + DVE_NUDGE_STEP, 0, 100);
+    if (direction === 'left')  dsk.dveX = clamp(dsk.dveX - DVE_NUDGE_STEP, 0, 100);
+    if (direction === 'right') dsk.dveX = clamp(dsk.dveX + DVE_NUDGE_STEP, 0, 100);
     if (direction === 'center') {
       dsk.dveX = 50;
       dsk.dveY = 50;

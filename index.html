@@ -176,6 +176,7 @@
 				<span id="quiz-question-num" aria-label="Question number">1/10</span>
 				<span id="quiz-score-display" aria-label="Current score">Score: 0</span>
 				<span id="quiz-timer" aria-label="Elapsed time">0:00</span>
+				<button class="quiz-action-btn tts-toggle-btn" id="quiz-tts-btn" onclick="toggleTTS()" aria-label="Mute voice" aria-pressed="false">🔊</button>
 				<button class="quiz-action-btn quiz-exit-btn" onclick="setMode('freeplay')" aria-label="Exit quiz and return to freeplay">← EXIT QUIZ</button>
 			</div>
 			<div id="quiz-prompt" aria-live="assertive" aria-atomic="true">Press START to begin the quiz</div>
@@ -194,6 +195,7 @@
 					<button class="lesson-submode-btn lesson-submode-active" id="lesson-watch-btn" onclick="setLessonSubMode(true)" aria-pressed="true">WATCH</button>
 					<button class="lesson-submode-btn" id="lesson-drive-btn" onclick="setLessonSubMode(false)" aria-pressed="false">DRIVE</button>
 				</div>
+				<button class="quiz-action-btn tts-toggle-btn" id="lesson-tts-btn" onclick="toggleTTS()" aria-label="Mute voice" aria-pressed="false">🔊</button>
 				<button class="quiz-action-btn lesson-exit-btn" onclick="exitLessonMode()" aria-label="Exit lesson">← EXIT LESSON</button>
 			</div>
 			<div id="lesson-instruction" aria-live="polite" aria-atomic="true">Welcome to lessons.</div>

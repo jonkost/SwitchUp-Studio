@@ -3825,6 +3825,7 @@ const RUN_THE_SHOW = {
 
     dom.quizPrompt.textContent = getQuizPromptText(question);
     dom.quizPrompt.style.color = '#f5a623';
+    ttsCancelAndSpeak(getQuizPromptText(question));
   }
 
   function checkAnswer() {
@@ -3840,12 +3841,14 @@ const RUN_THE_SHOW = {
       dom.panel.classList.add('quiz-correct');
       dom.quizPrompt.textContent = '✓ CORRECT!';
       dom.quizPrompt.style.color = '#00cc00';
+      ttsCancelAndSpeak('Correct!');
     } else {
       state.quizAllCorrect = false;
       state.quizResults.push({ prompt: question.prompt, category: level, result: 'INCORRECT' });
       dom.panel.classList.add('quiz-wrong');
       dom.quizPrompt.textContent = '✗ INCORRECT';
       dom.quizPrompt.style.color = '#ff4444';
+      ttsCancelAndSpeak('Incorrect.');
     }
 
     dom.quizScoreDisplay.textContent = `Score: ${state.quizScore}`;
@@ -5605,6 +5608,7 @@ function bindQuizDialogFocusLoop() {
     const isComplete = step.id === 'complete';
 
     instruction.textContent = step.instruction;
+    ttsCancelAndSpeak(step.instruction);
     progress.textContent = `STEP ${current} OF ${total}`;
 
     // Bar colour classes
@@ -6110,6 +6114,54 @@ function bindQuizDialogFocusLoop() {
   // END LESSON ENGINE
   // ============================================================
 
+  // ============================================================
+  //  TTS — Voice narration for quiz and lesson content
+  // ============================================================
+
+  const tts = {
+    muted: localStorage.getItem('su-tts-muted') === 'true',
+    supported: typeof window !== 'undefined' && 'speechSynthesis' in window,
+  };
+
+  function ttsClean(text) {
+    // Strip emoji and symbol characters before speaking
+    return (text || '')
+      .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
+      .replace(/[✓✗↺•·🎉]/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
+
+  function ttsSpeak(text, priority) {
+    if (!tts.supported || tts.muted) return;
+    const clean = ttsClean(text);
+    if (!clean) return;
+    if (priority) window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(clean);
+    utt.rate  = 1.05;
+    utt.pitch = 1.0;
+    window.speechSynthesis.speak(utt);
+  }
+
+  function ttsCancelAndSpeak(text) { ttsSpeak(text, true); }
+
+  function toggleTTS() {
+    tts.muted = !tts.muted;
+    localStorage.setItem('su-tts-muted', tts.muted);
+    if (tts.muted && tts.supported) window.speechSynthesis.cancel();
+    updateTTSButtons();
+  }
+
+  function updateTTSButtons() {
+    document.querySelectorAll('.tts-toggle-btn').forEach(btn => {
+      btn.textContent = tts.muted ? '🔇' : '🔊';
+      btn.setAttribute('aria-label', tts.muted ? 'Unmute voice' : 'Mute voice');
+      btn.setAttribute('aria-pressed', String(tts.muted));
+    });
+  }
+
+  // ============================================================
+
   Object.assign(window, {
     selectPgm,
     selectPvw,
@@ -6172,7 +6224,9 @@ function bindQuizDialogFocusLoop() {
     submitLessonName,
     retryLessonDrive,
     hideConfirm,
+    toggleTTS,
   });
 
+  updateTTSButtons();
   init();
 })();

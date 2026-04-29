@@ -9881,6 +9881,23 @@ body {
   flex-shrink: 0;
 }
 
+.tts-toggle-btn {
+  font-size: 16px !important;
+  padding: 4px 8px !important;
+  min-width: 36px;
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+}
+
+.tts-toggle-btn:hover {
+  opacity: 1;
+}
+
+.tts-toggle-btn[aria-pressed="true"] {
+  opacity: 0.4;
+}
+
 /* Big centred instruction — fixed height so the bar never shifts the layout */
 #lesson-instruction {
   font-family: 'Inter', sans-serif;

@@ -5094,6 +5094,7 @@ function bindQuizDialogFocusLoop() {
 
     const bar = document.getElementById('lesson-bar');
     if (bar) bar.classList.remove('lesson-visible');
+    scheduleLayout();
 
     showLessonResults();
   }
@@ -5218,6 +5219,7 @@ function bindQuizDialogFocusLoop() {
 
     const bar = document.getElementById('lesson-bar');
     if (bar) bar.classList.add('lesson-visible');
+    scheduleLayout();
 
     lessonState.active = true;
     _startDriveMode();
@@ -5244,6 +5246,7 @@ function bindQuizDialogFocusLoop() {
 
     const bar = document.getElementById('lesson-bar');
     if (bar) bar.classList.add('lesson-visible');
+    scheduleLayout();
 
     resetSwitcherState();
     updateLessonBar();
@@ -5257,6 +5260,7 @@ function bindQuizDialogFocusLoop() {
 
     const bar = document.getElementById('lesson-bar');
     if (bar) bar.classList.remove('lesson-visible');
+    scheduleLayout();
 
     setMode('freeplay');
   }
@@ -5287,6 +5291,7 @@ function bindQuizDialogFocusLoop() {
       const el = document.getElementById(id);
       if (el) el.classList.remove('lesson-visible');
     });
+    scheduleLayout();
 
     ['lesson-select-overlay', 'lesson-name-overlay', 'lesson-results-overlay'].forEach((id) => {
       const el = document.getElementById(id);

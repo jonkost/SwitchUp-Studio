@@ -512,6 +512,7 @@
     state.meMemorySlots[surfaceName][index] = cloneMEMemorySnapshot(buildMEMemorySnapshot(surfaceName));
     state.meMemoryMode = null;
     updateMEMemoryUI();
+    lessonCheckInteraction();
   }
 
   function recallMEMemorySlot(surfaceName, index) {
@@ -530,9 +531,11 @@
       syncActiveDskState();
       clearTransitionOverlays();
       refreshAllUI();
+      lessonCheckInteraction();
       return;
     }
     refreshAllUI();
+    lessonCheckInteraction();
   }
 
   function handleMEMemorySlot(surfaceName, index) {
@@ -1476,6 +1479,7 @@
     applyBusSnapshot(nextBus);
     clearTransitionOverlays();
     refreshAllUI();
+    lessonCheckInteraction();
   }
 
   function formatElapsed(seconds) {
@@ -2272,6 +2276,7 @@
     updateCHRControlsVisibility();
     updateDSKUI();
     updateDSKOverlays();
+    lessonCheckInteraction();
     scheduleLayout();
     maybeResolveRunTheShow();
   }
@@ -2288,6 +2293,7 @@
     updateDSKOverlays();
     scheduleLayout();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function openDVEMoreWindow() { openDVEEditor(); }
@@ -2457,6 +2463,7 @@
     updateDSKUI();
     scheduleLayout();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function selectDSKSource(sourceIndex) {
@@ -2479,6 +2486,7 @@
     updateDSKUI();
     updateDSKOverlays();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function dskCutChannel(index) {
@@ -2488,6 +2496,7 @@
     updateDSKUI();
     updateDSKOverlays();
     maybeResolveRunTheShow(true);
+    lessonCheckInteraction();
   }
 
   function dskAutoChannel(index) {
@@ -2527,6 +2536,7 @@
       updateDSKUI();
       updateDSKOverlays();
       maybeResolveRunTheShow(true);
+      lessonCheckInteraction();
     };
 
     requestAnimationFrame(animate);
@@ -4757,6 +4767,769 @@ function bindQuizDialogFocusLoop() {
         id: 'complete',
         watchOnly: true,
         instruction: '🎉 Lesson 1 complete! You know the layout, CUT and AUTO transitions, the key hotkeys, and how to fade to black. You\'re ready to run a show.',
+        highlight: [],
+        delay: 0,
+      },
+    ],
+
+    // ──────────────────────────────────────────────────────────
+    //  LESSON 2 — Keying & Graphics
+    // ──────────────────────────────────────────────────────────
+    2: [
+      // ── WATCH: Orientation ──
+      {
+        id: 'l2-intro',
+        watchOnly: true,
+        instruction: 'Lesson 2 covers keying and graphics. You\'ll load media, set a key type, preview it on the transition, and bring it on air — with and without the background.',
+        highlight: [],
+        delay: 4500,
+      },
+      {
+        id: 'l2-media-explained',
+        watchOnly: true,
+        instruction: 'MEDIA SEL opens the media resource panel. This is where you load a graphic into M1 or M2 before keying it.',
+        highlight: ['media-bank-btn'],
+        delay: 4000,
+      },
+      {
+        id: 'l2-key-type-explained',
+        watchOnly: true,
+        instruction: 'The Type of Key row lets you choose SELF, LUMA, or CHR. The right key type depends on how the graphic was made.',
+        highlight: ['key-type-row'],
+        delay: 4000,
+      },
+      {
+        id: 'l2-key-source-explained',
+        watchOnly: true,
+        instruction: 'The Key Source row is where you select which source feeds into DSK 1. You\'ll typically assign M1 or M2 here.',
+        highlight: ['dsk-source-row'],
+        delay: 4000,
+      },
+      {
+        id: 'l2-tie-explained',
+        watchOnly: true,
+        instruction: 'Pressing KEY 1 in the Preview/Tie row arms the key to transition with the background. It will ride along when you cut or dissolve.',
+        highlight: ['tie-key-1'],
+        delay: 4000,
+      },
+      {
+        id: 'l2-dsk-cut-explained',
+        watchOnly: true,
+        instruction: 'DSK CUT drops the key on or off instantly — independent of the background. DSK AUTO dissolves it on or off smoothly.',
+        highlight: ['dsk-cut-1', 'dsk-auto-1'],
+        delay: 4000,
+      },
+      // ── DRIVE: Self key with a tied transition ──
+      {
+        id: 'l2-take-cam1',
+        instruction: 'First, take CAM 1 to Program. Ready it on Preview, then CUT.',
+        highlight: ['pvw-btn-0'],
+        check: () => state.pgmIndex === 0,
+        hint: 'Select CAM 1 in Preview, then press CUT.',
+      },
+      {
+        id: 'l2-open-media',
+        instruction: 'Open Media Resources using the MEDIA SEL button.',
+        highlight: ['media-bank-btn'],
+        check: () => {
+          const el = document.getElementById('media-modal-overlay');
+          return el && (el.classList.contains('show') || el.style.display === 'flex' || (el.style.display !== 'none' && el.style.display !== ''));
+        },
+        hint: 'Press the MEDIA SEL button.',
+      },
+      {
+        id: 'l2-close-media',
+        watchOnly: true,
+        instruction: 'Good. The Side Graphic should already be loaded in M1. Close the media panel when you\'re ready.',
+        highlight: ['media-modal-close'],
+        delay: 0,
+      },
+      {
+        id: 'l2-select-dsk1',
+        instruction: 'Select DSK channel 1 using the SEL 1 button.',
+        highlight: ['dsk-sel-1'],
+        check: () => state.activeDSK === 0,
+        hint: 'Press SEL 1 in the DSK section.',
+      },
+      {
+        id: 'l2-set-key-source-m1',
+        instruction: 'Set the Key Source to M1.',
+        highlight: ['dsk-src-btn-5'],
+        check: () => state.dskState[0].sourceIndex === SOURCES.indexOf('M1'),
+        hint: 'Find M1 in the Key Source row and tap it.',
+      },
+      {
+        id: 'l2-set-self-key',
+        instruction: 'Set the key type to SELF.',
+        highlight: ['key-type-0'],
+        check: () => state.dskState[0].keyMode === 0,
+        hint: 'Press SELF in the Type of Key row.',
+      },
+      {
+        id: 'l2-preview-key',
+        instruction: 'Arm KEY 1 in the Preview/Tie row so it will ride with the next transition.',
+        highlight: ['tie-key-1'],
+        check: () => state.previewKeyState[0] === true,
+        hint: 'Press KEY 1 in the Preview / Tie row.',
+      },
+      {
+        id: 'l2-ready-cam1-again',
+        instruction: 'Now ready CAM 1 on Preview (it\'s already on Program — this sets up the dissolve with the key).',
+        highlight: ['pvw-btn-0'],
+        check: () => state.pvwIndex === 0,
+        hint: 'Select CAM 1 in the Preview row.',
+      },
+      {
+        id: 'l2-dissolve-cam1-with-key',
+        instruction: 'Dissolve to CAM 1 with Key 1 using AUTO. The graphic rides onto air with the background.',
+        highlight: ['btn-auto'],
+        check: () => state.pgmIndex === 0 && state.dskState[0].active === true && state.previewKeyState[0] === true,
+        hint: 'Press AUTO. Both the background and Key 1 will come on together.',
+      },
+      // ── DRIVE: Lose the tie, switch background under the key ──
+      {
+        id: 'l2-lose-tie',
+        instruction: 'Now lose the KEY 1 tie by pressing KEY 1 in the Preview/Tie row again. The key stays live but will no longer ride with the next transition.',
+        highlight: ['tie-key-1'],
+        check: () => state.dskState[0].active === true && state.previewKeyState[0] === false,
+        hint: 'Press KEY 1 in the Preview/Tie row to toggle the tie off.',
+      },
+      {
+        id: 'l2-ready-cam2',
+        instruction: 'Ready CAM 2 on Preview.',
+        highlight: ['pvw-btn-1'],
+        check: () => state.pvwIndex === 1,
+        hint: 'Select CAM 2 in the Preview row.',
+      },
+      {
+        id: 'l2-cut-cam2-under-key',
+        instruction: 'CUT to CAM 2. The background switches but the key stays on — that\'s "under the key."',
+        highlight: ['btn-cut'],
+        check: () => state.pgmIndex === 1 && state.dskState[0].active === true,
+        hint: 'Press CUT. The background changes but Key 1 remains on air.',
+      },
+      // ── DRIVE: Cut key off, then auto off ──
+      {
+        id: 'l2-cut-key-off',
+        instruction: 'Take Key 1 off using DSK CUT 1.',
+        highlight: ['dsk-cut-1'],
+        check: () => state.dskState[0].active === false,
+        hint: 'Press CUT in the DSK 1 row to take the key off.',
+      },
+      {
+        id: 'l2-dsk-auto-intro',
+        watchOnly: true,
+        instruction: 'Good. Now let\'s practice dissolving a key on and off using DSK AUTO.',
+        highlight: ['dsk-auto-1'],
+        delay: 3500,
+      },
+      {
+        id: 'l2-auto-key-on',
+        instruction: 'Dissolve Key 1 back on using DSK AUTO 1.',
+        highlight: ['dsk-auto-1'],
+        check: () => state.dskState[0].active === true,
+        hint: 'Press AUTO in the DSK 1 row.',
+      },
+      {
+        id: 'l2-auto-key-off',
+        instruction: 'Now dissolve Key 1 off using DSK AUTO 1.',
+        highlight: ['dsk-auto-1'],
+        check: () => state.dskState[0].active === false,
+        hint: 'Press AUTO in the DSK 1 row again to dissolve the key off.',
+      },
+      // ── DRIVE: Chroma key ──
+      {
+        id: 'l2-chroma-intro',
+        watchOnly: true,
+        instruction: 'Now let\'s try a chroma key. Open MEDIA SEL and load Live Bug into M1.',
+        highlight: ['media-bank-btn'],
+        delay: 0,
+      },
+      {
+        id: 'l2-chroma-open-media',
+        instruction: 'Open Media Resources.',
+        highlight: ['media-bank-btn'],
+        check: () => {
+          const el = document.getElementById('media-modal-overlay');
+          return el && (el.classList.contains('show') || el.style.display === 'flex' || (el.style.display !== 'none' && el.style.display !== ''));
+        },
+        hint: 'Press MEDIA SEL.',
+      },
+      {
+        id: 'l2-chroma-close-media',
+        watchOnly: true,
+        instruction: 'Load Live Bug to M1, then close the panel.',
+        highlight: ['media-modal-close'],
+        delay: 0,
+      },
+      {
+        id: 'l2-set-chr-key',
+        instruction: 'Set the key type to CHR (chroma key).',
+        highlight: ['key-type-2'],
+        check: () => state.dskState[0].keyMode === 2,
+        hint: 'Press CHR in the Type of Key row.',
+      },
+      {
+        id: 'l2-set-chr-blue',
+        instruction: 'Set the chroma color to BLUE (Live Bug uses a blue screen).',
+        highlight: ['chr-blue-btn'],
+        check: () => state.dskState[0].chrColor === 'blue',
+        hint: 'Press BLUE in the CHR Color selector.',
+      },
+      {
+        id: 'l2-preview-chr-key',
+        instruction: 'Arm KEY 1 in the Preview/Tie row.',
+        highlight: ['tie-key-1'],
+        check: () => state.previewKeyState[0] === true,
+        hint: 'Press KEY 1 in the Preview/Tie row.',
+      },
+      {
+        id: 'l2-ready-cpu',
+        instruction: 'Ready CPU on Preview.',
+        highlight: ['pvw-btn-3'],
+        check: () => state.pvwIndex === 3,
+        hint: 'Select CPU in the Preview row.',
+      },
+      {
+        id: 'l2-dissolve-cpu-with-bug',
+        instruction: 'Dissolve to CPU with the Live Bug chroma key riding on.',
+        highlight: ['btn-auto'],
+        check: () => state.pgmIndex === 3 && state.dskState[0].active === true && state.previewKeyState[0] === true,
+        hint: 'Press AUTO.',
+      },
+      {
+        id: 'l2-complete',
+        watchOnly: true,
+        instruction: '🎉 Lesson 2 complete! You can now load media, set key types, tie keys to transitions, switch under a live key, and remove keys cleanly. Ready for Lesson 3?',
+        highlight: [],
+        delay: 0,
+      },
+    ],
+
+    // ──────────────────────────────────────────────────────────
+    //  LESSON 3 — M/Es & DSK Ties
+    // ──────────────────────────────────────────────────────────
+    3: [
+      // ── WATCH: Orientation ──
+      {
+        id: 'l3-intro',
+        watchOnly: true,
+        instruction: 'Lesson 3 is about Mix/Effects and DVE keys. You\'ll build composites on ME 1 and use them as a key source on ME P/P.',
+        highlight: [],
+        delay: 4500,
+      },
+      {
+        id: 'l3-surface-explained',
+        watchOnly: true,
+        instruction: 'The Surface selector switches you between ME P/P (main output) and ME 1 (a separate bus you use to build composites). The ME P/P row stays in the switcher output at all times.',
+        highlight: ['surface-toggle-panel'],
+        delay: 4500,
+      },
+      {
+        id: 'l3-me1-explained',
+        watchOnly: true,
+        instruction: 'When you switch to ME 1, you\'re now controlling that separate bus. Anything you build here can be recalled as a source called "ME1" on ME P/P.',
+        highlight: ['surface-me1'],
+        delay: 4000,
+      },
+      {
+        id: 'l3-dve-toggle-explained',
+        watchOnly: true,
+        instruction: 'The DVE button enables a Picture-in-Picture effect on a key. Once on, tap the DVE slot to open the editor and reposition or resize the source.',
+        highlight: ['dve-toggle'],
+        delay: 4000,
+      },
+      {
+        id: 'l3-key2-key3-explained',
+        watchOnly: true,
+        instruction: 'You can run up to 4 keys at once using SEL 1–4. In Quiz Level 3 you\'ll often be working with Key 2 and Key 3 — not just Key 1.',
+        highlight: ['dsk-sel-2', 'dsk-sel-3'],
+        delay: 4000,
+      },
+      // ── DRIVE: DVE key on a single channel ──
+      {
+        id: 'l3-take-cam1',
+        instruction: 'Take CAM 1 to Program.',
+        highlight: ['pvw-btn-0'],
+        check: () => state.pgmIndex === 0,
+        hint: 'Ready CAM 1 on Preview then CUT.',
+      },
+      {
+        id: 'l3-select-dsk1',
+        instruction: 'Select DSK 1.',
+        highlight: ['dsk-sel-1'],
+        check: () => state.activeDSK === 0,
+        hint: 'Press SEL 1.',
+      },
+      {
+        id: 'l3-set-cpu-source',
+        instruction: 'Set the Key Source to CPU.',
+        highlight: ['dsk-src-btn-3'],
+        check: () => state.dskState[0].sourceIndex === SOURCES.indexOf('CPU'),
+        hint: 'Find CPU in the Key Source row.',
+      },
+      {
+        id: 'l3-enable-dve',
+        instruction: 'Enable DVE on this key using the DVE button.',
+        highlight: ['dve-toggle'],
+        check: () => state.dskState[0].dveEnabled === true,
+        hint: 'Press DVE in the Type of Key row.',
+      },
+      {
+        id: 'l3-open-dve-editor',
+        watchOnly: true,
+        instruction: 'The DVE slot will now show "tap to configure." Tap it and use the Scale slider and D-pad to size it down and move it to the bottom-right corner.',
+        highlight: ['dve-slot'],
+        delay: 0,
+      },
+      {
+        id: 'l3-preview-dve-key',
+        instruction: 'When positioned, arm KEY 1 in the Preview/Tie row.',
+        highlight: ['tie-key-1'],
+        check: () => state.previewKeyState[0] === true,
+        hint: 'Press KEY 1 in the Preview/Tie row.',
+      },
+      {
+        id: 'l3-ready-cam2',
+        instruction: 'Ready CAM 2 on Preview.',
+        highlight: ['pvw-btn-1'],
+        check: () => state.pvwIndex === 1,
+        hint: 'Select CAM 2 in the Preview row.',
+      },
+      {
+        id: 'l3-take-cam2-with-dve',
+        instruction: 'Take CAM 2 to Program with the DVE key riding on.',
+        highlight: ['btn-cut'],
+        check: () => state.pgmIndex === 1 && state.dskState[0].active === true && state.previewKeyState[0] === true,
+        hint: 'Press CUT.',
+      },
+      {
+        id: 'l3-lose-tie-dve',
+        instruction: 'Lose the KEY 1 tie.',
+        highlight: ['tie-key-1'],
+        check: () => state.dskState[0].active === true && state.previewKeyState[0] === false,
+        hint: 'Press KEY 1 in the Preview/Tie row to toggle the tie off.',
+      },
+      {
+        id: 'l3-ready-cpu-bg',
+        instruction: 'Ready CPU on Preview.',
+        highlight: ['pvw-btn-3'],
+        check: () => state.pvwIndex === 3,
+        hint: 'Select CPU in the Preview row.',
+      },
+      {
+        id: 'l3-cut-cpu-under-key',
+        instruction: 'CUT to CPU under the live DVE key.',
+        highlight: ['btn-cut'],
+        check: () => state.pgmIndex === 3 && state.dskState[0].active === true,
+        hint: 'Press CUT.',
+      },
+      {
+        id: 'l3-auto-key-off',
+        instruction: 'Auto Key 1 off using DSK AUTO 1.',
+        highlight: ['dsk-auto-1'],
+        check: () => state.dskState[0].active === false,
+        hint: 'Press AUTO in the DSK 1 row.',
+      },
+      // ── DRIVE: ME 1 composite ──
+      {
+        id: 'l3-me1-intro',
+        watchOnly: true,
+        instruction: 'Now let\'s build a composite on ME 1. First, switch the surface to ME 1.',
+        highlight: ['surface-me1'],
+        delay: 0,
+      },
+      {
+        id: 'l3-switch-to-me1',
+        instruction: 'Switch the active surface to ME 1.',
+        highlight: ['surface-me1'],
+        check: () => state.surfaceMode === 'ME1',
+        hint: 'Press ME 1 in the Surface selector.',
+      },
+      {
+        id: 'l3-take-blk-me1',
+        instruction: 'Take BLK on ME 1 — this gives us a clean black canvas to build on.',
+        highlight: ['pvw-btn-8', 'btn-cut'],
+        check: () => state.surfaceMode === 'ME1' && state.pgmIndex === 8,
+        hint: 'Ready BLK on Preview then press CUT.',
+      },
+      {
+        id: 'l3-me1-build-intro',
+        watchOnly: true,
+        instruction: 'Now build a side-by-side composite: two sources in DVE PIP boxes, side by side with borders and crop. Use Key 1 for one source and Key 2 for the other.',
+        highlight: [],
+        delay: 0,
+      },
+      {
+        id: 'l3-switch-back-mepp',
+        instruction: 'When your side-by-side composite is complete, switch back to ME P/P.',
+        highlight: ['surface-mepp'],
+        check: () => state.surfaceMode === 'ME_PP',
+        hint: 'Press ME P/P in the Surface selector.',
+      },
+      {
+        id: 'l3-ready-me1',
+        instruction: 'Ready ME1 as a source on Preview.',
+        highlight: ['pvw-btn-7'],
+        check: () => state.pvwIndex === 7,
+        hint: 'Find ME1 in the Preview row and select it.',
+      },
+      {
+        id: 'l3-take-me1',
+        instruction: 'CUT ME1 to Program.',
+        highlight: ['btn-cut'],
+        check: () => state.pgmIndex === 7,
+        hint: 'Press CUT.',
+      },
+      {
+        id: 'l3-ready-cam2-from-me1',
+        instruction: 'Ready CAM 2 on Preview.',
+        highlight: ['pvw-btn-1'],
+        check: () => state.pvwIndex === 1,
+        hint: 'Select CAM 2 in the Preview row.',
+      },
+      {
+        id: 'l3-take-cam2-from-me1',
+        instruction: 'CUT to CAM 2.',
+        highlight: ['btn-cut'],
+        check: () => state.pgmIndex === 1,
+        hint: 'Press CUT.',
+      },
+      // ── DRIVE: ME1 as key source ──
+      {
+        id: 'l3-me1-as-key-intro',
+        watchOnly: true,
+        instruction: 'Great. Now we\'ll use that ME 1 composite as a DVE key source — like a picture-in-picture of the whole composite.',
+        highlight: [],
+        delay: 3500,
+      },
+      {
+        id: 'l3-sel-dsk1-for-me1',
+        instruction: 'Select DSK 1.',
+        highlight: ['dsk-sel-1'],
+        check: () => state.activeDSK === 0,
+        hint: 'Press SEL 1.',
+      },
+      {
+        id: 'l3-set-me1-source',
+        instruction: 'Set the Key Source to ME1.',
+        highlight: ['dsk-src-btn-7'],
+        check: () => state.dskState[0].sourceIndex === SOURCES.indexOf('ME1'),
+        hint: 'Find ME1 in the Key Source row.',
+      },
+      {
+        id: 'l3-enable-dve-me1',
+        instruction: 'Enable DVE for this key.',
+        highlight: ['dve-toggle'],
+        check: () => state.dskState[0].dveEnabled === true,
+        hint: 'Press DVE in the Type of Key row.',
+      },
+      {
+        id: 'l3-position-dve-me1',
+        watchOnly: true,
+        instruction: 'Open the DVE editor and size it down and move it to the bottom-right corner, then close the editor.',
+        highlight: ['dve-slot'],
+        delay: 0,
+      },
+      {
+        id: 'l3-preview-me1-key',
+        instruction: 'Arm KEY 1 in the Preview/Tie row.',
+        highlight: ['tie-key-1'],
+        check: () => state.previewKeyState[0] === true,
+        hint: 'Press KEY 1 in the Preview/Tie row.',
+      },
+      {
+        id: 'l3-ready-cam1-for-me1-key',
+        instruction: 'Ready CAM 1 on Preview.',
+        highlight: ['pvw-btn-0'],
+        check: () => state.pvwIndex === 0,
+        hint: 'Select CAM 1 in the Preview row.',
+      },
+      {
+        id: 'l3-dissolve-cam1-me1-key',
+        instruction: 'Dissolve to CAM 1 with the ME1 DVE key riding on.',
+        highlight: ['btn-auto'],
+        check: () => state.pgmIndex === 0 && state.dskState[0].active === true,
+        hint: 'Press AUTO.',
+      },
+      {
+        id: 'l3-auto-key1-off',
+        instruction: 'Dissolve Key 1 off.',
+        highlight: ['dsk-auto-1'],
+        check: () => state.dskState[0].active === false,
+        hint: 'Press AUTO in the DSK 1 row.',
+      },
+      {
+        id: 'l3-complete',
+        watchOnly: true,
+        instruction: '🎉 Lesson 3 complete! You can now work with DVE keys, multiple DSK channels, build ME 1 composites, and use ME 1 as a key source. Ready for Lesson 4?',
+        highlight: [],
+        delay: 0,
+      },
+    ],
+
+    // ──────────────────────────────────────────────────────────
+    //  LESSON 4 — Advanced & Review
+    // ──────────────────────────────────────────────────────────
+    4: [
+      // ── WATCH: Orientation ──
+      {
+        id: 'l4-intro',
+        watchOnly: true,
+        instruction: 'Lesson 4 is the advanced and review lesson. You\'ll build ME 1 precomps, store them to ME 1 macros, recall them, and use them as live key sources — the full expert workflow.',
+        highlight: [],
+        delay: 5000,
+      },
+      {
+        id: 'l4-memory-explained',
+        watchOnly: true,
+        instruction: 'The Macro row at the top of the panel has STORE and RECALL for both ME P/P and ME 1. Storing a macro saves the entire bus state — sources, keys, DVE positions, everything.',
+        highlight: ['me-memory-bar'],
+        delay: 4500,
+      },
+      {
+        id: 'l4-workflow-explained',
+        watchOnly: true,
+        instruction: 'The expert workflow is: build composite → store to ME 1 macro → clear and build a second composite → store that → then recall either one on demand during a show.',
+        highlight: ['me-memory-bar'],
+        delay: 5000,
+      },
+      // ── DRIVE: Build side-by-side, store to ME 1 Macro 1 ──
+      {
+        id: 'l4-switch-to-me1-build1',
+        instruction: 'Switch to ME 1.',
+        highlight: ['surface-me1'],
+        check: () => state.surfaceMode === 'ME1',
+        hint: 'Press ME 1 in the Surface selector.',
+      },
+      {
+        id: 'l4-blk-me1-build1',
+        instruction: 'Take BLK on ME 1.',
+        highlight: ['btn-cut', 'pvw-btn-8'],
+        check: () => state.surfaceMode === 'ME1' && state.pgmIndex === 8,
+        hint: 'Ready BLK then CUT.',
+      },
+      {
+        id: 'l4-build-side-by-side',
+        watchOnly: true,
+        instruction: 'Build a CAM 3 | CAM 1 side-by-side: two DVE keys, each ~95% scale, H crop ~40%, bordered, CAM 3 left and CAM 1 right. This step won\'t advance until you store it.',
+        highlight: [],
+        delay: 0,
+      },
+      {
+        id: 'l4-store-macro1',
+        instruction: 'Store this side-by-side to ME 1 Macro 1 — press STORE next to the ME1 memory bank, then press slot 1.',
+        highlight: ['me-1-store', 'me-1-slot-1'],
+        check: () => {
+          const slots = state.meMemorySlots && state.meMemorySlots['ME1'];
+          return !!(slots && slots[0] && slots[0].bus);
+        },
+        hint: 'Press STORE in the ME1 memory row, then press slot button 1.',
+      },
+      // ── DRIVE: Clear ME 1, build quad, store to Macro 2 ──
+      {
+        id: 'l4-blk-me1-build2',
+        instruction: 'Take BLK on ME 1 again to clear the canvas.',
+        highlight: ['pvw-btn-8', 'btn-cut'],
+        check: () => state.surfaceMode === 'ME1' && state.pgmIndex === 8,
+        hint: 'Ready BLK then CUT.',
+      },
+      {
+        id: 'l4-build-quad',
+        watchOnly: true,
+        instruction: 'Now build a quad: four DVE keys (CAM 1, CAM 2, CAM 3, CPU), each at 50% scale, sized into the four corners with H and V crop and borders.',
+        highlight: [],
+        delay: 0,
+      },
+      {
+        id: 'l4-store-macro2',
+        instruction: 'Store the quad to ME 1 Macro 2.',
+        highlight: ['me-1-store', 'me-1-slot-2'],
+        check: () => {
+          const slots = state.meMemorySlots && state.meMemorySlots['ME1'];
+          return !!(slots && slots[1] && slots[1].bus);
+        },
+        hint: 'Press STORE in the ME1 row, then press slot 2.',
+      },
+      // ── DRIVE: Recall workflow ──
+      {
+        id: 'l4-recall-intro',
+        watchOnly: true,
+        instruction: 'Both composites are stored. Now practice recalling them on demand — like you would live during a show.',
+        highlight: [],
+        delay: 3500,
+      },
+      {
+        id: 'l4-recall-macro1',
+        instruction: 'Recall ME 1 Macro 1 to load the side-by-side back onto ME 1.',
+        highlight: ['me-1-recall', 'me-1-slot-1'],
+        check: () => {
+          const slots = state.meMemorySlots && state.meMemorySlots['ME1'];
+          if (!slots || !slots[0] || !slots[0].bus) return false;
+          const snap = state.surfaceStates['ME1'];
+          return snap && snap.dskState && snap.dskState.some(d => d.active && d.dveEnabled);
+        },
+        hint: 'Press RECALL then slot 1 in the ME1 memory row.',
+      },
+      // ── DRIVE: Switch to MEPP, take ME1, then use it as a key ──
+      {
+        id: 'l4-switch-to-mepp',
+        instruction: 'Switch back to ME P/P.',
+        highlight: ['surface-mepp'],
+        check: () => state.surfaceMode === 'ME_PP',
+        hint: 'Press ME P/P in the Surface selector.',
+      },
+      {
+        id: 'l4-ready-me1',
+        instruction: 'Ready ME1 on Preview.',
+        highlight: ['pvw-btn-7'],
+        check: () => state.pvwIndex === 7,
+        hint: 'Select ME1 in the Preview row.',
+      },
+      {
+        id: 'l4-cut-me1',
+        instruction: 'CUT ME1 to Program.',
+        highlight: ['btn-cut'],
+        check: () => state.pgmIndex === 7,
+        hint: 'Press CUT.',
+      },
+      {
+        id: 'l4-ready-cam2-after-me1',
+        instruction: 'Ready CAM 2 on Preview.',
+        highlight: ['pvw-btn-1'],
+        check: () => state.pvwIndex === 1,
+        hint: 'Select CAM 2 in the Preview row.',
+      },
+      {
+        id: 'l4-cut-cam2',
+        instruction: 'CUT to CAM 2.',
+        highlight: ['btn-cut'],
+        check: () => state.pgmIndex === 1,
+        hint: 'Press CUT.',
+      },
+      // ── DRIVE: ME1 as DVE key, placed bottom-right ──
+      {
+        id: 'l4-sel-dsk1',
+        instruction: 'Select DSK 1.',
+        highlight: ['dsk-sel-1'],
+        check: () => state.activeDSK === 0,
+        hint: 'Press SEL 1.',
+      },
+      {
+        id: 'l4-set-me1-key-source',
+        instruction: 'Set the Key Source to ME1.',
+        highlight: ['dsk-src-btn-7'],
+        check: () => state.dskState[0].sourceIndex === SOURCES.indexOf('ME1'),
+        hint: 'Find ME1 in the Key Source row.',
+      },
+      {
+        id: 'l4-enable-dve-key',
+        instruction: 'Enable DVE for Key 1.',
+        highlight: ['dve-toggle'],
+        check: () => state.dskState[0].dveEnabled === true,
+        hint: 'Press DVE in the Type of Key row.',
+      },
+      {
+        id: 'l4-position-dve-bottom-right',
+        watchOnly: true,
+        instruction: 'Open the DVE editor, size it down, and move it to the bottom-right corner. Close when done.',
+        highlight: ['dve-slot'],
+        delay: 0,
+      },
+      {
+        id: 'l4-preview-key1-me1',
+        instruction: 'Arm KEY 1 in the Preview/Tie row.',
+        highlight: ['tie-key-1'],
+        check: () => state.previewKeyState[0] === true,
+        hint: 'Press KEY 1 in the Preview/Tie row.',
+      },
+      {
+        id: 'l4-ready-cam1-for-key',
+        instruction: 'Ready CAM 1 on Preview.',
+        highlight: ['pvw-btn-0'],
+        check: () => state.pvwIndex === 0,
+        hint: 'Select CAM 1 in the Preview row.',
+      },
+      {
+        id: 'l4-dissolve-cam1-with-me1-key',
+        instruction: 'Dissolve to CAM 1 with the ME1 DVE key.',
+        highlight: ['btn-auto'],
+        check: () => state.pgmIndex === 0 && state.dskState[0].active === true,
+        hint: 'Press AUTO.',
+      },
+      {
+        id: 'l4-auto-off-final',
+        instruction: 'Dissolve Key 1 off.',
+        highlight: ['dsk-auto-1'],
+        check: () => state.dskState[0].active === false,
+        hint: 'Press AUTO in the DSK 1 row.',
+      },
+      // ── DRIVE: Recall Macro 2 and dissolve it to air ──
+      {
+        id: 'l4-recall-macro2-prep',
+        watchOnly: true,
+        instruction: 'Final challenge: recall the quad composite from ME 1 Macro 2 and dissolve it to air.',
+        highlight: [],
+        delay: 3500,
+      },
+      {
+        id: 'l4-switch-to-me1-recall2',
+        instruction: 'Switch to ME 1.',
+        highlight: ['surface-me1'],
+        check: () => state.surfaceMode === 'ME1',
+        hint: 'Press ME 1.',
+      },
+      {
+        id: 'l4-recall-macro2',
+        instruction: 'Recall ME 1 Macro 2.',
+        highlight: ['me-1-recall', 'me-1-slot-2'],
+        check: () => {
+          const slots = state.meMemorySlots && state.meMemorySlots['ME1'];
+          if (!slots || !slots[1] || !slots[1].bus) return false;
+          const snap = state.surfaceStates['ME1'];
+          return snap && snap.dskState && snap.dskState.filter(d => d.active && d.dveEnabled).length >= 4;
+        },
+        hint: 'Press RECALL then slot 2 in the ME1 row.',
+      },
+      {
+        id: 'l4-switch-to-mepp-final',
+        instruction: 'Switch back to ME P/P.',
+        highlight: ['surface-mepp'],
+        check: () => state.surfaceMode === 'ME_PP',
+        hint: 'Press ME P/P.',
+      },
+      {
+        id: 'l4-ready-me1-quad',
+        instruction: 'Set ME1 on Preview.',
+        highlight: ['pvw-btn-7'],
+        check: () => state.pvwIndex === 7,
+        hint: 'Select ME1 in the Preview row.',
+      },
+      {
+        id: 'l4-dissolve-me1-quad',
+        instruction: 'Dissolve ME1 to Program.',
+        highlight: ['btn-auto'],
+        check: () => state.pgmIndex === 7,
+        hint: 'Press AUTO.',
+      },
+      {
+        id: 'l4-ready-blk-final',
+        instruction: 'Set BLK on Preview.',
+        highlight: ['pvw-btn-8'],
+        check: () => state.pvwIndex === 8,
+        hint: 'Select BLK in the Preview row.',
+      },
+      {
+        id: 'l4-dissolve-to-black',
+        instruction: 'Dissolve to black.',
+        highlight: ['btn-auto'],
+        check: () => state.pgmIndex === 8,
+        hint: 'Press AUTO.',
+      },
+      {
+        id: 'l4-complete',
+        watchOnly: true,
+        instruction: '🎉 Lesson 4 complete! You can now build ME 1 composites, store and recall them as macros, and use them as live key sources. You\'re ready for the Expert quiz.',
         highlight: [],
         delay: 0,
       },

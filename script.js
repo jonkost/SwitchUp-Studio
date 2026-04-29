@@ -3661,6 +3661,7 @@ const RUN_THE_SHOW = {
   }
 
   function setMode(mode) {
+    if (mode === 'quiz' && lessonState.active) _teardownLesson();
     state.quizMode = mode === 'quiz';
 
     dom.modeFreeplayButton.className = `mode-btn${!state.quizMode ? ' mode-active' : ''}`;
@@ -5266,6 +5267,7 @@ function bindQuizDialogFocusLoop() {
   }
 
   function enterLessonMode() {
+    if (state.quizMode) setMode('freeplay');
     // First time this session: collect student info before showing lesson list
     if (!lessonState.nameCollected) {
       const ol = document.getElementById('lesson-name-overlay');
@@ -5282,22 +5284,21 @@ function bindQuizDialogFocusLoop() {
     }
   }
 
-  function exitLessonMode() {
+  function _teardownLesson() {
     clearLessonTimer();
     lessonClearHighlights();
     lessonState.active = false;
-
-    ['lesson-bar'].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el.classList.remove('lesson-visible');
-    });
+    const bar = document.getElementById('lesson-bar');
+    if (bar) bar.classList.remove('lesson-visible');
     scheduleLayout();
-
     ['lesson-select-overlay', 'lesson-name-overlay', 'lesson-results-overlay'].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.classList.remove('show');
     });
+  }
 
+  function exitLessonMode() {
+    _teardownLesson();
     setMode('freeplay');
   }
 

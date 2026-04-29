@@ -3661,7 +3661,24 @@ const RUN_THE_SHOW = {
   }
 
   function setMode(mode) {
-    if (mode === 'quiz' && lessonState.active) _teardownLesson();
+    if (mode === 'quiz' && lessonState.active) {
+      showConfirm(
+        'LEAVE LESSON?',
+        'You\'re in an active lesson. Leaving now will lose your progress.',
+        'LEAVE LESSON',
+        () => { _teardownLesson(); setMode('quiz'); }
+      );
+      return;
+    }
+    if (mode === 'freeplay' && lessonState.active) {
+      showConfirm(
+        'LEAVE LESSON?',
+        'You\'re in an active lesson. Leaving now will lose your progress.',
+        'LEAVE LESSON',
+        () => { _teardownLesson(); setMode('freeplay'); }
+      );
+      return;
+    }
     state.quizMode = mode === 'quiz';
 
     dom.modeFreeplayButton.className = `mode-btn${!state.quizMode ? ' mode-active' : ''}`;
@@ -5267,7 +5284,15 @@ function bindQuizDialogFocusLoop() {
   }
 
   function enterLessonMode() {
-    if (state.quizMode) setMode('freeplay');
+    if (state.quizMode) {
+      showConfirm(
+        'LEAVE QUIZ?',
+        'You\'re in an active quiz. Leaving now will lose your score and progress.',
+        'LEAVE QUIZ',
+        () => { setMode('freeplay'); enterLessonMode(); }
+      );
+      return;
+    }
     // First time this session: collect student info before showing lesson list
     if (!lessonState.nameCollected) {
       const ol = document.getElementById('lesson-name-overlay');
@@ -5300,6 +5325,20 @@ function bindQuizDialogFocusLoop() {
   function exitLessonMode() {
     _teardownLesson();
     setMode('freeplay');
+  }
+
+  function showConfirm(heading, copy, leaveLabel, onLeave) {
+    document.getElementById('confirm-heading').textContent = heading;
+    document.getElementById('confirm-copy').textContent = copy;
+    const leaveBtn = document.getElementById('confirm-leave-btn');
+    leaveBtn.textContent = leaveLabel;
+    leaveBtn.onclick = () => { hideConfirm(); onLeave(); };
+    document.getElementById('confirm-overlay').classList.add('show');
+    setTimeout(() => document.getElementById('confirm-stay-btn').focus(), 50);
+  }
+
+  function hideConfirm() {
+    document.getElementById('confirm-overlay').classList.remove('show');
   }
 
   // ============================================================
@@ -5367,6 +5406,7 @@ function bindQuizDialogFocusLoop() {
     setLessonSubMode,
     submitLessonName,
     retryLessonDrive,
+    hideConfirm,
   });
 
   init();

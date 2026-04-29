@@ -672,6 +672,18 @@
 
 	</div>
 
+	<!-- CONFIRM LEAVE DIALOG (generic — used when switching modes mid-session) -->
+	<div id="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-heading">
+		<div id="confirm-dialog" tabindex="-1">
+			<div id="confirm-heading" class="dialog-heading"></div>
+			<div id="confirm-copy" class="dialog-copy"></div>
+			<div class="dialog-actions">
+				<button type="button" id="confirm-leave-btn"></button>
+				<button type="button" id="confirm-stay-btn" onclick="hideConfirm()">STAY</button>
+			</div>
+		</div>
+	</div>
+
 	<div id="media-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="media-modal-title" aria-describedby="media-modal-copy">
 		<div id="media-modal-dialog" tabindex="-1">
 			<div class="media-modal-topbar media-modal-topbar-tight">

@@ -6169,6 +6169,24 @@ function bindQuizDialogFocusLoop() {
     localStorage.setItem('su-tts-voice', voiceURI);
   }
 
+  function previewTTS() {
+    const btn = document.getElementById('tts-preview-btn');
+    if (!tts.supported) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance('This is a preview of the selected voice.');
+    utt.rate  = tts.rate;
+    utt.pitch = 1.0;
+    if (tts.voiceURI) {
+      const voices = window.speechSynthesis.getVoices();
+      const match = voices.find(v => v.voiceURI === tts.voiceURI);
+      if (match) utt.voice = match;
+    }
+    if (btn) btn.classList.add('previewing');
+    utt.onend = () => { if (btn) btn.classList.remove('previewing'); };
+    utt.onerror = () => { if (btn) btn.classList.remove('previewing'); };
+    window.speechSynthesis.speak(utt);
+  }
+
   function setTTSRate(value) {
     tts.rate = parseFloat(value);
     localStorage.setItem('su-tts-rate', String(tts.rate));
@@ -6293,6 +6311,7 @@ function bindQuizDialogFocusLoop() {
     toggleTTS,
     setTTSVoice,
     setTTSRate,
+    previewTTS,
     setTheme,
     populateTTSVoices,
   });

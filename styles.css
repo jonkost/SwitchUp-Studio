@@ -10022,6 +10022,7 @@ body {
 }
 
 /* Arrow beacon — pointing down at the highlighted element */
+/* Amber/gold so it stands out against blue buttons (ME P/P, etc.) */
 .lesson-highlight::after {
   content: '';
   position: absolute;
@@ -10030,11 +10031,11 @@ body {
   transform: translateX(-50%);
   width: 36px;
   height: 36px;
-  background: #2288ff;
+  background: #FFB300;
   clip-path: polygon(50% 100%, 0 0, 100% 0);
   pointer-events: none;
   z-index: 100;
-  filter: drop-shadow(0 0 8px rgba(34,136,255,0.8));
+  filter: drop-shadow(0 0 8px rgba(255,179,0,0.85));
   animation: lessonBeaconBounce 0.85s ease-in-out infinite;
 }
 
@@ -10443,3 +10444,299 @@ body {
   transition: all 0.15s;
 }
 #confirm-stay-btn:hover { color: #ccc; border-color: #666; background: #1a1a20; }
+
+/* ═══════════════════════════════════════════════════════
+   ACCESSIBILITY & THEME ADDITIONS
+   ═══════════════════════════════════════════════════════ */
+
+/* ── TTS icon buttons in bars ──────────────────────────── */
+.tts-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  padding: 4px 6px !important;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+  color: var(--vs-clean-ink, #eef3fb);
+}
+.tts-toggle-btn:hover { opacity: 0.85; }
+.tts-toggle-btn.tts-active { opacity: 1; color: #FFB300; }
+
+/* ── Voice toggle row inside lesson name dialog ────────── */
+.lesson-voice-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+.lesson-voice-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--vs-clean-muted, #bcc7d9);
+}
+.lesson-voice-btn {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  color: var(--vs-clean-dim, #8c98ad);
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 52px;
+}
+.lesson-voice-btn:hover {
+  border-color: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1);
+  color: #eef3fb;
+}
+.lesson-voice-btn.lesson-voice-on {
+  border-color: rgba(255,179,0,0.5);
+  background: rgba(255,179,0,0.12);
+  color: #FFB300;
+}
+
+/* ── Accessibility menu section ────────────────────────── */
+.menu-accessibility-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+}
+.menu-access-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 40px;
+}
+.menu-access-row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.menu-access-row-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--vs-clean-ink, #eef3fb);
+}
+.menu-access-row-meta {
+  font-size: 11px;
+  color: var(--vs-clean-dim, #8c98ad);
+  letter-spacing: 0.01em;
+}
+
+/* Voice toggle in the menu — larger than bar version */
+.menu-tts-btn {
+  min-width: 44px;
+  min-height: 36px;
+  padding: 6px 10px !important;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.12) !important;
+  background: rgba(255,255,255,0.05) !important;
+  font-size: 14px;
+}
+.menu-tts-btn:hover {
+  border-color: rgba(255,255,255,0.28) !important;
+  background: rgba(255,255,255,0.1) !important;
+}
+.menu-tts-btn.tts-active {
+  border-color: rgba(255,179,0,0.45) !important;
+  background: rgba(255,179,0,0.1) !important;
+  color: #FFB300;
+}
+
+/* Voice select dropdown */
+.menu-access-select {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--vs-clean-ink, #eef3fb);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 6px 10px;
+  max-width: 160px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.menu-access-select:hover { border-color: rgba(255,255,255,0.25); }
+.menu-access-select option { background: #11141c; color: #eef3fb; }
+
+/* Speed range input */
+.menu-access-range {
+  width: 120px;
+  accent-color: #FFB300;
+  cursor: pointer;
+}
+
+/* Theme buttons */
+.menu-access-row-themes {
+  flex-wrap: wrap;
+}
+.menu-theme-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.menu-theme-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: var(--vs-clean-muted, #bcc7d9);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.menu-theme-btn:hover {
+  border-color: rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.1);
+  color: #eef3fb;
+}
+.menu-theme-btn.theme-btn-active,
+.menu-theme-btn[aria-pressed="true"] {
+  border-color: rgba(255,179,0,0.55);
+  background: rgba(255,179,0,0.12);
+  color: #FFB300;
+}
+
+/* ── High Contrast theme ───────────────────────────────── */
+body[data-theme="hc"] {
+  --ui-bg: #000000;
+  --ui-surface: #0a0c12;
+  --ui-surface-2: #101318;
+  --ui-surface-3: #161b24;
+  --ui-border: rgba(255,255,255,0.22);
+  --ui-border-strong: rgba(255,255,255,0.4);
+  --ui-ink: #ffffff;
+  --ui-ink-soft: #e8eef8;
+  --ui-ink-faint: #c0cad8;
+  background: #000000 !important;
+}
+body[data-theme="hc"] #panel,
+body[data-theme="hc"] #multiviewer,
+body[data-theme="hc"] #mode-bar,
+body[data-theme="hc"] #quiz-bar,
+body[data-theme="hc"] #lesson-bar,
+body[data-theme="hc"] #macro-quick-bar {
+  border-color: rgba(255,255,255,0.28) !important;
+}
+body[data-theme="hc"] #hotkey-splash,
+body[data-theme="hc"] .dialog-card {
+  border: 2px solid rgba(255,255,255,0.32) !important;
+}
+
+/* ── Light theme ────────────────────────────────────────── */
+body[data-theme="light"] {
+  --ui-bg: #dde2eb;
+  --ui-surface: #f4f6fa;
+  --ui-surface-2: #eaecf2;
+  --ui-surface-3: #e2e5ec;
+  --ui-border: rgba(0,0,0,0.09);
+  --ui-border-strong: rgba(0,0,0,0.16);
+  --ui-ink: #0d1117;
+  --ui-ink-soft: #2d3444;
+  --ui-ink-faint: #5a6275;
+  --ui-shadow-sm: 0 8px 24px rgba(0,0,0,0.1);
+  --ui-shadow-md: 0 18px 48px rgba(0,0,0,0.14);
+  background: #dde2eb !important;
+}
+body[data-theme="light"] #hotkey-splash {
+  background: linear-gradient(180deg, #f4f6fa, #eaecf2) !important;
+  color: #0d1117;
+}
+body[data-theme="light"] .menu-group-label,
+body[data-theme="light"] .hotkey-splash-title,
+body[data-theme="light"] .menu-action-title {
+  color: #0d1117 !important;
+}
+body[data-theme="light"] .menu-action-meta,
+body[data-theme="light"] .menu-group-copy,
+body[data-theme="light"] .menu-panel-copy {
+  color: #4a5568 !important;
+}
+body[data-theme="light"] .menu-action-btn {
+  background: rgba(0,0,0,0.04) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #0d1117 !important;
+}
+body[data-theme="light"] .menu-action-btn:hover {
+  background: rgba(0,0,0,0.08) !important;
+  border-color: rgba(0,0,0,0.18) !important;
+}
+body[data-theme="light"] .dialog-card {
+  background: #f4f6fa !important;
+  color: #0d1117 !important;
+}
+body[data-theme="light"] .dialog-heading,
+body[data-theme="light"] .dialog-copy {
+  color: #0d1117 !important;
+}
+body[data-theme="light"] .dialog-card input {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.15) !important;
+  color: #0d1117 !important;
+}
+body[data-theme="light"] .dialog-card input::placeholder { color: #8a96ab !important; }
+body[data-theme="light"] #mode-bar,
+body[data-theme="light"] #quiz-bar,
+body[data-theme="light"] #lesson-bar,
+body[data-theme="light"] #macro-quick-bar {
+  background: linear-gradient(180deg, rgba(238,242,250,0.97), rgba(224,228,238,0.99)) !important;
+  color: #0d1117 !important;
+}
+body[data-theme="light"] .quiz-action-btn,
+body[data-theme="light"] .lesson-submode-btn {
+  color: #0d1117 !important;
+}
+body[data-theme="light"] .menu-access-select {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.15) !important;
+  color: #0d1117 !important;
+}
+body[data-theme="light"] .menu-access-select option { background: #f4f6fa; color: #0d1117; }
+body[data-theme="light"] .menu-theme-btn {
+  border-color: rgba(0,0,0,0.15) !important;
+  background: rgba(0,0,0,0.04) !important;
+  color: #2d3444 !important;
+}
+body[data-theme="light"] .menu-theme-btn:hover {
+  background: rgba(0,0,0,0.09) !important;
+  color: #0d1117 !important;
+}
+body[data-theme="light"] .lesson-voice-row {
+  background: rgba(0,0,0,0.04) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+}
+body[data-theme="light"] .lesson-voice-label { color: #2d3444 !important; }
+body[data-theme="light"] .lesson-voice-btn {
+  border-color: rgba(0,0,0,0.15) !important;
+  background: rgba(0,0,0,0.04) !important;
+  color: #5a6275 !important;
+}
+body[data-theme="light"] #hotkey-splash-close { color: #2d3444 !important; }
+body[data-theme="light"] .tts-toggle-btn { color: #2d3444 !important; }
+body[data-theme="light"] .menu-access-row-title { color: #0d1117 !important; }
+body[data-theme="light"] .menu-access-row-meta { color: #5a6275 !important; }
+body[data-theme="light"] .menu-tts-btn {
+  border-color: rgba(0,0,0,0.15) !important;
+  background: rgba(0,0,0,0.04) !important;
+  color: #0d1117 !important;
+}

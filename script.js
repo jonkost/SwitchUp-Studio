@@ -2800,8 +2800,8 @@
     }
 
     if (dom.menuModeAction) {
-      setMenuActionCopy(dom.menuModeAction, state.quizMode ? 'Return to Freeplay' : 'Open Quiz Mode', state.quizMode ? 'Leave the active quiz workflow' : 'Switch from practice mode into scoring', '', { toggle: true, on: state.quizMode });
-      setPressed(dom.menuModeAction, state.quizMode);
+      setMenuActionCopy(dom.menuModeAction, state.quizMode ? 'Return to Freeplay' : 'Open Quiz Mode', state.quizMode ? 'Leave the active quiz and return to practice' : 'Switch from practice mode into scoring');
+      setPressed(dom.menuModeAction, false);
     }
 
     if (dom.menuSurfaceAction) {
@@ -6118,8 +6118,15 @@ function bindQuizDialogFocusLoop() {
   //  TTS — Voice narration for quiz and lesson content
   // ============================================================
 
+  // ── TTS SVG icon strings (Feather-style) ──────────────────────────
+  const TTS_SVG_ON  = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`;
+  const TTS_SVG_OFF = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
+
   const tts = {
-    muted: localStorage.getItem('su-tts-muted') === 'true',
+    // Voice defaults to OFF — user opts in via lesson dialog or accessibility menu
+    muted:   localStorage.getItem('su-tts-muted') !== 'false',
+    rate:    parseFloat(localStorage.getItem('su-tts-rate')  || '0.85'),
+    voiceURI: localStorage.getItem('su-tts-voice') || '',
     supported: typeof window !== 'undefined' && 'speechSynthesis' in window,
   };
 
@@ -6138,8 +6145,13 @@ function bindQuizDialogFocusLoop() {
     if (!clean) return;
     if (priority) window.speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(clean);
-    utt.rate  = 1.05;
+    utt.rate  = tts.rate;
     utt.pitch = 1.0;
+    if (tts.voiceURI) {
+      const voices = window.speechSynthesis.getVoices();
+      const match = voices.find(v => v.voiceURI === tts.voiceURI);
+      if (match) utt.voice = match;
+    }
     window.speechSynthesis.speak(utt);
   }
 
@@ -6147,16 +6159,70 @@ function bindQuizDialogFocusLoop() {
 
   function toggleTTS() {
     tts.muted = !tts.muted;
-    localStorage.setItem('su-tts-muted', tts.muted);
+    localStorage.setItem('su-tts-muted', String(tts.muted));
     if (tts.muted && tts.supported) window.speechSynthesis.cancel();
     updateTTSButtons();
   }
 
+  function setTTSVoice(voiceURI) {
+    tts.voiceURI = voiceURI;
+    localStorage.setItem('su-tts-voice', voiceURI);
+  }
+
+  function setTTSRate(value) {
+    tts.rate = parseFloat(value);
+    localStorage.setItem('su-tts-rate', String(tts.rate));
+    const label = document.getElementById('tts-rate-label');
+    if (label) label.textContent = tts.rate.toFixed(2) + '×';
+  }
+
+  function populateTTSVoices() {
+    const sel = document.getElementById('tts-voice-select');
+    if (!sel || !tts.supported) return;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return;
+    sel.innerHTML = '<option value="">Default</option>' +
+      voices.map(v => `<option value="${v.voiceURI}"${v.voiceURI === tts.voiceURI ? ' selected' : ''}>${v.name} (${v.lang})</option>`).join('');
+  }
+
+  if (tts.supported) {
+    window.speechSynthesis.addEventListener('voiceschanged', populateTTSVoices);
+  }
+
   function updateTTSButtons() {
+    const svgIcon = tts.muted ? TTS_SVG_OFF : TTS_SVG_ON;
     document.querySelectorAll('.tts-toggle-btn').forEach(btn => {
-      btn.textContent = tts.muted ? '🔇' : '🔊';
-      btn.setAttribute('aria-label', tts.muted ? 'Unmute voice' : 'Mute voice');
-      btn.setAttribute('aria-pressed', String(tts.muted));
+      btn.innerHTML = svgIcon;
+      btn.setAttribute('aria-label', tts.muted ? 'Turn on voice' : 'Turn off voice');
+      btn.setAttribute('aria-pressed', String(!tts.muted));
+      btn.classList.toggle('tts-active', !tts.muted);
+    });
+    // Sync the lesson dialog voice button text
+    const dlgBtn = document.getElementById('lesson-voice-btn');
+    if (dlgBtn) {
+      dlgBtn.textContent = tts.muted ? 'OFF' : 'ON';
+      dlgBtn.classList.toggle('lesson-voice-on', !tts.muted);
+    }
+    // Sync rate display
+    const rateRange = document.getElementById('tts-rate-range');
+    if (rateRange) rateRange.value = String(tts.rate);
+    const rateLabel = document.getElementById('tts-rate-label');
+    if (rateLabel) rateLabel.textContent = tts.rate.toFixed(2) + '×';
+  }
+
+  // ── Theme engine ───────────────────────────────────────────────────
+  function setTheme(name) {
+    document.body.setAttribute('data-theme', name || 'default');
+    localStorage.setItem('su-theme', name || 'default');
+    updateThemeButtons();
+  }
+
+  function updateThemeButtons() {
+    const current = document.body.getAttribute('data-theme') || 'default';
+    document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+      const active = btn.dataset.themeBtn === current;
+      btn.classList.toggle('theme-btn-active', active);
+      btn.setAttribute('aria-pressed', String(active));
     });
   }
 
@@ -6225,8 +6291,17 @@ function bindQuizDialogFocusLoop() {
     retryLessonDrive,
     hideConfirm,
     toggleTTS,
+    setTTSVoice,
+    setTTSRate,
+    setTheme,
+    populateTTSVoices,
   });
 
+  // Restore saved theme on load
+  const _savedTheme = localStorage.getItem('su-theme') || 'default';
+  document.body.setAttribute('data-theme', _savedTheme);
+  updateThemeButtons();
   updateTTSButtons();
+  if (tts.supported) populateTTSVoices();
   init();
 })();

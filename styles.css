@@ -10960,3 +10960,276 @@ body[data-theme="light"] .menu-license-link  { color: #1a56db !important; }
   background: rgba(255,179,0,0.12);
   color: #FFB300;
 }
+
+/* ══════════════════════════════════════════════════════════
+   LIGHT THEME — FULL CONTROL SURFACE
+   Panel, multiviewer, all buttons, labels
+   ══════════════════════════════════════════════════════════ */
+
+/* Override DS + VS-clean variables in one shot */
+body[data-theme="light"] {
+  --ds-bg:            #d5dce9;
+  --ds-panel:         linear-gradient(180deg, #e2e8f2 0%, #d8dfe9 100%);
+  --ds-surface:       #edf0f8;
+  --ds-surface-2:     #e5e9f2;
+  --ds-surface-3:     #dde2ec;
+  --ds-ink:           #0d1117;
+  --ds-ink-soft:      #1e2535;
+  --ds-ink-muted:     #4a5568;
+  --ds-ink-faint:     #6b7687;
+  --ds-line:          rgba(0,0,0,0.1);
+  --ds-line-mid:      rgba(0,0,0,0.14);
+  --ds-line-strong:   rgba(0,0,0,0.2);
+  --vs-clean-panel:         linear-gradient(180deg, #e2e8f2, #d8dfe9);
+  --vs-clean-panel-soft:    linear-gradient(180deg, #edf0f8, #e5e9f2);
+  --vs-clean-line:          rgba(0,0,0,0.1);
+  --vs-clean-line-strong:   rgba(0,0,0,0.16);
+  --vs-clean-ink:           #0d1117;
+  --vs-clean-muted:         #2d3444;
+  --vs-clean-dim:           #5a6275;
+}
+
+/* Panel + multiviewer shell */
+body[data-theme="light"] #panel,
+body[data-theme="light"] #multiviewer {
+  background: linear-gradient(180deg, #dde4f0 0%, #d3daea 100%) !important;
+  border-color: rgba(0,0,0,0.11) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6),
+              0 16px 48px rgba(0,0,0,0.1),
+              0 0 0 1px rgba(0,0,0,0.07) !important;
+}
+
+/* Transition + tie sub-panel */
+body[data-theme="light"] #transition-tie-panel {
+  background: linear-gradient(180deg, #e5eaf5 0%, #dce2ed 100%) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+}
+body[data-theme="light"] .transition-tie-label { color: #5a6275 !important; }
+
+/* DSK info cards */
+body[data-theme="light"] .dsk-info {
+  background: rgba(0,0,0,0.04) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+body[data-theme="light"] .dsk-info-source { color: #6b3fc8 !important; }
+body[data-theme="light"] .dsk-info-mode   { color: #6b7687 !important; }
+body[data-theme="light"] .dsk-info.dsk-info-active {
+  background: rgba(200,30,30,0.08) !important;
+  border-color: rgba(200,30,30,0.25) !important;
+}
+body[data-theme="light"] .dsk-info.dsk-info-active .dsk-info-source { color: #cc2020 !important; }
+
+/* Row / group labels */
+body[data-theme="light"] .row-label,
+body[data-theme="light"] .dsk-group-label,
+body[data-theme="light"] .dve-section-label,
+body[data-theme="light"] .dsk-info-mode { color: #5a6275 !important; }
+
+/* ── Control surface buttons: base ──────────────────────── */
+body[data-theme="light"] .src-btn,
+body[data-theme="light"] .trans-btn,
+body[data-theme="light"] .tie-btn,
+body[data-theme="light"] .dsk-btn {
+  background: linear-gradient(180deg, #ffffff 0%, #f2f5fc 100%) !important;
+  border: 1px solid rgba(0,0,0,0.16) !important;
+  color: #0d1117 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9),
+              0 1px 3px rgba(0,0,0,0.09) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body[data-theme="light"] .src-btn:hover,
+body[data-theme="light"] .trans-btn:hover,
+body[data-theme="light"] .tie-btn:hover,
+body[data-theme="light"] .dsk-btn:hover {
+  background: linear-gradient(180deg, #eef2fc 0%, #e6ebf5 100%) !important;
+  border-color: rgba(0,0,0,0.24) !important;
+  color: #0d1117 !important;
+}
+
+body[data-theme="light"] .surface-btn {
+  background: linear-gradient(180deg, #ffffff 0%, #f2f5fc 100%) !important;
+  border: 1px solid rgba(0,0,0,0.16) !important;
+  color: #0d1117 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body[data-theme="light"] .me-memory-btn {
+  background: linear-gradient(180deg, #ffffff 0%, #f2f5fc 100%) !important;
+  border: 1px solid rgba(0,0,0,0.16) !important;
+  color: #0d1117 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ── Active states: vivid colors stay, specificity re-declared ─ */
+/* PGM — Red */
+body[data-theme="light"] .src-btn.pgm-active,
+body[data-theme="light"] .dsk-btn.dsk-key-on {
+  background: linear-gradient(180deg, #ff3b38 0%, #d42e2b 100%) !important;
+  border-color: rgba(255,80,75,0.6) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(220,50,45,0.35) !important;
+}
+/* PVW — Green */
+body[data-theme="light"] .src-btn.pvw-active,
+body[data-theme="light"] .dsk-btn.chr-green-active {
+  background: linear-gradient(180deg, #30c858 0%, #1e9a40 100%) !important;
+  border-color: rgba(55,215,95,0.55) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(30,170,60,0.35) !important;
+}
+/* Key source / ME P/P active — Blue */
+body[data-theme="light"] #surface-mepp.surface-btn-active,
+body[data-theme="light"] .src-btn.key-type-active,
+body[data-theme="light"] .src-btn.dsk-src-active,
+body[data-theme="light"] .dsk-btn.chr-blue-active,
+body[data-theme="light"] .menu-action-btn[aria-pressed="true"] {
+  background: linear-gradient(180deg, #2490ff 0%, #0a7ef0 100%) !important;
+  border-color: rgba(80,165,255,0.55) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(20,130,255,0.3) !important;
+}
+/* DVE active — Purple */
+body[data-theme="light"] .src-btn.dve-toggle-active {
+  background: linear-gradient(180deg, #9b68ff 0%, #7a4eff 100%) !important;
+  border-color: rgba(160,115,255,0.55) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(140,95,255,0.3) !important;
+}
+/* ME 1 / DSK SEL active — Yellow */
+body[data-theme="light"] #surface-me1.surface-btn-active,
+body[data-theme="light"] .dsk-btn.dsk-sel-active {
+  background: linear-gradient(180deg, #ffd343 0%, #e5af10 100%) !important;
+  border-color: rgba(255,215,80,0.6) !important;
+  color: #151515 !important;
+  box-shadow: 0 0 10px rgba(230,180,10,0.3) !important;
+}
+/* Tie active — Amber */
+body[data-theme="light"] .tie-btn.tie-btn-active {
+  background: linear-gradient(180deg, #FFB300 0%, #e09400 100%) !important;
+  border-color: rgba(255,179,0,0.6) !important;
+  color: #151515 !important;
+}
+/* ME memory filled — Orange */
+body[data-theme="light"] .me-memory-slot.me-memory-slot-filled,
+body[data-theme="light"] .me-memory-btn.me-memory-btn-filled {
+  background: linear-gradient(180deg, #ff9b58 0%, #ef7027 100%) !important;
+  border-color: rgba(255,155,90,0.7) !important;
+  color: #ffffff !important;
+}
+/* ME memory STORE/RECALL target highlight */
+body[data-theme="light"] .me-memory-btn.me-memory-slot-target-store,
+body[data-theme="light"] .me-memory-btn.me-memory-slot-target-recall {
+  border-color: rgba(255,179,0,0.7) !important;
+  box-shadow: 0 0 8px rgba(255,179,0,0.45) !important;
+}
+
+/* Shortcut chips on light surface */
+body[data-theme="light"] .shortcut-chip {
+  background: rgba(0,0,0,0.12) !important;
+  border-color: rgba(0,0,0,0.22) !important;
+  color: #0d1117 !important;
+  box-shadow: none !important;
+}
+
+/* Multiviewer cell labels */
+body[data-theme="light"] .mv-cell-label {
+  color: #0d1117 !important;
+}
+body[data-theme="light"] .mv-large.pgm-box .mv-label { color: #ffffff !important; }
+body[data-theme="light"] .mv-large.pvw-box .mv-label { color: #ffffff !important; }
+
+/* ══════════════════════════════════════════════════════════
+   HIGH CONTRAST — BOLDER BUTTONS
+   Thicker borders, brighter text, vivid active glows
+   ══════════════════════════════════════════════════════════ */
+
+/* HC button base — visible borders, pure white text */
+body[data-theme="hc"] .src-btn,
+body[data-theme="hc"] .trans-btn,
+body[data-theme="hc"] .tie-btn,
+body[data-theme="hc"] .dsk-btn {
+  background: linear-gradient(180deg, #1c2133 0%, #131826 100%) !important;
+  border: 2px solid rgba(255,255,255,0.3) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+body[data-theme="hc"] .src-btn:hover,
+body[data-theme="hc"] .trans-btn:hover,
+body[data-theme="hc"] .tie-btn:hover,
+body[data-theme="hc"] .dsk-btn:hover {
+  background: linear-gradient(180deg, #252d42 0%, #1a2235 100%) !important;
+  border-color: rgba(255,255,255,0.6) !important;
+}
+body[data-theme="hc"] .surface-btn,
+body[data-theme="hc"] .me-memory-btn,
+body[data-theme="hc"] .macro-quick-btn {
+  border: 2px solid rgba(255,255,255,0.28) !important;
+  color: #ffffff !important;
+  backdrop-filter: none !important;
+}
+
+/* HC active states — vivid + glow */
+body[data-theme="hc"] .src-btn.pgm-active,
+body[data-theme="hc"] .dsk-btn.dsk-key-on {
+  background: #ff2d2a !important;
+  border: 2px solid #ff6a67 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(255,50,45,0.6) !important;
+}
+body[data-theme="hc"] .src-btn.pvw-active,
+body[data-theme="hc"] .dsk-btn.chr-green-active {
+  background: #22d455 !important;
+  border: 2px solid #55f080 !important;
+  color: #000 !important;
+  box-shadow: 0 0 12px rgba(30,210,70,0.6) !important;
+}
+body[data-theme="hc"] #surface-mepp.surface-btn-active,
+body[data-theme="hc"] .src-btn.key-type-active,
+body[data-theme="hc"] .src-btn.dsk-src-active,
+body[data-theme="hc"] .dsk-btn.chr-blue-active {
+  background: #1a7fff !important;
+  border: 2px solid #66aaff !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(30,130,255,0.6) !important;
+}
+body[data-theme="hc"] .src-btn.dve-toggle-active {
+  background: #8855ff !important;
+  border: 2px solid #bb88ff !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(140,90,255,0.6) !important;
+}
+body[data-theme="hc"] #surface-me1.surface-btn-active,
+body[data-theme="hc"] .dsk-btn.dsk-sel-active {
+  background: #ffcc00 !important;
+  border: 2px solid #ffe566 !important;
+  color: #0d0d0d !important;
+  box-shadow: 0 0 12px rgba(255,200,0,0.55) !important;
+}
+body[data-theme="hc"] .tie-btn.tie-btn-active {
+  background: #FFB300 !important;
+  border: 2px solid #ffd44d !important;
+  color: #0d0d0d !important;
+  box-shadow: 0 0 12px rgba(255,179,0,0.5) !important;
+}
+body[data-theme="hc"] .me-memory-slot.me-memory-slot-filled,
+body[data-theme="hc"] .me-memory-btn.me-memory-btn-filled {
+  background: #ff8c3a !important;
+  border: 2px solid #ffb36a !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(255,140,55,0.5) !important;
+}
+/* HC row labels — brighter */
+body[data-theme="hc"] .row-label,
+body[data-theme="hc"] .dsk-group-label,
+body[data-theme="hc"] .transition-tie-label,
+body[data-theme="hc"] .dve-section-label { color: rgba(255,255,255,0.65) !important; }
+
+/* HC shortcut chips */
+body[data-theme="hc"] .shortcut-chip {
+  background: rgba(255,255,255,0.15) !important;
+  border-color: rgba(255,255,255,0.35) !important;
+  color: #ffffff !important;
+}

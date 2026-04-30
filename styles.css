@@ -10713,65 +10713,167 @@ body[data-theme="hc"] .menu-license-terms { color: #b8c8de !important; }
 
 /* ══════════════════════════════════════════════════════════
    LIGHT THEME  (body[data-theme="light"])
-   Chrome goes light; switcher panel stays dark (it's hardware)
+   Chrome goes light; switcher surface stays dark (hardware)
    ══════════════════════════════════════════════════════════ */
 body[data-theme="light"] {
-  background: #d4d9e4 !important;
-}
-body[data-theme="light"] #hotkey-splash {
-  background: linear-gradient(180deg, #f2f5fb 0%, #e8ecf4 100%) !important;
-  border: 1.5px solid rgba(0,0,0,0.12) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-body[data-theme="light"] .menu-group,
-body[data-theme="light"] .menu-group-practice,
-body[data-theme="light"] .menu-group-macros,
-body[data-theme="light"] .menu-group-accessibility {
-  background: rgba(255,255,255,0.72) !important;
-  border: 1px solid rgba(0,0,0,0.1) !important;
-}
-body[data-theme="light"] .menu-group-license {
-  background: rgba(0,0,0,0.03) !important;
-  border: 1px solid rgba(0,0,0,0.08) !important;
-}
-body[data-theme="light"] .menu-action-btn {
-  background: rgba(0,0,0,0.04) !important;
-  border: 1px solid rgba(0,0,0,0.1) !important;
+  background: #dce1ec !important;
   color: #0d1117 !important;
 }
-body[data-theme="light"] .menu-action-btn:hover {
-  background: rgba(0,0,0,0.08) !important;
-  border-color: rgba(0,0,0,0.18) !important;
-}
-body[data-theme="light"] .menu-action-title { color: #0d1117 !important; }
-body[data-theme="light"] .menu-action-meta  { color: #4a5568 !important; }
-body[data-theme="light"] .menu-group-label  { color: #1a2030 !important; }
-body[data-theme="light"] .hotkey-splash-title { color: #0d1117 !important; }
-body[data-theme="light"] .menu-group-copy,
-body[data-theme="light"] .menu-panel-copy  { color: #4a5568 !important; }
-body[data-theme="light"] #hotkey-splash-close { color: #2d3444 !important; }
+
+/* ── Mode bar + quiz/lesson/macro bars ────────────────── */
 body[data-theme="light"] #mode-bar,
 body[data-theme="light"] #quiz-bar,
 body[data-theme="light"] #lesson-bar,
 body[data-theme="light"] #macro-quick-bar {
-  background: linear-gradient(180deg, rgba(238,242,252,0.98), rgba(224,230,244,0.99)) !important;
-  border-color: rgba(0,0,0,0.12) !important;
+  background: #f0f3fa !important;
+  border: 1.5px solid rgba(0,0,0,0.1) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
-body[data-theme="light"] #mode-bar button,
-body[data-theme="light"] .quiz-action-btn,
-body[data-theme="light"] .lesson-submode-btn,
+
+/* ── Mode-bar buttons: menu, mode tabs, fullscreen ────── */
+body[data-theme="light"] #menu-btn,
+body[data-theme="light"] .mode-btn,
+body[data-theme="light"] #fullscreen-btn {
+  background: rgba(0,0,0,0.05) !important;
+  border: 1px solid rgba(0,0,0,0.12) !important;
+  color: #0d1117 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body[data-theme="light"] #menu-btn:hover,
+body[data-theme="light"] .mode-btn:hover,
+body[data-theme="light"] #fullscreen-btn:hover {
+  background: rgba(0,0,0,0.10) !important;
+  border-color: rgba(0,0,0,0.2) !important;
+}
+body[data-theme="light"] .mode-btn.mode-active {
+  background: #0d1117 !important;
+  color: #f0f3fa !important;
+  border-color: #0d1117 !important;
+}
+body[data-theme="light"] #menu-btn span {
+  background-color: #0d1117 !important;
+}
+
+/* ── Quiz/lesson bar text & action buttons ────────────── */
 body[data-theme="light"] #quiz-question-num,
 body[data-theme="light"] #quiz-score-display,
 body[data-theme="light"] #quiz-timer,
 body[data-theme="light"] #lesson-progress,
 body[data-theme="light"] #lesson-instruction,
-body[data-theme="light"] #quiz-prompt {
+body[data-theme="light"] #quiz-prompt { color: #0d1117 !important; }
+
+body[data-theme="light"] .quiz-action-btn,
+body[data-theme="light"] .lesson-submode-btn {
+  background: rgba(0,0,0,0.06) !important;
+  border: 1px solid rgba(0,0,0,0.13) !important;
   color: #0d1117 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
+body[data-theme="light"] .quiz-action-btn:hover,
+body[data-theme="light"] .lesson-submode-btn:hover {
+  background: rgba(0,0,0,0.11) !important;
+  border-color: rgba(0,0,0,0.22) !important;
+}
+body[data-theme="light"] .lesson-submode-btn.lesson-submode-active {
+  background: #0d1117 !important;
+  color: #f0f3fa !important;
+  border-color: transparent !important;
+}
+body[data-theme="light"] .macro-quick-bar-label { color: #4a5568 !important; }
+body[data-theme="light"] .macro-quick-btn {
+  background: rgba(0,0,0,0.06) !important;
+  border-color: rgba(0,0,0,0.13) !important;
+  color: #0d1117 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ── Main menu panel ──────────────────────────────────── */
+body[data-theme="light"] #hotkey-splash {
+  background: #f0f3fa !important;
+  border: 1.5px solid rgba(0,0,0,0.1) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body[data-theme="light"] #hotkey-splash-close {
+  color: #2d3444 !important;
+  background: rgba(0,0,0,0.06) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+body[data-theme="light"] .hotkey-splash-title { color: #0d1117 !important; }
+body[data-theme="light"] .menu-panel-copy     { color: #4a5568 !important; }
+
+/* ── Menu section cards ───────────────────────────────── */
+body[data-theme="light"] .menu-group,
+body[data-theme="light"] .menu-group-practice,
+body[data-theme="light"] .menu-group-macros,
+body[data-theme="light"] .menu-group-accessibility {
+  background: #ffffff !important;
+  border: 1px solid rgba(0,0,0,0.09) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+body[data-theme="light"] .menu-group-license {
+  background: rgba(0,0,0,0.02) !important;
+  border: 1px solid rgba(0,0,0,0.07) !important;
+  box-shadow: none !important;
+}
+body[data-theme="light"] .menu-group-label { color: #1a2030 !important; }
+body[data-theme="light"] .menu-group-copy  { color: #4a5568 !important; }
+
+/* ── Menu action buttons ──────────────────────────────── */
+body[data-theme="light"] .menu-action-btn {
+  background: rgba(0,0,0,0.03) !important;
+  border: 1px solid rgba(0,0,0,0.09) !important;
+  color: #0d1117 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body[data-theme="light"] .menu-action-btn:hover {
+  background: rgba(0,0,0,0.07) !important;
+  border-color: rgba(0,0,0,0.16) !important;
+}
+body[data-theme="light"] .menu-action-btn:disabled {
+  background: rgba(0,0,0,0.02) !important;
+  color: #9aa0b0 !important;
+}
+body[data-theme="light"] .menu-action-title { color: #0d1117 !important; }
+body[data-theme="light"] .menu-action-meta  { color: #4a5568 !important; }
+body[data-theme="light"] .menu-action-key   { color: #6b7687 !important; border-color: rgba(0,0,0,0.15) !important; }
+body[data-theme="light"] .menu-action-btn-danger { border-color: rgba(200,0,0,0.25) !important; }
+body[data-theme="light"] .menu-action-btn-danger .menu-action-title { color: #b91c1c !important; }
+
+/* ── Macro slots ──────────────────────────────────────── */
+body[data-theme="light"] .macro-slot {
+  background: rgba(0,0,0,0.03) !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+body[data-theme="light"] .macro-slot-label   { color: #0d1117 !important; }
+body[data-theme="light"] .macro-slot-status  { color: #6b7687 !important; }
+body[data-theme="light"] .macro-slot-summary { color: #4a5568 !important; }
+body[data-theme="light"] .macro-slot-btn {
+  background: rgba(0,0,0,0.05) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #0d1117 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body[data-theme="light"] .macro-slot-btn:hover {
+  background: rgba(0,0,0,0.10) !important;
+  border-color: rgba(0,0,0,0.18) !important;
+}
+
+/* ── Dialogs ──────────────────────────────────────────── */
 body[data-theme="light"] .dialog-card {
-  background: #f2f5fb !important;
-  border-color: rgba(0,0,0,0.12) !important;
+  background: #f0f3fa !important;
+  border-color: rgba(0,0,0,0.11) !important;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.13) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 body[data-theme="light"] .dialog-heading { color: #0d1117 !important; }
 body[data-theme="light"] .dialog-copy    { color: #4a5568 !important; }
@@ -10779,24 +10881,32 @@ body[data-theme="light"] .dialog-card input {
   background: #ffffff !important;
   border-color: rgba(0,0,0,0.15) !important;
   color: #0d1117 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 body[data-theme="light"] .dialog-card input::placeholder { color: #8a96ab !important; }
-/* Accessibility rows */
+
+/* ── Accessibility rows ───────────────────────────────── */
 body[data-theme="light"] .menu-access-row-title { color: #0d1117 !important; }
 body[data-theme="light"] .menu-access-row-meta  { color: #5a6275 !important; }
 body[data-theme="light"] .menu-tts-btn {
-  border-color: rgba(0,0,0,0.15) !important;
+  border-color: rgba(0,0,0,0.13) !important;
   background: rgba(0,0,0,0.04) !important;
   color: #0d1117 !important;
 }
 body[data-theme="light"] .menu-access-select {
-  background: rgba(0,0,0,0.05) !important;
-  border-color: rgba(0,0,0,0.15) !important;
+  background: rgba(0,0,0,0.04) !important;
+  border-color: rgba(0,0,0,0.13) !important;
   color: #0d1117 !important;
 }
-body[data-theme="light"] .menu-access-select option { background: #f2f5fb; color: #0d1117; }
+body[data-theme="light"] .menu-access-select option { background: #f0f3fa; color: #0d1117; }
+body[data-theme="light"] .tts-voice-preview-btn {
+  border-color: rgba(0,0,0,0.13) !important;
+  background: rgba(0,0,0,0.04) !important;
+  color: #2d3444 !important;
+}
 body[data-theme="light"] .menu-theme-btn {
-  border-color: rgba(0,0,0,0.15) !important;
+  border-color: rgba(0,0,0,0.13) !important;
   background: rgba(0,0,0,0.04) !important;
   color: #2d3444 !important;
 }
@@ -10805,40 +10915,24 @@ body[data-theme="light"] .menu-theme-btn:hover {
   color: #0d1117 !important;
 }
 body[data-theme="light"] .tts-toggle-btn { color: #2d3444 !important; }
-body[data-theme="light"] .tts-voice-preview-btn {
-  border-color: rgba(0,0,0,0.15) !important;
-  background: rgba(0,0,0,0.04) !important;
-  color: #2d3444 !important;
-}
-/* Lesson dialog */
+
+/* ── Lesson name dialog ───────────────────────────────── */
 body[data-theme="light"] .lesson-voice-row {
-  background: rgba(0,0,0,0.04) !important;
-  border-color: rgba(0,0,0,0.12) !important;
+  background: rgba(0,0,0,0.03) !important;
+  border-color: rgba(0,0,0,0.1) !important;
 }
 body[data-theme="light"] .lesson-voice-label { color: #2d3444 !important; }
 body[data-theme="light"] .lesson-voice-btn {
-  border-color: rgba(0,0,0,0.15) !important;
+  border-color: rgba(0,0,0,0.13) !important;
   background: rgba(0,0,0,0.04) !important;
   color: #5a6275 !important;
 }
-/* Macro slots */
-body[data-theme="light"] .macro-slot {
-  background: rgba(0,0,0,0.04) !important;
-  border-color: rgba(0,0,0,0.1) !important;
-}
-body[data-theme="light"] .macro-slot-label   { color: #0d1117 !important; }
-body[data-theme="light"] .macro-slot-status  { color: #4a5568 !important; }
-body[data-theme="light"] .macro-slot-summary { color: #4a5568 !important; }
-body[data-theme="light"] .macro-slot-btn {
-  background: rgba(0,0,0,0.06) !important;
-  border-color: rgba(0,0,0,0.12) !important;
-  color: #0d1117 !important;
-}
-/* License section */
+
+/* ── License ──────────────────────────────────────────── */
 body[data-theme="light"] .menu-license-title { color: #0d1117 !important; }
 body[data-theme="light"] .menu-license-copy  { color: #4a5568 !important; }
-body[data-theme="light"] .menu-license-terms { color: #4a5568 !important; }
-body[data-theme="light"] .menu-license-link  { color: #2468d0 !important; }
+body[data-theme="light"] .menu-license-terms li { color: #4a5568 !important; }
+body[data-theme="light"] .menu-license-link  { color: #1a56db !important; }
 
 /* Voice preview button */
 .tts-voice-preview-btn {

@@ -11140,6 +11140,65 @@ body[data-theme="light"] .mv-cell-label {
 body[data-theme="light"] .mv-large.pgm-box .mv-label { color: #ffffff !important; }
 body[data-theme="light"] .mv-large.pvw-box .mv-label { color: #ffffff !important; }
 
+/* ── Dialog name/class inputs (ID specificity beats .dialog-card input) ── */
+body[data-theme="light"] #quiz-name-input,
+body[data-theme="light"] #lesson-name-input,
+body[data-theme="light"] #quiz-class-input,
+body[data-theme="light"] #lesson-class-input {
+  background: #ffffff !important;
+  border: 1px solid rgba(0,0,0,0.15) !important;
+  color: #0d1117 !important;
+}
+body[data-theme="light"] #quiz-name-input::placeholder,
+body[data-theme="light"] #lesson-name-input::placeholder,
+body[data-theme="light"] #quiz-class-input::placeholder,
+body[data-theme="light"] #lesson-class-input::placeholder {
+  color: #8a96ab !important;
+}
+body[data-theme="light"] #quiz-name-input:focus,
+body[data-theme="light"] #lesson-name-input:focus,
+body[data-theme="light"] #quiz-class-input:focus,
+body[data-theme="light"] #lesson-class-input:focus {
+  border-color: rgba(0,0,0,0.35) !important;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.08) !important;
+}
+
+/* ── Dialog back button (ID specificity needs explicit light override) ── */
+body[data-theme="light"] #quiz-name-back-btn,
+body[data-theme="light"] #lesson-name-back-btn {
+  background: linear-gradient(180deg, #ffffff 0%, #f2f5fc 100%) !important;
+  border: 1px solid rgba(0,0,0,0.16) !important;
+  color: #0d1117 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body[data-theme="light"] #quiz-name-back-btn:hover,
+body[data-theme="light"] #lesson-name-back-btn:hover {
+  background: linear-gradient(180deg, #eef2fc 0%, #e6ebf5 100%) !important;
+  border-color: rgba(0,0,0,0.24) !important;
+  color: #0d1117 !important;
+}
+
+/* ── Practice Quiz toggle / Voice narration toggle ── */
+body[data-theme="light"] .dialog-toggle-btn,
+body[data-theme="light"] #quiz-practice-toggle {
+  background: rgba(0,0,0,0.04) !important;
+  border: 1px solid rgba(0,0,0,0.13) !important;
+  color: #2d3444 !important;
+}
+body[data-theme="light"] .dialog-toggle-btn:hover,
+body[data-theme="light"] #quiz-practice-toggle:hover {
+  background: rgba(0,0,0,0.08) !important;
+  border-color: rgba(0,0,0,0.2) !important;
+  color: #0d1117 !important;
+}
+body[data-theme="light"] .dialog-toggle-btn.is-active,
+body[data-theme="light"] #quiz-practice-toggle[aria-pressed="true"] {
+  background: rgba(30,154,64,0.10) !important;
+  border-color: rgba(30,154,64,0.40) !important;
+  color: #1a6b35 !important;
+}
+
 /* ══════════════════════════════════════════════════════════
    HIGH CONTRAST — BOLDER BUTTONS
    Thicker borders, brighter text, vivid active glows

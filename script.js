@@ -3165,60 +3165,60 @@ const QUIZ_BANK = {
     buildDissolveQuestion('CAM 3'),
     buildTakeQuestion('BLK'),
     buildDissolveQuestion('BLK'),
-    { prompt: 'Ready CAM 1. Take CAM 1. Ready CAM 2. Take CAM 2.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'cut') },
-    { prompt: 'Set CPU. Dissolve to CPU. Set CAM 1. Dissolve to CAM 1.', check: () => backgroundTransitionCheck(idx('CAM 1'), 'auto') },
-    { prompt: 'Ready CAM 3. Take CAM 3. Ready CPU. Take CPU.', check: () => backgroundTransitionCheck(idx('CPU'), 'cut') },
-    { prompt: 'Set GFX. Dissolve to GFX. Set CAM 1. Dissolve to CAM 1.', check: () => backgroundTransitionCheck(idx('CAM 1'), 'auto') },
-    { prompt: 'Ready CAM 2. Take CAM 2. Ready CAM 3. Take CAM 3.', check: () => backgroundTransitionCheck(idx('CAM 3'), 'cut') },
-    { prompt: 'Set CAM 2. Dissolve to CAM 2. Set CPU. Dissolve to CPU.', check: () => backgroundTransitionCheck(idx('CPU'), 'auto') },
-    { prompt: 'Ready GFX. Take GFX. Ready BLK. Take BLK.', check: () => backgroundTransitionCheck(idx('BLK'), 'cut') },
-    { prompt: 'Set CAM 3. Dissolve to CAM 3. Set BLK. Dissolve to BLK.', check: () => backgroundTransitionCheck(idx('BLK'), 'auto') },
+    buildTakeQuestion('M1'),
+    buildDissolveQuestion('M1'),
+    buildTakeQuestion('M2'),
+    buildDissolveQuestion('M2'),
+    buildTakeQuestion('ME1'),
+    buildDissolveQuestion('ME1'),
+    buildTakeQuestion('BARS'),
+    buildDissolveQuestion('BARS'),
   ],
 
   'bank-2': [
-    { prompt: 'Load Side Graphic to M1. Set Key 1 with M1, self key. Preview Key 1. Set CAM 1. Dissolve to CAM 1 with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('CAM 1', 'auto', 0, 'M1', 'side-graphic-tips', { keyMode: 'SELF' }) },
-    { prompt: 'Load Side Graphic to M2. Set Key 1 with M2, self key. Preview Key 1. Ready CAM 3. Take CAM 3 with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('CAM 3', 'cut', 0, 'M2', 'side-graphic-tips', { keyMode: 'SELF' }) },
-    { prompt: 'Load Live Bug to M1. Set Key 1 with M1, chroma blue. Preview Key 1. Set CPU. Dissolve to CPU with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('CPU', 'auto', 0, 'M1', 'live-bug', { keyMode: 'CHR', chrColor: 'blue' }) },
-    { prompt: 'Ready CAM 1. Take CAM 1. Set Key 1 with M1, self key. Take Key 1.', check: () => backgroundTransitionCheck(idx('CAM 1'), 'cut') && dskMatches(0, { sourceIndex: idx('M1'), keyMode: 'SELF', active: true }) && lastDskMethodIs(0, 'cut', true) },
-    { prompt: 'Ready CAM 3. Take CAM 3. Set Key 1 with M2, self key. Auto Key 1 on.', check: () => backgroundTransitionCheck(idx('CAM 3'), 'cut') && dskMatches(0, { sourceIndex: idx('M2'), keyMode: 'SELF', active: true }) && lastDskMethodIs(0, 'auto', true) },
-    { prompt: 'Ready CPU. Take CPU. Load OTS to M2. Set Key 1 with M2, chroma green. Take Key 1.', check: () => backgroundTransitionCheck(idx('CPU'), 'cut') && mediaDskMatches(0, 'M2', 'ots', { keyMode: 'CHR', chrColor: 'green', active: true }) && lastDskMethodIs(0, 'cut', true) },
-    { prompt: 'Ready CAM 1. Take CAM 1. Set Key 1 with M1, self key. Take Key 1. Ready CAM 2. Take CAM 2 under Key 1.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'cut') && dskMatches(0, { sourceIndex: idx('M1'), keyMode: 'SELF', active: true }) },
-    { prompt: 'Ready CAM 3. Take CAM 3. Set Key 1 with M2, self key. Auto Key 1 on. Set CAM 2. Dissolve to CAM 2 under Key 1.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'auto') && dskMatches(0, { sourceIndex: idx('M2'), keyMode: 'SELF', active: true }) },
-    { prompt: 'Ready CPU. Take CPU. Load Full Screen Graphic to M1. Set Key 1 with M1, luma key. Take Key 1. Ready CAM 1. Take CAM 1 under Key 1.', check: () => backgroundTransitionCheck(idx('CAM 1'), 'cut') && mediaDskMatches(0, 'M1', 'full-screen-graphic', { keyMode: 'LUMA', active: true }) },
-    { prompt: 'Set Key 1 with M1, self key. Preview Key 1. Set CAM 1. Dissolve to CAM 1 with Key 1. Lose Key 1 tie. Ready CAM 2. Take CAM 2 under Key 1.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'cut') && keyLiveNoTieCheck(0, { sourceIndex: idx('M1'), keyMode: 'SELF' }) },
-    { prompt: 'Set Key 1 with M2, self key. Preview Key 1. Ready CAM 3. Take CAM 3 with Key 1. Lose Key 1 tie. Set CAM 2. Dissolve to CAM 2 under Key 1.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'auto') && keyLiveNoTieCheck(0, { sourceIndex: idx('M2'), keyMode: 'SELF' }) },
-    { prompt: 'Load Live Bug to M1. Set Key 1 with M1, chroma blue. Preview Key 1. Ready CPU. Take CPU with Key 1. Lose Key 1 tie. Ready CAM 2. Take CAM 2 under Key 1.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'cut') && mediaKeyLiveNoTieCheck(0, 'M1', 'live-bug', { keyMode: 'CHR', chrColor: 'blue' }) },
-    { prompt: 'Ready CAM 1. Take CAM 1. Set Key 1 with M1, self key. Take Key 1. Take Key 1 off.', check: () => backgroundTransitionCheck(idx('CAM 1'), 'cut') && dskMatches(0, { sourceIndex: idx('M1'), keyMode: 'SELF', active: false }) && lastDskMethodIs(0, 'cut', false) },
-    { prompt: 'Ready CAM 3. Take CAM 3. Set Key 1 with M2, self key. Auto Key 1 on. Auto Key 1 off.', check: () => backgroundTransitionCheck(idx('CAM 3'), 'cut') && dskMatches(0, { sourceIndex: idx('M2'), keyMode: 'SELF', active: false }) && lastDskMethodIs(0, 'auto', false) },
-    { prompt: 'Ready CPU. Take CPU. Load OTS to M2. Set Key 1 with M2, chroma green. Auto Key 1 on. Take Key 1 off.', check: () => backgroundTransitionCheck(idx('CPU'), 'cut') && mediaDskMatches(0, 'M2', 'ots', { keyMode: 'CHR', chrColor: 'green', active: false }) && lastDskMethodIs(0, 'cut', false) },
-    { prompt: 'Set Key 1 with M1, self key. Preview Key 1. Ready CAM 1. Take CAM 1 with Key 1. Auto Key 1 off.', check: () => backgroundTransitionCheck(idx('CAM 1'), 'cut') && dskMatches(0, { sourceIndex: idx('M1'), keyMode: 'SELF', active: false, preview: true }) && lastDskMethodIs(0, 'auto', false) },
-    { prompt: 'Set Key 1 with M2, self key. Preview Key 1. Set CAM 3. Dissolve to CAM 3 with Key 1. Take Key 1 off.', check: () => backgroundTransitionCheck(idx('CAM 3'), 'auto') && dskMatches(0, { sourceIndex: idx('M2'), keyMode: 'SELF', active: false, preview: true }) && lastDskMethodIs(0, 'cut', false) },
-    { prompt: 'Load Full Screen Graphic to M1. Set Key 1 with M1, luma key. Preview Key 1. Ready CPU. Take CPU with Key 1. Auto Key 1 off.', check: () => backgroundTransitionCheck(idx('CPU'), 'cut') && mediaDskMatches(0, 'M1', 'full-screen-graphic', { keyMode: 'LUMA', active: false, preview: true }) && lastDskMethodIs(0, 'auto', false) },
-    { prompt: 'Ready CAM 2. Take CAM 2. Set Key 1 with M1, self key. Take Key 1. Set CPU. Dissolve to CPU under Key 1.', check: () => backgroundTransitionCheck(idx('CPU'), 'auto') && dskMatches(0, { sourceIndex: idx('M1'), keyMode: 'SELF', active: true }) },
-    { prompt: 'Ready CPU. Take CPU. Load Live Bug to M1. Set Key 1 with M1, chroma blue. Take Key 1. Set BLK. Dissolve to BLK under Key 1.', check: () => backgroundTransitionCheck(idx('BLK'), 'auto') && mediaDskMatches(0, 'M1', 'live-bug', { keyMode: 'CHR', chrColor: 'blue', active: true }) },
+    { prompt: 'Load Side Graphic to M1. Set Key 1 with M1, self key.', check: () => mediaKeyPreparedCheck(0, 'M1', 'side-graphic-tips', { keyMode: 'SELF' }) },
+    { prompt: 'Load Live Bug to M1. Set Key 1 with M1, chroma blue.', check: () => mediaKeyPreparedCheck(0, 'M1', 'live-bug', { keyMode: 'CHR', chrColor: 'blue' }) },
+    { prompt: 'Load OTS to M2. Set Key 1 with M2, chroma green.', check: () => mediaKeyPreparedCheck(0, 'M2', 'ots', { keyMode: 'CHR', chrColor: 'green' }) },
+    { prompt: 'Load Full Screen Graphic to M1. Set Key 1 with M1, luma key.', check: () => mediaKeyPreparedCheck(0, 'M1', 'full-screen-graphic', { keyMode: 'LUMA' }) },
+    { prompt: 'Load Side Graphic to M1. Set Key 1 with M1, self key. Preview Key 1.', check: () => mediaKeyPreviewCheck(0, 'M1', 'side-graphic-tips', { keyMode: 'SELF' }) },
+    { prompt: 'Load Live Bug to M1. Set Key 1 with M1, chroma blue. Preview Key 1.', check: () => mediaKeyPreviewCheck(0, 'M1', 'live-bug', { keyMode: 'CHR', chrColor: 'blue' }) },
+    { prompt: 'Load OTS to M2. Set Key 1 with M2, chroma green. Preview Key 1.', check: () => mediaKeyPreviewCheck(0, 'M2', 'ots', { keyMode: 'CHR', chrColor: 'green' }) },
+    { prompt: 'Load Side Graphic to M1. Set Key 1 with M1, self key. Take CAM 1 with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('CAM 1', 'cut', 0, 'M1', 'side-graphic-tips', { keyMode: 'SELF' }) },
+    { prompt: 'Load Side Graphic to M2. Set Key 1 with M2, self key. Dissolve to CAM 3 with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('CAM 3', 'auto', 0, 'M2', 'side-graphic-tips', { keyMode: 'SELF' }) },
+    { prompt: 'Load Live Bug to M1. Set Key 1 with M1, chroma blue. Dissolve to CPU with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('CPU', 'auto', 0, 'M1', 'live-bug', { keyMode: 'CHR', chrColor: 'blue' }) },
+    { prompt: 'Load OTS to M2. Set Key 1 with M2, chroma green. Take CAM 2 with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('CAM 2', 'cut', 0, 'M2', 'ots', { keyMode: 'CHR', chrColor: 'green' }) },
+    { prompt: 'Load Full Screen Graphic to M1. Set Key 1 with M1, luma key. Take CAM 1 with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('CAM 1', 'cut', 0, 'M1', 'full-screen-graphic', { keyMode: 'LUMA' }) },
+    { prompt: 'Set Key 1 with M1, self key. Take Key 1.', check: () => dskMatches(0, { sourceIndex: idx('M1'), keyMode: 'SELF', active: true }) && lastDskMethodIs(0, 'cut', true) },
+    { prompt: 'Set Key 1 with M2, self key. Auto Key 1 on.', check: () => dskMatches(0, { sourceIndex: idx('M2'), keyMode: 'SELF', active: true }) && lastDskMethodIs(0, 'auto', true) },
+    { prompt: 'Load Side Graphic to M1. Set Key 2 with M1, self key. Take CAM 3 with Key 2.', check: () => mediaKeyTakeWithBackgroundCheck('CAM 3', 'cut', 1, 'M1', 'side-graphic-tips', { keyMode: 'SELF' }) },
+    { prompt: 'Load Live Bug to M2. Set Key 2 with M2, chroma blue. Dissolve to CAM 1 with Key 2.', check: () => mediaKeyTakeWithBackgroundCheck('CAM 1', 'auto', 1, 'M2', 'live-bug', { keyMode: 'CHR', chrColor: 'blue' }) },
+    { prompt: 'Load OTS to M2. Set Key 3 with M2, chroma green. Take CPU with Key 3.', check: () => mediaKeyTakeWithBackgroundCheck('CPU', 'cut', 2, 'M2', 'ots', { keyMode: 'CHR', chrColor: 'green' }) },
+    { prompt: 'Load OTS to M1. Set Key 1 with M1, chroma green. Take CAM 3 with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('CAM 3', 'cut', 0, 'M1', 'ots', { keyMode: 'CHR', chrColor: 'green' }) },
+    { prompt: 'Set Key 1 with M1, self key. Preview Key 1.', check: () => mediaKeyPreviewCheck(0, 'M1', 'stock-m1', { keyMode: 'SELF' }) },
+    { prompt: 'Set Key 1 with M2, self key. Preview Key 1.', check: () => mediaKeyPreviewCheck(0, 'M2', 'stock-m2', { keyMode: 'SELF' }) },
   ],
 
   'bank-3': [
-    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Size down and move bottom right. Preview Key 1. Set CAM 1. Dissolve to CAM 1 with Key 1.', check: () => keyTakeWithBackgroundCheck(idx('CAM 1'), 'auto', 0, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'bottom-right' }) },
-    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Size down and move top left. Preview Key 1. Ready CAM 2. Take CAM 2 with Key 1.', check: () => keyTakeWithBackgroundCheck(idx('CAM 2'), 'cut', 0, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'top-left' }) },
-    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Size down and move top right. Preview Key 1. Ready CAM 3. Take CAM 3 with Key 1.', check: () => keyTakeWithBackgroundCheck(idx('CAM 3'), 'cut', 0, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'top-right' }) },
-    { prompt: 'Set Key 1 with M1, self key. Preview Key 1. Set CAM 1. Dissolve to CAM 1 with Key 1. Lose Key 1 tie. Ready CAM 2. Take CAM 2 under Key 1.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'cut') && keyLiveNoTieCheck(0, { sourceIndex: idx('M1'), keyMode: 'SELF' }) },
-    { prompt: 'Set Key 1 with M2, self key. DVE Key 1 on. Move it right. Preview Key 1. Set CAM 3. Dissolve to CAM 3 with Key 1.', check: () => keyTakeWithBackgroundCheck(idx('CAM 3'), 'auto', 0, { sourceIndex: idx('M2'), keyMode: 'SELF', dveEnabled: true, dveZone: 'right' }) },
-    { prompt: 'Load Live Bug to M1. Set Key 1 with M1, chroma blue. Preview Key 1. Ready CPU. Take CPU with Key 1. Lose Key 1 tie. Ready CAM 2. Take CAM 2 under Key 1.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'cut') && mediaKeyLiveNoTieCheck(0, 'M1', 'live-bug', { keyMode: 'CHR', chrColor: 'blue' }) },
-    { prompt: 'Ready CAM 1. Take CAM 1. Set Key 2 with CPU. DVE Key 2 on. Size down and move bottom left. Take Key 2.', check: () => backgroundTransitionCheck(idx('CAM 1'), 'cut') && dskMatches(1, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'bottom-left', active: true }) && lastDskMethodIs(1, 'cut', true) },
-    { prompt: 'Ready CAM 3. Take CAM 3. Set Key 2 with M2, self key. DVE Key 2 on. Move it right. Auto Key 2 on.', check: () => backgroundTransitionCheck(idx('CAM 3'), 'cut') && dskMatches(1, { sourceIndex: idx('M2'), keyMode: 'SELF', dveEnabled: true, dveZone: 'right', active: true }) && lastDskMethodIs(1, 'auto', true) },
-    { prompt: 'Ready CPU. Take CPU. Load Live Bug to M2. Set Key 2 with M2, chroma blue. Take Key 2. Ready CAM 1. Take CAM 1 under Key 2.', check: () => backgroundTransitionCheck(idx('CAM 1'), 'cut') && mediaDskMatches(1, 'M2', 'live-bug', { keyMode: 'CHR', chrColor: 'blue', active: true }) },
-    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Scale up and move left. Preview Key 1. Ready CAM 2. Take CAM 2 with Key 1.', check: () => keyTakeWithBackgroundCheck(idx('CAM 2'), 'cut', 0, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'left-large' }) },
-    { prompt: 'Set Key 1 with M1, self key. Preview Key 1. Ready CAM 1. Take CAM 1 with Key 1. Auto Key 1 off.', check: () => backgroundTransitionCheck(idx('CAM 1'), 'cut') && dskMatches(0, { sourceIndex: idx('M1'), keyMode: 'SELF', active: false, preview: true }) && lastDskMethodIs(0, 'auto', false) },
-    { prompt: 'Set Key 1 with M2, self key. DVE Key 1 on. Move it right. Preview Key 1. Ready CAM 3. Take CAM 3 with Key 1. Take Key 1 off.', check: () => backgroundTransitionCheck(idx('CAM 3'), 'cut') && dskMatches(0, { sourceIndex: idx('M2'), keyMode: 'SELF', dveEnabled: true, dveZone: 'right', active: false, preview: true }) && lastDskMethodIs(0, 'cut', false) },
-    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Size down and move center. Preview Key 1. Set CAM 2. Dissolve to CAM 2 with Key 1. Auto Key 1 off.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'auto') && dskMatches(0, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'center', active: false, preview: true }) && lastDskMethodIs(0, 'auto', false) },
-    { prompt: 'Ready CAM 2. Take CAM 2. Set Key 3 with CPU. DVE Key 3 on. Scale up and move left. Take Key 3.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'cut') && dskMatches(2, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'left-large', active: true }) && lastDskMethodIs(2, 'cut', true) },
-    { prompt: 'Ready CAM 1. Take CAM 1. Load Full Screen Graphic to M1. Set Key 3 with M1, luma key. Auto Key 3 on. Ready CPU. Take CPU under Key 3.', check: () => backgroundTransitionCheck(idx('CPU'), 'cut') && mediaDskMatches(2, 'M1', 'full-screen-graphic', { keyMode: 'LUMA', active: true }) },
-    { prompt: 'Set Key 2 with CPU. DVE Key 2 on. Size down and move bottom right. Preview Key 2. Set CAM 1. Dissolve to CAM 1 with Key 2. Lose Key 2 tie. Ready CPU. Take CPU under Key 2.', check: () => backgroundTransitionCheck(idx('CPU'), 'cut') && keyLiveNoTieCheck(1, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'bottom-right' }) },
-    { prompt: 'Set Key 2 with M1, self key. Preview Key 2. Set CAM 1. Dissolve to CAM 1 with Key 2. Lose Key 2 tie. Set CAM 2. Dissolve to CAM 2 under Key 2.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'auto') && keyLiveNoTieCheck(1, { sourceIndex: idx('M1'), keyMode: 'SELF' }) },
-    { prompt: 'Set Key 2 with M2, self key. DVE Key 2 on. Move it right. Preview Key 2. Ready CAM 3. Take CAM 3 with Key 2. Lose Key 2 tie. Ready CAM 2. Take CAM 2 under Key 2.', check: () => backgroundTransitionCheck(idx('CAM 2'), 'cut') && keyLiveNoTieCheck(1, { sourceIndex: idx('M2'), keyMode: 'SELF', dveEnabled: true, dveZone: 'right' }) },
-    { prompt: 'Ready CPU. Take CPU. Set Key 3 with CPU. DVE Key 3 on. Scale up and move left. Auto Key 3 on. Auto Key 3 off.', check: () => backgroundTransitionCheck(idx('CPU'), 'cut') && dskMatches(2, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'left-large', active: false }) && lastDskMethodIs(2, 'auto', false) },
-    { prompt: 'Load OTS to M2. Set Key 1 with M2, chroma green. Preview Key 1. Set BLK. Dissolve to BLK with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('BLK', 'auto', 0, 'M2', 'ots', { keyMode: 'CHR', chrColor: 'green' }) },
+    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Move it bottom right.', check: () => keyPreparedCheck(0, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'bottom-right' }) },
+    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Move it top left.', check: () => keyPreparedCheck(0, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'top-left' }) },
+    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Move it top right.', check: () => keyPreparedCheck(0, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'top-right' }) },
+    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Move it bottom left.', check: () => keyPreparedCheck(0, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'bottom-left' }) },
+    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Scale it up and move it left.', check: () => keyPreparedCheck(0, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'left-large' }) },
+    { prompt: 'Load Side Graphic to M1. Set Key 1 with M1, self key. DVE Key 1 on.', check: () => mediaKeyPreparedCheck(0, 'M1', 'side-graphic-tips', { keyMode: 'SELF', dveEnabled: true }) },
+    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Preview Key 1.', check: () => keyPreviewCheck(0, { sourceIndex: idx('CPU'), dveEnabled: true }) },
+    { prompt: 'Set Key 1 with CPU. Preview Key 1. Take CAM 2 with Key 1.', check: () => keyTakeWithBackgroundCheck(idx('CAM 2'), 'cut', 0, { sourceIndex: idx('CPU') }) },
+    { prompt: 'Set Key 1 with CPU. Preview Key 1. Dissolve to CAM 1 with Key 1.', check: () => keyTakeWithBackgroundCheck(idx('CAM 1'), 'auto', 0, { sourceIndex: idx('CPU') }) },
+    { prompt: 'Set Key 2 with CPU. DVE Key 2 on. Move it bottom left.', check: () => keyPreparedCheck(1, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'bottom-left' }) },
+    { prompt: 'Set Key 2 with CPU. DVE Key 2 on. Move it right.', check: () => keyPreparedCheck(1, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'right' }) },
+    { prompt: 'Set Key 2 with CPU. Preview Key 2. Take CAM 3 with Key 2.', check: () => keyTakeWithBackgroundCheck(idx('CAM 3'), 'cut', 1, { sourceIndex: idx('CPU') }) },
+    { prompt: 'Set Key 2 with CPU. Preview Key 2. Dissolve to CAM 1 with Key 2.', check: () => keyTakeWithBackgroundCheck(idx('CAM 1'), 'auto', 1, { sourceIndex: idx('CPU') }) },
+    { prompt: 'Set Key 3 with CPU. DVE Key 3 on. Scale it up and move it left.', check: () => keyPreparedCheck(2, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'left-large' }) },
+    { prompt: 'Set Key 3 with CPU. Preview Key 3. Take CAM 2 with Key 3.', check: () => keyTakeWithBackgroundCheck(idx('CAM 2'), 'cut', 2, { sourceIndex: idx('CPU') }) },
+    { prompt: 'Load OTS to M2. Set Key 1 with M2, chroma green. Preview Key 1.', check: () => mediaKeyPreviewCheck(0, 'M2', 'ots', { keyMode: 'CHR', chrColor: 'green' }) },
+    { prompt: 'Load OTS to M2. Set Key 1 with M2, chroma green. Dissolve to BLK with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('BLK', 'auto', 0, 'M2', 'ots', { keyMode: 'CHR', chrColor: 'green' }) },
+    { prompt: 'Load Full Screen Graphic to M1. Set Key 3 with M1, luma key. Auto Key 3 on.', check: () => mediaDskMatches(2, 'M1', 'full-screen-graphic', { keyMode: 'LUMA', active: true }) && lastDskMethodIs(2, 'auto', true) },
+    { prompt: 'Set Key 1 with CPU. DVE Key 1 on. Move it center.', check: () => keyPreparedCheck(0, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'center' }) },
+    { prompt: 'Load Live Bug to M1. Set Key 1 with M1, chroma blue. Preview Key 1.', check: () => mediaKeyPreviewCheck(0, 'M1', 'live-bug', { keyMode: 'CHR', chrColor: 'blue' }) },
   ],
 };
 
@@ -3452,62 +3452,6 @@ const RUN_THE_SHOW = {
     return map[zone] || 'Adjust the DVE';
   }
 
-  function buildAdvancedTakeQuestion(kind, method) {
-    const prompt = `${kind === 'quad' ? 'On ME 1, take BLK. Build a quad of CAM 1, CAM 2, CAM 3, and CPU with DVE, crop, and borders.' : 'On ME 1, take BLK. Build a CAM 3 | CAM 1 side-by-side with DVE, crop, and borders.'} Switch back to ME P/P. ${getPreviewVerb(method)} ME1. ${getTransitionVerb(method)} ME1.`;
-    return {
-      prompt,
-      check: () => state.surfaceMode === 'ME_PP'
-        && me1CompositeMatches(kind)
-        && backgroundTransitionCheck(idx('ME1'), method),
-    };
-  }
-
-  function buildAdvancedKeyQuestion(kind, dskIndex, zone, backgroundSource, method) {
-    const prompt = `${kind === 'quad' ? 'On ME 1, take BLK. Build a quad of CAM 1, CAM 2, CAM 3, and CPU with DVE, crop, and borders.' : 'On ME 1, take BLK. Build a CAM 3 | CAM 1 side-by-side with DVE, crop, and borders.'} Switch back to ME P/P. Set Key ${dskIndex + 1} with ME1. DVE Key ${dskIndex + 1} on. ${getZonePrompt(zone)}. Preview Key ${dskIndex + 1}. ${getPreviewVerb(method)} ${backgroundSource}. ${getTransitionVerb(method)} ${backgroundSource} with Key ${dskIndex + 1}.`;
-    return {
-      prompt,
-      check: () => state.surfaceMode === 'ME_PP'
-        && me1CompositeMatches(kind)
-        && keyTakeWithBackgroundCheck(idx(backgroundSource), method, dskIndex, {
-          sourceIndex: idx('ME1'),
-          keyMode: 'DVE_FULL',
-          dveEnabled: true,
-          dveZone: zone,
-        }),
-    };
-  }
-
-  function buildAdvancedBankQuestions() {
-    const questions = [
-      buildAdvancedTakeQuestion('side', 'cut'),
-      buildAdvancedTakeQuestion('side', 'auto'),
-      buildAdvancedTakeQuestion('quad', 'cut'),
-      buildAdvancedTakeQuestion('quad', 'auto'),
-    ];
-
-    const configs = [
-      ['side', 0, 'bottom-right', 'CAM 2', 'cut'],
-      ['side', 0, 'bottom-right', 'CAM 1', 'auto'],
-      ['side', 1, 'top-right', 'CPU', 'cut'],
-      ['side', 1, 'top-left', 'CAM 3', 'auto'],
-      ['side', 2, 'right', 'CAM 1', 'cut'],
-      ['side', 2, 'left-large', 'CPU', 'auto'],
-      ['side', 3, 'bottom-left', 'CAM 2', 'cut'],
-      ['side', 3, 'center', 'CAM 3', 'auto'],
-      ['quad', 0, 'bottom-right', 'CAM 2', 'cut'],
-      ['quad', 0, 'top-right', 'CAM 1', 'auto'],
-      ['quad', 1, 'bottom-left', 'CPU', 'cut'],
-      ['quad', 1, 'right', 'CAM 3', 'auto'],
-      ['quad', 2, 'top-left', 'CAM 1', 'cut'],
-      ['quad', 2, 'left-large', 'CPU', 'auto'],
-      ['quad', 3, 'center', 'CAM 2', 'cut'],
-      ['quad', 3, 'bottom-right', 'CAM 3', 'auto'],
-    ];
-
-    configs.forEach((config) => questions.push(buildAdvancedKeyQuestion(...config)));
-    return questions;
-  }
-
   function buildExpertTakeQuestion(recallSlot, kind, method) {
     const prompt = `On ME 1, take BLK. Build a CAM 3 | CAM 1 side-by-side with DVE, crop, and borders. Store it to ME 1 Macro 1. Stay on ME 1, clear it and build a quad of CAM 1, CAM 2, CAM 3, and CPU with DVE, crop, and borders. Store it to ME 1 Macro 2. Recall ME 1 Macro ${recallSlot + 1}. Switch to ME P/P. ${getPreviewVerb(method)} ME1. ${getTransitionVerb(method)} ME1.`;
     return {
@@ -3538,30 +3482,34 @@ const RUN_THE_SHOW = {
   }
 
   function buildExpertBankQuestions() {
-    const questions = [
-      buildExpertTakeQuestion(0, 'side', 'cut'),
-      buildExpertTakeQuestion(0, 'side', 'auto'),
-      buildExpertTakeQuestion(1, 'quad', 'cut'),
-      buildExpertTakeQuestion(1, 'quad', 'auto'),
+    return [
+      // Build composites on ME 1
+      { prompt: 'Switch to ME 1. Take BLK. Build a CAM 3 | CAM 1 side-by-side with DVE, crop, and borders.', check: () => state.surfaceMode === 'ME1' && me1CompositeMatches('side') },
+      { prompt: 'Switch to ME 1. Take BLK. Build a quad of CAM 1, CAM 2, CAM 3, and CPU with DVE, crop, and borders.', check: () => state.surfaceMode === 'ME1' && me1CompositeMatches('quad') },
+      // Store composites to macros
+      { prompt: 'Switch to ME 1. Build a CAM 3 | CAM 1 side-by-side. Store it to ME 1 Macro 1.', check: () => me1SlotMatches(0, 'side') },
+      { prompt: 'Switch to ME 1. Build a quad composite. Store it to ME 1 Macro 2.', check: () => me1SlotMatches(1, 'quad') },
+      { prompt: 'Switch to ME 1. Build a CAM 3 | CAM 1 side-by-side. Store it to ME 1 Macro 3.', check: () => me1SlotMatches(2, 'side') },
+      // Switch back after building
+      { prompt: 'Switch to ME 1. Build a CAM 3 | CAM 1 side-by-side. Switch back to ME P/P.', check: () => state.surfaceMode === 'ME_PP' && me1CompositeMatches('side') },
+      { prompt: 'Switch to ME 1. Build a quad composite. Switch back to ME P/P.', check: () => state.surfaceMode === 'ME_PP' && me1CompositeMatches('quad') },
+      // ME1 as background source
+      { prompt: 'Switch to ME P/P. Ready ME1. Take ME1.', check: () => state.surfaceMode === 'ME_PP' && backgroundTransitionCheck(idx('ME1'), 'cut') },
+      { prompt: 'Switch to ME P/P. Set ME1. Dissolve to ME1.', check: () => state.surfaceMode === 'ME_PP' && backgroundTransitionCheck(idx('ME1'), 'auto') },
+      // ME1 as DVE key — setup
+      { prompt: 'Set Key 1 with ME1. DVE Key 1 on. Move it bottom right.', check: () => keyPreparedCheck(0, { sourceIndex: idx('ME1'), dveEnabled: true, dveZone: 'bottom-right' }) },
+      { prompt: 'Set Key 1 with ME1. DVE Key 1 on. Move it top left.', check: () => keyPreparedCheck(0, { sourceIndex: idx('ME1'), dveEnabled: true, dveZone: 'top-left' }) },
+      { prompt: 'Set Key 2 with ME1. DVE Key 2 on. Move it bottom left.', check: () => keyPreparedCheck(1, { sourceIndex: idx('ME1'), dveEnabled: true, dveZone: 'bottom-left' }) },
+      { prompt: 'Set Key 3 with ME1. DVE Key 3 on. Move it top right.', check: () => keyPreparedCheck(2, { sourceIndex: idx('ME1'), dveEnabled: true, dveZone: 'top-right' }) },
+      { prompt: 'Set Key 4 with ME1. DVE Key 4 on. Move it right.', check: () => keyPreparedCheck(3, { sourceIndex: idx('ME1'), dveEnabled: true, dveZone: 'right' }) },
+      // ME1 as key — take with background
+      { prompt: 'Set Key 1 with ME1. Preview Key 1. Take CAM 2 with Key 1.', check: () => keyTakeWithBackgroundCheck(idx('CAM 2'), 'cut', 0, { sourceIndex: idx('ME1') }) },
+      { prompt: 'Set Key 1 with ME1. Preview Key 1. Dissolve to CAM 3 with Key 1.', check: () => keyTakeWithBackgroundCheck(idx('CAM 3'), 'auto', 0, { sourceIndex: idx('ME1') }) },
+      { prompt: 'Set Key 2 with ME1. Preview Key 2. Take CAM 1 with Key 2.', check: () => keyTakeWithBackgroundCheck(idx('CAM 1'), 'cut', 1, { sourceIndex: idx('ME1') }) },
+      { prompt: 'Set Key 2 with ME1. Preview Key 2. Dissolve to CPU with Key 2.', check: () => keyTakeWithBackgroundCheck(idx('CPU'), 'auto', 1, { sourceIndex: idx('ME1') }) },
+      { prompt: 'Set Key 3 with ME1. Preview Key 3. Take CAM 2 with Key 3.', check: () => keyTakeWithBackgroundCheck(idx('CAM 2'), 'cut', 2, { sourceIndex: idx('ME1') }) },
+      { prompt: 'Set Key 4 with ME1. Preview Key 4. Dissolve to CAM 1 with Key 4.', check: () => keyTakeWithBackgroundCheck(idx('CAM 1'), 'auto', 3, { sourceIndex: idx('ME1') }) },
     ];
-
-    const configs = [
-      [0, 'side', 0, 'bottom-right', 'CAM 2', 'cut'],
-      [0, 'side', 1, 'top-right', 'CAM 1', 'auto'],
-      [0, 'side', 2, 'left-large', 'CPU', 'cut'],
-      [0, 'side', 3, 'center', 'CAM 3', 'auto'],
-      [1, 'quad', 0, 'bottom-left', 'CAM 1', 'cut'],
-      [1, 'quad', 1, 'right', 'CPU', 'auto'],
-      [1, 'quad', 2, 'top-left', 'CAM 2', 'cut'],
-      [1, 'quad', 3, 'bottom-right', 'CAM 3', 'auto'],
-      [0, 'side', 0, 'top-left', 'CAM 3', 'auto'],
-      [1, 'quad', 1, 'bottom-right', 'CAM 2', 'cut'],
-      [0, 'side', 2, 'right', 'CAM 1', 'auto'],
-      [1, 'quad', 3, 'center', 'CPU', 'cut'],
-    ];
-
-    configs.forEach((config) => questions.push(buildExpertKeyQuestion(...config)));
-    return questions;
   }
 
   function buildAdvancedRunTheShow() {
@@ -3613,7 +3561,6 @@ const RUN_THE_SHOW = {
   LEVEL_LABELS['bank-4'] = 'Level 4 — Expert';
   LEVEL_LABELS['rts-3'] = 'Run the Show — Advanced';
   LEVEL_LABELS['rts-4'] = 'Run the Show — Expert';
-  QUIZ_BANK['bank-3'] = buildAdvancedBankQuestions();
   QUIZ_BANK['bank-4'] = buildExpertBankQuestions();
   RUN_THE_SHOW['rts-3'] = buildAdvancedRunTheShow();
   RUN_THE_SHOW['rts-4'] = buildExpertRunTheShow();
@@ -5304,21 +5251,89 @@ function bindQuizDialogFocusLoop() {
         check: () => state.surfaceMode === 'ME1' && state.pgmIndex === 8,
         hint: 'Ready BLK then CUT.',
       },
+      // ── DRIVE: Build side-by-side step by step ──
       {
-        id: 'l4-build-side-by-side',
+        id: 'l4-sbs-intro',
         watchOnly: true,
-        instruction: 'Build a CAM 3 | CAM 1 side-by-side: two DVE keys, each ~95% scale, H crop ~40%, bordered, CAM 3 left and CAM 1 right. This step won\'t advance until you store it.',
+        instruction: 'Build the side-by-side: DSK 1 = CAM 3 on the left, DSK 2 = CAM 1 on the right. Both need DVE on at ~95% scale with H crop ~40% and a border.',
         highlight: [],
+        delay: 4000,
+      },
+      {
+        id: 'l4-sbs-sel-dsk1',
+        instruction: 'Select DSK 1.',
+        highlight: ['dsk-sel-1'],
+        check: () => state.activeDSK === 0,
+        hint: 'Press SEL 1.',
+      },
+      {
+        id: 'l4-sbs-src-cam3',
+        instruction: 'Set the Key Source to CAM 3 — the left side of the frame.',
+        highlight: ['dsk-src-btn-2'],
+        check: () => state.dskState[0].sourceIndex === SOURCES.indexOf('CAM 3'),
+        hint: 'Select CAM 3 in the Key Source row.',
+      },
+      {
+        id: 'l4-sbs-dve1',
+        instruction: 'Enable DVE for DSK 1.',
+        highlight: ['dve-toggle'],
+        check: () => state.dskState[0].dveEnabled === true,
+        hint: 'Press DVE in the Type of Key row.',
+      },
+      {
+        id: 'l4-sbs-cut1-on',
+        instruction: 'Cut DSK 1 on to activate it.',
+        highlight: ['dsk-cut-1'],
+        check: () => state.dskState[0].active === true,
+        hint: 'Press CUT in the DSK 1 column.',
+      },
+      {
+        id: 'l4-sbs-config-dve1',
+        watchOnly: true,
+        instruction: 'Open the DVE editor for DSK 1. Set size to ~95%, H crop to ~40%, move X all the way left (~15%), and enable the border. Close when done.',
+        highlight: ['dve-slot'],
+        delay: 0,
+      },
+      {
+        id: 'l4-sbs-sel-dsk2',
+        instruction: 'Select DSK 2.',
+        highlight: ['dsk-sel-2'],
+        check: () => state.activeDSK === 1,
+        hint: 'Press SEL 2.',
+      },
+      {
+        id: 'l4-sbs-src-cam1',
+        instruction: 'Set the Key Source to CAM 1 — the right side of the frame.',
+        highlight: ['dsk-src-btn-0'],
+        check: () => state.dskState[1].sourceIndex === SOURCES.indexOf('CAM 1'),
+        hint: 'Select CAM 1 in the Key Source row.',
+      },
+      {
+        id: 'l4-sbs-dve2',
+        instruction: 'Enable DVE for DSK 2.',
+        highlight: ['dve-toggle'],
+        check: () => state.dskState[1].dveEnabled === true,
+        hint: 'Press DVE in the Type of Key row.',
+      },
+      {
+        id: 'l4-sbs-cut2-on',
+        instruction: 'Cut DSK 2 on.',
+        highlight: ['dsk-cut-2'],
+        check: () => state.dskState[1].active === true,
+        hint: 'Press CUT in the DSK 2 column.',
+      },
+      {
+        id: 'l4-sbs-config-dve2',
+        watchOnly: true,
+        instruction: 'Open the DVE editor for DSK 2. Same size and H crop as DSK 1, but move X all the way right (~85%), and enable the border. Close when done.',
+        highlight: ['dve-slot'],
         delay: 0,
       },
       {
         id: 'l4-store-macro1',
         instruction: 'Store this side-by-side to ME 1 Macro 1 — press STORE next to the ME1 memory bank, then press slot 1.',
         highlight: ['me-1-store', 'me-1-slot-1'],
-        check: () => {
-          const slots = state.meMemorySlots && state.meMemorySlots['ME1'];
-          return !!(slots && slots[0] && slots[0].bus);
-        },
+        check: () => me1SlotMatches(0, 'side'),
         hint: 'Press STORE in the ME1 memory row, then press slot button 1.',
       },
       // ── DRIVE: Clear ME 1, build quad, store to Macro 2 ──
@@ -5329,21 +5344,159 @@ function bindQuizDialogFocusLoop() {
         check: () => state.surfaceMode === 'ME1' && state.pgmIndex === 8,
         hint: 'Ready BLK then CUT.',
       },
+      // ── DRIVE: Build quad step by step ──
       {
-        id: 'l4-build-quad',
+        id: 'l4-quad-intro',
         watchOnly: true,
-        instruction: 'Now build a quad: four DVE keys (CAM 1, CAM 2, CAM 3, CPU), each at 50% scale, sized into the four corners with H and V crop and borders.',
+        instruction: 'Build the quad: four DVE keys at ~50% scale, each cropped into a corner with H and V crop and borders. CAM 1 top-left, CAM 2 top-right, CAM 3 bottom-left, CPU bottom-right.',
         highlight: [],
+        delay: 4500,
+      },
+      {
+        id: 'l4-quad-sel-dsk1',
+        instruction: 'Select DSK 1.',
+        highlight: ['dsk-sel-1'],
+        check: () => state.activeDSK === 0,
+        hint: 'Press SEL 1.',
+      },
+      {
+        id: 'l4-quad-src-cam1',
+        instruction: 'Set DSK 1 Key Source to CAM 1 — top-left corner.',
+        highlight: ['dsk-src-btn-0'],
+        check: () => state.dskState[0].sourceIndex === SOURCES.indexOf('CAM 1'),
+        hint: 'Select CAM 1 in the Key Source row.',
+      },
+      {
+        id: 'l4-quad-dve1',
+        instruction: 'Enable DVE for DSK 1.',
+        highlight: ['dve-toggle'],
+        check: () => state.dskState[0].dveEnabled === true,
+        hint: 'Press DVE in the Type of Key row.',
+      },
+      {
+        id: 'l4-quad-cut1-on',
+        instruction: 'Cut DSK 1 on.',
+        highlight: ['dsk-cut-1'],
+        check: () => state.dskState[0].active === true,
+        hint: 'Press CUT in the DSK 1 column.',
+      },
+      {
+        id: 'l4-quad-config-dve1',
+        watchOnly: true,
+        instruction: 'Open the DVE editor for DSK 1. Set size to ~50%, add H and V crop, move to the top-left corner, enable the border. Close when done.',
+        highlight: ['dve-slot'],
+        delay: 0,
+      },
+      {
+        id: 'l4-quad-sel-dsk2',
+        instruction: 'Select DSK 2.',
+        highlight: ['dsk-sel-2'],
+        check: () => state.activeDSK === 1,
+        hint: 'Press SEL 2.',
+      },
+      {
+        id: 'l4-quad-src-cam2',
+        instruction: 'Set DSK 2 Key Source to CAM 2 — top-right corner.',
+        highlight: ['dsk-src-btn-1'],
+        check: () => state.dskState[1].sourceIndex === SOURCES.indexOf('CAM 2'),
+        hint: 'Select CAM 2 in the Key Source row.',
+      },
+      {
+        id: 'l4-quad-dve2',
+        instruction: 'Enable DVE for DSK 2.',
+        highlight: ['dve-toggle'],
+        check: () => state.dskState[1].dveEnabled === true,
+        hint: 'Press DVE in the Type of Key row.',
+      },
+      {
+        id: 'l4-quad-cut2-on',
+        instruction: 'Cut DSK 2 on.',
+        highlight: ['dsk-cut-2'],
+        check: () => state.dskState[1].active === true,
+        hint: 'Press CUT in the DSK 2 column.',
+      },
+      {
+        id: 'l4-quad-config-dve2',
+        watchOnly: true,
+        instruction: 'DVE editor for DSK 2: same size and crop, move to top-right corner, enable border. Close when done.',
+        highlight: ['dve-slot'],
+        delay: 0,
+      },
+      {
+        id: 'l4-quad-sel-dsk3',
+        instruction: 'Select DSK 3.',
+        highlight: ['dsk-sel-3'],
+        check: () => state.activeDSK === 2,
+        hint: 'Press SEL 3.',
+      },
+      {
+        id: 'l4-quad-src-cam3',
+        instruction: 'Set DSK 3 Key Source to CAM 3 — bottom-left corner.',
+        highlight: ['dsk-src-btn-2'],
+        check: () => state.dskState[2].sourceIndex === SOURCES.indexOf('CAM 3'),
+        hint: 'Select CAM 3 in the Key Source row.',
+      },
+      {
+        id: 'l4-quad-dve3',
+        instruction: 'Enable DVE for DSK 3.',
+        highlight: ['dve-toggle'],
+        check: () => state.dskState[2].dveEnabled === true,
+        hint: 'Press DVE in the Type of Key row.',
+      },
+      {
+        id: 'l4-quad-cut3-on',
+        instruction: 'Cut DSK 3 on.',
+        highlight: ['dsk-cut-3'],
+        check: () => state.dskState[2].active === true,
+        hint: 'Press CUT in the DSK 3 column.',
+      },
+      {
+        id: 'l4-quad-config-dve3',
+        watchOnly: true,
+        instruction: 'DVE editor for DSK 3: same size and crop, move to bottom-left corner, enable border. Close when done.',
+        highlight: ['dve-slot'],
+        delay: 0,
+      },
+      {
+        id: 'l4-quad-sel-dsk4',
+        instruction: 'Select DSK 4.',
+        highlight: ['dsk-sel-4'],
+        check: () => state.activeDSK === 3,
+        hint: 'Press SEL 4.',
+      },
+      {
+        id: 'l4-quad-src-cpu',
+        instruction: 'Set DSK 4 Key Source to CPU — bottom-right corner.',
+        highlight: ['dsk-src-btn-3'],
+        check: () => state.dskState[3].sourceIndex === SOURCES.indexOf('CPU'),
+        hint: 'Select CPU in the Key Source row.',
+      },
+      {
+        id: 'l4-quad-dve4',
+        instruction: 'Enable DVE for DSK 4.',
+        highlight: ['dve-toggle'],
+        check: () => state.dskState[3].dveEnabled === true,
+        hint: 'Press DVE in the Type of Key row.',
+      },
+      {
+        id: 'l4-quad-cut4-on',
+        instruction: 'Cut DSK 4 on.',
+        highlight: ['dsk-cut-4'],
+        check: () => state.dskState[3].active === true,
+        hint: 'Press CUT in the DSK 4 column.',
+      },
+      {
+        id: 'l4-quad-config-dve4',
+        watchOnly: true,
+        instruction: 'DVE editor for DSK 4: same size and crop, move to bottom-right corner, enable border. Close when done.',
+        highlight: ['dve-slot'],
         delay: 0,
       },
       {
         id: 'l4-store-macro2',
         instruction: 'Store the quad to ME 1 Macro 2.',
         highlight: ['me-1-store', 'me-1-slot-2'],
-        check: () => {
-          const slots = state.meMemorySlots && state.meMemorySlots['ME1'];
-          return !!(slots && slots[1] && slots[1].bus);
-        },
+        check: () => me1SlotMatches(1, 'quad'),
         hint: 'Press STORE in the ME1 row, then press slot 2.',
       },
       // ── DRIVE: Recall workflow ──
@@ -5358,12 +5511,7 @@ function bindQuizDialogFocusLoop() {
         id: 'l4-recall-macro1',
         instruction: 'Recall ME 1 Macro 1 to load the side-by-side back onto ME 1.',
         highlight: ['me-1-recall', 'me-1-slot-1'],
-        check: () => {
-          const slots = state.meMemorySlots && state.meMemorySlots['ME1'];
-          if (!slots || !slots[0] || !slots[0].bus) return false;
-          const snap = state.surfaceStates['ME1'];
-          return snap && snap.dskState && snap.dskState.some(d => d.active && d.dveEnabled);
-        },
+        check: () => state.surfaceMode === 'ME1' && me1CompositeMatches('side') && me1SlotMatches(0, 'side'),
         hint: 'Press RECALL then slot 1 in the ME1 memory row.',
       },
       // ── DRIVE: Switch to MEPP, take ME1, then use it as a key ──
@@ -5478,12 +5626,7 @@ function bindQuizDialogFocusLoop() {
         id: 'l4-recall-macro2',
         instruction: 'Recall ME 1 Macro 2.',
         highlight: ['me-1-recall', 'me-1-slot-2'],
-        check: () => {
-          const slots = state.meMemorySlots && state.meMemorySlots['ME1'];
-          if (!slots || !slots[1] || !slots[1].bus) return false;
-          const snap = state.surfaceStates['ME1'];
-          return snap && snap.dskState && snap.dskState.filter(d => d.active && d.dveEnabled).length >= 4;
-        },
+        check: () => state.surfaceMode === 'ME1' && me1CompositeMatches('quad') && me1SlotMatches(1, 'quad'),
         hint: 'Press RECALL then slot 2 in the ME1 row.',
       },
       {
@@ -6194,11 +6337,27 @@ function bindQuizDialogFocusLoop() {
     if (label) label.textContent = tts.rate.toFixed(2) + '×';
   }
 
+  const TTS_PREFERRED_VOICE_KEYWORDS = ['Samantha', 'Alex', 'Karen', 'Daniel', 'Moira', 'Fiona', 'Enhanced', 'Premium', 'Natural'];
+
+  function selectBestTTSVoice(voices) {
+    if (!voices.length || tts.voiceURI) return;
+    const enVoices = voices.filter(v => /^en[-_]/i.test(v.lang));
+    const pool = enVoices.length ? enVoices : voices;
+    for (const keyword of TTS_PREFERRED_VOICE_KEYWORDS) {
+      const match = pool.find(v => v.name.includes(keyword));
+      if (match) { tts.voiceURI = match.voiceURI; return; }
+    }
+    const local = pool.find(v => v.localService);
+    if (local) tts.voiceURI = local.voiceURI;
+  }
+
   function populateTTSVoices() {
     const sel = document.getElementById('tts-voice-select');
-    if (!sel || !tts.supported) return;
+    if (!tts.supported) return;
     const voices = window.speechSynthesis.getVoices();
     if (!voices.length) return;
+    selectBestTTSVoice(voices);
+    if (!sel) return;
     sel.innerHTML = '<option value="">Default</option>' +
       voices.map(v => `<option value="${v.voiceURI}"${v.voiceURI === tts.voiceURI ? ' selected' : ''}>${v.name} (${v.lang})</option>`).join('');
   }

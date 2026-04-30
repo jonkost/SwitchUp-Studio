@@ -7816,6 +7816,13 @@ body {
   background: none !important;
   box-shadow: none !important;
   min-height: 40px !important;
+  max-height: 18vh !important;
+  overflow-y: auto !important;
+}
+
+#quiz-bar {
+  max-height: 30vh !important;
+  overflow-y: auto !important;
 }
 
 #quiz-name-dialog,

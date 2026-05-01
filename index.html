@@ -157,16 +157,16 @@
 									<label class="menu-access-row-title" for="tts-voice-select">Voice</label>
 								</div>
 								<select id="tts-voice-select" class="menu-access-select" onchange="setTTSVoice(this.value)">
-									<option value="">Default</option>
+									<option value="af_heart">Heart (US Female)</option>
 								</select>
 								<button type="button" class="tts-voice-preview-btn" id="tts-preview-btn" onclick="previewTTS()" aria-label="Preview selected voice">▶ Preview</button>
 							</div>
 							<div class="menu-access-row">
 								<div class="menu-access-row-label">
 									<label class="menu-access-row-title" for="tts-rate-range">Speed</label>
-									<span class="menu-access-row-meta" id="tts-rate-label">0.85×</span>
+									<span class="menu-access-row-meta" id="tts-rate-label">1.00×</span>
 								</div>
-								<input type="range" id="tts-rate-range" class="menu-access-range" min="0.5" max="1.5" step="0.05" value="0.85" oninput="setTTSRate(this.value)">
+								<input type="range" id="tts-rate-range" class="menu-access-range" min="0.5" max="1.5" step="0.05" value="1.0" oninput="setTTSRate(this.value)">
 							</div>
 							<div class="menu-access-row menu-access-row-themes">
 								<div class="menu-access-row-label">

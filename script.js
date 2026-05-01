@@ -6265,16 +6265,33 @@ function bindQuizDialogFocusLoop() {
   const TTS_SVG_ON  = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`;
   const TTS_SVG_OFF = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
 
+  const KOKORO_VOICES = [
+    { id: 'af_heart',     label: 'Heart (US Female)'     },
+    { id: 'af_bella',    label: 'Bella (US Female)'     },
+    { id: 'af_nicole',   label: 'Nicole (US Female)'    },
+    { id: 'af_sarah',    label: 'Sarah (US Female)'     },
+    { id: 'af_sky',      label: 'Sky (US Female)'       },
+    { id: 'am_adam',     label: 'Adam (US Male)'        },
+    { id: 'am_michael',  label: 'Michael (US Male)'     },
+    { id: 'bf_emma',     label: 'Emma (UK Female)'      },
+    { id: 'bf_isabella', label: 'Isabella (UK Female)'  },
+    { id: 'bm_george',   label: 'George (UK Male)'      },
+    { id: 'bm_lewis',    label: 'Lewis (UK Male)'       },
+  ];
+
+  const _savedVoice = localStorage.getItem('su-tts-voice') || 'af_heart';
   const tts = {
-    // Voice defaults to OFF — user opts in via lesson dialog or accessibility menu
     muted:   localStorage.getItem('su-tts-muted') !== 'false',
-    rate:    parseFloat(localStorage.getItem('su-tts-rate')  || '0.85'),
-    voiceURI: localStorage.getItem('su-tts-voice') || '',
-    supported: typeof window !== 'undefined' && 'speechSynthesis' in window,
+    rate:    parseFloat(localStorage.getItem('su-tts-rate') || '1.0'),
+    voice:   KOKORO_VOICES.some(v => v.id === _savedVoice) ? _savedVoice : 'af_heart',
+    model:   null,
+    loading: false,
+    ready:   false,
+    _ctx:    null,
+    _source: null,
   };
 
   function ttsClean(text) {
-    // Strip emoji and symbol characters before speaking
     return (text || '')
       .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
       .replace(/[✓✗↺•·🎉]/g, '')
@@ -6282,20 +6299,49 @@ function bindQuizDialogFocusLoop() {
       .trim();
   }
 
-  function ttsSpeak(text, priority) {
-    if (!tts.supported || tts.muted) return;
+  function ttsStop() {
+    if (tts._source) {
+      try { tts._source.stop(); } catch (_) {}
+      tts._source = null;
+    }
+  }
+
+  async function initKokoro() {
+    if (tts.model || tts.loading) return;
+    tts.loading = true;
+    try {
+      const { KokoroTTS } = await import('https://esm.sh/kokoro-js');
+      tts.model = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8' });
+      tts.ready = true;
+    } catch (e) {
+      console.warn('[TTS] Kokoro failed to load:', e);
+      tts.ready = false;
+    } finally {
+      tts.loading = false;
+    }
+  }
+
+  async function ttsSpeak(text, priority) {
+    if (tts.muted) return;
     const clean = ttsClean(text);
     if (!clean) return;
-    if (priority) window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(clean);
-    utt.rate  = tts.rate;
-    utt.pitch = 1.0;
-    if (tts.voiceURI) {
-      const voices = window.speechSynthesis.getVoices();
-      const match = voices.find(v => v.voiceURI === tts.voiceURI);
-      if (match) utt.voice = match;
+    if (priority) ttsStop();
+    if (!tts.ready) {
+      await initKokoro();
+      if (!tts.ready) return;
     }
-    window.speechSynthesis.speak(utt);
+    const result = await tts.model.generate(clean, { voice: tts.voice });
+    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new AudioContext();
+    const ctx = tts._ctx;
+    const buf = ctx.createBuffer(1, result.audio.length, result.sampling_rate);
+    buf.getChannelData(0).set(result.audio);
+    const source = ctx.createBufferSource();
+    source.buffer = buf;
+    source.playbackRate.value = tts.rate;
+    source.connect(ctx.destination);
+    tts._source = source;
+    source.onended = () => { if (tts._source === source) tts._source = null; };
+    source.start();
   }
 
   function ttsCancelAndSpeak(text) { ttsSpeak(text, true); }
@@ -6303,31 +6349,31 @@ function bindQuizDialogFocusLoop() {
   function toggleTTS() {
     tts.muted = !tts.muted;
     localStorage.setItem('su-tts-muted', String(tts.muted));
-    if (tts.muted && tts.supported) window.speechSynthesis.cancel();
+    if (tts.muted) {
+      ttsStop();
+    } else if (!tts.ready && !tts.loading) {
+      initKokoro();
+    }
     updateTTSButtons();
   }
 
-  function setTTSVoice(voiceURI) {
-    tts.voiceURI = voiceURI;
-    localStorage.setItem('su-tts-voice', voiceURI);
+  function setTTSVoice(voiceId) {
+    tts.voice = voiceId;
+    localStorage.setItem('su-tts-voice', voiceId);
   }
 
-  function previewTTS() {
+  async function previewTTS() {
     const btn = document.getElementById('tts-preview-btn');
-    if (!tts.supported) return;
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance('This is a preview of the selected voice.');
-    utt.rate  = tts.rate;
-    utt.pitch = 1.0;
-    if (tts.voiceURI) {
-      const voices = window.speechSynthesis.getVoices();
-      const match = voices.find(v => v.voiceURI === tts.voiceURI);
-      if (match) utt.voice = match;
-    }
     if (btn) btn.classList.add('previewing');
-    utt.onend = () => { if (btn) btn.classList.remove('previewing'); };
-    utt.onerror = () => { if (btn) btn.classList.remove('previewing'); };
-    window.speechSynthesis.speak(utt);
+    ttsStop();
+    await ttsSpeak('This is a preview of the selected voice.', false);
+    if (tts._source) {
+      const src = tts._source;
+      const prev = src.onended;
+      src.onended = () => { if (prev) prev(); if (btn) btn.classList.remove('previewing'); };
+    } else {
+      if (btn) btn.classList.remove('previewing');
+    }
   }
 
   function setTTSRate(value) {
@@ -6337,33 +6383,12 @@ function bindQuizDialogFocusLoop() {
     if (label) label.textContent = tts.rate.toFixed(2) + '×';
   }
 
-  const TTS_PREFERRED_VOICE_KEYWORDS = ['Samantha', 'Alex', 'Karen', 'Daniel', 'Moira', 'Fiona', 'Enhanced', 'Premium', 'Natural'];
-
-  function selectBestTTSVoice(voices) {
-    if (!voices.length || tts.voiceURI) return;
-    const enVoices = voices.filter(v => /^en[-_]/i.test(v.lang));
-    const pool = enVoices.length ? enVoices : voices;
-    for (const keyword of TTS_PREFERRED_VOICE_KEYWORDS) {
-      const match = pool.find(v => v.name.includes(keyword));
-      if (match) { tts.voiceURI = match.voiceURI; return; }
-    }
-    const local = pool.find(v => v.localService);
-    if (local) tts.voiceURI = local.voiceURI;
-  }
-
   function populateTTSVoices() {
     const sel = document.getElementById('tts-voice-select');
-    if (!tts.supported) return;
-    const voices = window.speechSynthesis.getVoices();
-    if (!voices.length) return;
-    selectBestTTSVoice(voices);
     if (!sel) return;
-    sel.innerHTML = '<option value="">Default</option>' +
-      voices.map(v => `<option value="${v.voiceURI}"${v.voiceURI === tts.voiceURI ? ' selected' : ''}>${v.name} (${v.lang})</option>`).join('');
-  }
-
-  if (tts.supported) {
-    window.speechSynthesis.addEventListener('voiceschanged', populateTTSVoices);
+    sel.innerHTML = KOKORO_VOICES.map(v =>
+      `<option value="${v.id}"${v.id === tts.voice ? ' selected' : ''}>${v.label}</option>`
+    ).join('');
   }
 
   function updateTTSButtons() {
@@ -6374,13 +6399,11 @@ function bindQuizDialogFocusLoop() {
       btn.setAttribute('aria-pressed', String(!tts.muted));
       btn.classList.toggle('tts-active', !tts.muted);
     });
-    // Sync the lesson dialog voice button text
     const dlgBtn = document.getElementById('lesson-voice-btn');
     if (dlgBtn) {
       dlgBtn.textContent = tts.muted ? 'OFF' : 'ON';
       dlgBtn.classList.toggle('lesson-voice-on', !tts.muted);
     }
-    // Sync rate display
     const rateRange = document.getElementById('tts-rate-range');
     if (rateRange) rateRange.value = String(tts.rate);
     const rateLabel = document.getElementById('tts-rate-label');
@@ -6480,6 +6503,6 @@ function bindQuizDialogFocusLoop() {
   document.body.setAttribute('data-theme', _savedTheme);
   updateThemeButtons();
   updateTTSButtons();
-  if (tts.supported) populateTTSVoices();
+  populateTTSVoices();
   init();
 })();

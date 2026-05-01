@@ -6366,14 +6366,25 @@ function bindQuizDialogFocusLoop() {
     const btn = document.getElementById('tts-preview-btn');
     if (btn) btn.classList.add('previewing');
     ttsStop();
-    await ttsSpeak('This is a preview of the selected voice.', false);
-    if (tts._source) {
-      const src = tts._source;
-      const prev = src.onended;
-      src.onended = () => { if (prev) prev(); if (btn) btn.classList.remove('previewing'); };
-    } else {
-      if (btn) btn.classList.remove('previewing');
+    if (!tts.ready) {
+      await initKokoro();
+      if (!tts.ready) { if (btn) btn.classList.remove('previewing'); return; }
     }
+    const result = await tts.model.generate('This is a preview of the selected voice.', { voice: tts.voice });
+    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new AudioContext();
+    const ctx = tts._ctx;
+    const buf = ctx.createBuffer(1, result.audio.length, result.sampling_rate);
+    buf.getChannelData(0).set(result.audio);
+    const source = ctx.createBufferSource();
+    source.buffer = buf;
+    source.playbackRate.value = tts.rate;
+    source.connect(ctx.destination);
+    tts._source = source;
+    source.onended = () => {
+      if (tts._source === source) tts._source = null;
+      if (btn) btn.classList.remove('previewing');
+    };
+    source.start();
   }
 
   function setTTSRate(value) {

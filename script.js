@@ -6350,6 +6350,14 @@ function bindQuizDialogFocusLoop() {
       try { tts._source.stop(); } catch (_) {}
       tts._source = null;
     }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+  }
+
+  function ttsSpeechFallback(text) {
+    if (!window.speechSynthesis) return;
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate = tts.rate;
+    window.speechSynthesis.speak(utt);
   }
 
   function initKokoro() {
@@ -6377,27 +6385,31 @@ function bindQuizDialogFocusLoop() {
     const clean = ttsClean(text);
     if (!clean) return;
     if (priority) ttsStop();
-    // Create / resume AudioContext before any await so it stays inside the user gesture
-    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const ctx = tts._ctx;
-    if (ctx.state === 'suspended') await ctx.resume();
-    if (!tts.ready) {
-      await initKokoro();
-      if (!tts.ready) return;
-    }
-    try {
-      const result = await tts.model.generate(clean, { voice: tts.voice });
-      const buf = ctx.createBuffer(1, result.audio.length, result.sampling_rate);
-      buf.getChannelData(0).set(result.audio);
-      const source = ctx.createBufferSource();
-      source.buffer = buf;
-      source.playbackRate.value = tts.rate;
-      source.connect(ctx.destination);
-      tts._source = source;
-      source.onended = () => { if (tts._source === source) tts._source = null; };
-      source.start();
-    } catch (e) {
-      console.warn('[TTS] Playback failed:', e);
+
+    if (tts.ready) {
+      // Kokoro is loaded — use it
+      if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = tts._ctx;
+      if (ctx.state === 'suspended') await ctx.resume();
+      try {
+        const result = await tts.model.generate(clean, { voice: tts.voice });
+        const buf = ctx.createBuffer(1, result.audio.length, result.sampling_rate);
+        buf.getChannelData(0).set(result.audio);
+        const source = ctx.createBufferSource();
+        source.buffer = buf;
+        source.playbackRate.value = tts.rate;
+        source.connect(ctx.destination);
+        tts._source = source;
+        source.onended = () => { if (tts._source === source) tts._source = null; };
+        source.start();
+      } catch (e) {
+        console.warn('[TTS] Kokoro playback failed, using speech synthesis:', e);
+        ttsSpeechFallback(clean);
+      }
+    } else {
+      // Kokoro not ready — speak immediately via Web Speech API, load Kokoro in background
+      ttsSpeechFallback(clean);
+      if (!tts._loadPromise) initKokoro();
     }
   }
 

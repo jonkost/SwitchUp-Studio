@@ -3100,6 +3100,13 @@
     'rts-4': 'Run the Show — Expert',
   };
 
+  const LESSON_TITLES = {
+    1: 'Lesson 1, Introduction',
+    2: 'Lesson 2, Keying and Graphics',
+    3: 'Lesson 3, Mix Effects and DSK Ties',
+    4: 'Lesson 4, Advanced and Review',
+  };
+
   const idx = (name) => getSourceIndex(name);
 
   function previewSourceCheck(source) {
@@ -3641,6 +3648,7 @@ const RUN_THE_SHOW = {
       dom.quizBar.classList.add('quiz-visible');
       resetSwitcherState();
       dom.quizNameOverlay.classList.add('show');
+      if (!tts.muted) initKokoro();
       updateUtilityMenuActions();
       scheduleLayout();
       if (!isFullscreenActive()) setTimeout(() => dom.quizNameInput.focus(), 50);
@@ -3682,6 +3690,7 @@ const RUN_THE_SHOW = {
     dom.quizNameOverlay.classList.remove('show');
     dom.quizLevelOverlay.classList.add('show');
     setTimeout(() => dom.quizLevelDialog.focus(), 50);
+    ttsCancelAndSpeak('Select a quiz level.');
   }
 
   function backToNameEntry() {
@@ -3699,6 +3708,7 @@ const RUN_THE_SHOW = {
     dom.quizPrompt.textContent = `${label} — Press START`;
     dom.quizPrompt.style.color = '#f5a623';
     setQuizButtonVisibility({ start: true, check: false, skip: false });
+    ttsCancelAndSpeak(`${label} selected. Press Start when ready.`);
   }
 
   function promptLoadsBank(prompt, bankName) {
@@ -5682,6 +5692,7 @@ function bindQuizDialogFocusLoop() {
     watchTimer: null,
     steps: [],
     overlayVisible: false,
+    _pendingConfirm: null,
     // Progress tracking
     watchCompleted: false,   // true once user has finished Watch
     driveStarted: false,     // true once Drive mode has been entered at least once
@@ -5751,7 +5762,9 @@ function bindQuizDialogFocusLoop() {
     const isComplete = step.id === 'complete';
 
     instruction.textContent = step.instruction;
-    ttsCancelAndSpeak(step.instruction);
+    const _confirm = lessonState._pendingConfirm;
+    lessonState._pendingConfirm = null;
+    ttsCancelAndSpeak(_confirm ? `${_confirm} selected. ${step.instruction}` : step.instruction);
     progress.textContent = `STEP ${current} OF ${total}`;
 
     // Bar colour classes
@@ -6156,6 +6169,8 @@ function bindQuizDialogFocusLoop() {
   }
 
   function startLesson(lessonId) {
+    if (!tts.muted) initKokoro();
+    lessonState._pendingConfirm = LESSON_TITLES[lessonId] || `Lesson ${lessonId}`;
     clearLessonTimer();
     lessonState.lessonId = lessonId;
     lessonState.steps = getLessonSteps(lessonId);
@@ -6218,6 +6233,7 @@ function bindQuizDialogFocusLoop() {
     } else {
       const overlay = document.getElementById('lesson-select-overlay');
       if (overlay) overlay.classList.add('show');
+      ttsCancelAndSpeak('Select a lesson.');
     }
   }
 
@@ -6281,18 +6297,48 @@ function bindQuizDialogFocusLoop() {
 
   const _savedVoice = localStorage.getItem('su-tts-voice') || 'af_heart';
   const tts = {
-    muted:   localStorage.getItem('su-tts-muted') === 'true',
-    rate:    parseFloat(localStorage.getItem('su-tts-rate') || '1.0'),
-    voice:   KOKORO_VOICES.some(v => v.id === _savedVoice) ? _savedVoice : 'af_heart',
-    model:   null,
-    loading: false,
-    ready:   false,
-    _ctx:    null,
-    _source: null,
+    muted:        localStorage.getItem('su-tts-muted') === 'true',
+    rate:         parseFloat(localStorage.getItem('su-tts-rate') || '1.0'),
+    voice:        KOKORO_VOICES.some(v => v.id === _savedVoice) ? _savedVoice : 'af_heart',
+    model:        null,
+    loading:      false,
+    ready:        false,
+    _ctx:         null,
+    _source:      null,
+    _loadPromise: null,
   };
 
+  function ttsExpand(text) {
+    const inLesson = lessonState.active;
+    return text
+      // Multi-word phrases first
+      .replace(/\bMEDIA\s+SEL\b/g, 'Media Select')
+      .replace(/\bME\s*P\/P\b/g, inLesson ? 'Mix Effect Preview Program' : 'M.E. program preview')
+      // Numbered sources (before single-word matches)
+      .replace(/\bCAM\s*(\d+)\b/g, (_, n) => `Camera ${n}`)
+      .replace(/\bME\s*(\d+)\b/g, (_, n) => inLesson ? `Mix Effect ${n}` : `M.E. ${n}`)
+      .replace(/\bM(\d+)\b/g, (_, n) => `Media ${n}`)
+      // Source name abbreviations
+      .replace(/\bCAM\b/g, 'Camera')
+      .replace(/\bGFX\b/g, 'Graphics')
+      .replace(/\bBLK\b/g, 'Black')
+      .replace(/\bBARS\b/g, 'Bars')
+      .replace(/\bCPU\b/g, 'Computer')
+      .replace(/\bOTS\b/g, 'over the shoulder')
+      // Bus / panel abbreviations
+      .replace(/\bPGM\b/g, 'Program')
+      .replace(/\bPVW\b/g, 'Preview')
+      .replace(/\bME\b/g, inLesson ? 'Mix Effect' : 'M.E.')
+      .replace(/\bDVE\b/g, 'digital video effect')
+      .replace(/\bDSK\b/g, 'downstream key')
+      .replace(/\bCHR\b/g, 'Chroma')
+      .replace(/\bSEL\b/g, 'Select')
+      // Catch-all: remaining ALL-CAPS words → lowercase so TTS reads them as words, not acronyms
+      .replace(/\b[A-Z]{2,}\b/g, w => w.toLowerCase());
+  }
+
   function ttsClean(text) {
-    return (text || '')
+    return ttsExpand(text || '')
       .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
       .replace(/[✓✗↺•·🎉]/g, '')
       .replace(/\s{2,}/g, ' ')
@@ -6306,19 +6352,24 @@ function bindQuizDialogFocusLoop() {
     }
   }
 
-  async function initKokoro() {
-    if (tts.model || tts.loading) return;
+  function initKokoro() {
+    if (tts.model) return Promise.resolve();
+    if (tts._loadPromise) return tts._loadPromise;
     tts.loading = true;
-    try {
-      const { KokoroTTS } = await import('https://esm.sh/kokoro-js');
-      tts.model = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8' });
-      tts.ready = true;
-    } catch (e) {
-      console.warn('[TTS] Kokoro failed to load:', e);
-      tts.ready = false;
-    } finally {
-      tts.loading = false;
-    }
+    tts._loadPromise = (async () => {
+      try {
+        const { KokoroTTS } = await import('https://esm.sh/kokoro-js');
+        tts.model = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8' });
+        tts.ready = true;
+      } catch (e) {
+        console.warn('[TTS] Kokoro failed to load:', e);
+        tts.ready = false;
+        tts._loadPromise = null;
+      } finally {
+        tts.loading = false;
+      }
+    })();
+    return tts._loadPromise;
   }
 
   async function ttsSpeak(text, priority) {
@@ -6334,16 +6385,20 @@ function bindQuizDialogFocusLoop() {
       await initKokoro();
       if (!tts.ready) return;
     }
-    const result = await tts.model.generate(clean, { voice: tts.voice });
-    const buf = ctx.createBuffer(1, result.audio.length, result.sampling_rate);
-    buf.getChannelData(0).set(result.audio);
-    const source = ctx.createBufferSource();
-    source.buffer = buf;
-    source.playbackRate.value = tts.rate;
-    source.connect(ctx.destination);
-    tts._source = source;
-    source.onended = () => { if (tts._source === source) tts._source = null; };
-    source.start();
+    try {
+      const result = await tts.model.generate(clean, { voice: tts.voice });
+      const buf = ctx.createBuffer(1, result.audio.length, result.sampling_rate);
+      buf.getChannelData(0).set(result.audio);
+      const source = ctx.createBufferSource();
+      source.buffer = buf;
+      source.playbackRate.value = tts.rate;
+      source.connect(ctx.destination);
+      tts._source = source;
+      source.onended = () => { if (tts._source === source) tts._source = null; };
+      source.start();
+    } catch (e) {
+      console.warn('[TTS] Playback failed:', e);
+    }
   }
 
   function ttsCancelAndSpeak(text) { ttsSpeak(text, true); }

@@ -6326,13 +6326,15 @@ function bindQuizDialogFocusLoop() {
     const clean = ttsClean(text);
     if (!clean) return;
     if (priority) ttsStop();
+    // Create / resume AudioContext before any await so it stays inside the user gesture
+    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new AudioContext();
+    const ctx = tts._ctx;
+    if (ctx.state === 'suspended') await ctx.resume();
     if (!tts.ready) {
       await initKokoro();
       if (!tts.ready) return;
     }
     const result = await tts.model.generate(clean, { voice: tts.voice });
-    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new AudioContext();
-    const ctx = tts._ctx;
     const buf = ctx.createBuffer(1, result.audio.length, result.sampling_rate);
     buf.getChannelData(0).set(result.audio);
     const source = ctx.createBufferSource();
@@ -6366,13 +6368,15 @@ function bindQuizDialogFocusLoop() {
     const btn = document.getElementById('tts-preview-btn');
     if (btn) btn.classList.add('previewing');
     ttsStop();
+    // Create / resume AudioContext before any await so it stays inside the user gesture
+    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new AudioContext();
+    const ctx = tts._ctx;
+    if (ctx.state === 'suspended') await ctx.resume();
     if (!tts.ready) {
       await initKokoro();
       if (!tts.ready) { if (btn) btn.classList.remove('previewing'); return; }
     }
     const result = await tts.model.generate('This is a preview of the selected voice.', { voice: tts.voice });
-    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new AudioContext();
-    const ctx = tts._ctx;
     const buf = ctx.createBuffer(1, result.audio.length, result.sampling_rate);
     buf.getChannelData(0).set(result.audio);
     const source = ctx.createBufferSource();

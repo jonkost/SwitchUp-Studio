@@ -6281,7 +6281,7 @@ function bindQuizDialogFocusLoop() {
 
   const _savedVoice = localStorage.getItem('su-tts-voice') || 'af_heart';
   const tts = {
-    muted:   localStorage.getItem('su-tts-muted') !== 'false',
+    muted:   localStorage.getItem('su-tts-muted') === 'true',
     rate:    parseFloat(localStorage.getItem('su-tts-rate') || '1.0'),
     voice:   KOKORO_VOICES.some(v => v.id === _savedVoice) ? _savedVoice : 'af_heart',
     model:   null,

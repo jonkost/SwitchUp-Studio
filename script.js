@@ -6378,7 +6378,7 @@ function bindQuizDialogFocusLoop() {
     if (!clean) return;
     if (priority) ttsStop();
     // Create / resume AudioContext before any await so it stays inside the user gesture
-    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new AudioContext();
+    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new (window.AudioContext || window.webkitAudioContext)();
     const ctx = tts._ctx;
     if (ctx.state === 'suspended') await ctx.resume();
     if (!tts.ready) {
@@ -6424,7 +6424,7 @@ function bindQuizDialogFocusLoop() {
     if (btn) btn.classList.add('previewing');
     ttsStop();
     // Create / resume AudioContext before any await so it stays inside the user gesture
-    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new AudioContext();
+    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new (window.AudioContext || window.webkitAudioContext)();
     const ctx = tts._ctx;
     if (ctx.state === 'suspended') await ctx.resume();
     if (!tts.ready) {

@@ -10472,10 +10472,8 @@ body {
 .tts-toggle-btn:hover { opacity: 0.85; }
 .tts-toggle-btn.tts-active { opacity: 1; color: #FFB300; }
 
-/* Kokoro loading/ready dot */
-.tts-toggle-btn.tts-kokoro-loading::after,
-.tts-toggle-btn.tts-kokoro-ready::after {
-  content: '';
+/* Kokoro loading/ready dot — real span so Safari renders it */
+.tts-dot {
   position: absolute;
   top: 3px;
   right: 3px;
@@ -10484,11 +10482,11 @@ body {
   border-radius: 50%;
   pointer-events: none;
 }
-.tts-toggle-btn.tts-kokoro-loading::after {
+.tts-dot.tts-kokoro-loading {
   background: #f5a623;
   animation: tts-dot-pulse 1.4s ease-in-out infinite;
 }
-.tts-toggle-btn.tts-kokoro-ready::after {
+.tts-dot.tts-kokoro-ready {
   background: #4caf50;
 }
 @keyframes tts-dot-pulse {

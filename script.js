@@ -6362,8 +6362,13 @@ function bindQuizDialogFocusLoop() {
 
   function setTTSDot(state) {
     document.querySelectorAll('.tts-toggle-btn').forEach(btn => {
-      btn.classList.remove('tts-kokoro-loading', 'tts-kokoro-ready');
-      if (state) btn.classList.add(state);
+      const existing = btn.querySelector('.tts-dot');
+      if (existing) existing.remove();
+      if (state) {
+        const dot = document.createElement('span');
+        dot.className = `tts-dot ${state}`;
+        btn.appendChild(dot);
+      }
     });
   }
 

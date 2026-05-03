@@ -6378,7 +6378,6 @@ function bindQuizDialogFocusLoop() {
         tts.model = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8' });
         tts.ready = true;
         setTTSDot('tts-kokoro-ready');
-        setTimeout(() => setTTSDot(null), 2000);
       } catch (e) {
         console.warn('[TTS] Kokoro failed to load:', e);
         tts.ready = false;

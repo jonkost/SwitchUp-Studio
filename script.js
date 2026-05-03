@@ -6360,19 +6360,30 @@ function bindQuizDialogFocusLoop() {
     window.speechSynthesis.speak(utt);
   }
 
+  function setTTSDot(state) {
+    document.querySelectorAll('.tts-toggle-btn').forEach(btn => {
+      btn.classList.remove('tts-kokoro-loading', 'tts-kokoro-ready');
+      if (state) btn.classList.add(state);
+    });
+  }
+
   function initKokoro() {
     if (tts.model) return Promise.resolve();
     if (tts._loadPromise) return tts._loadPromise;
     tts.loading = true;
+    setTTSDot('tts-kokoro-loading');
     tts._loadPromise = (async () => {
       try {
         const { KokoroTTS } = await import('https://esm.sh/kokoro-js');
         tts.model = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8' });
         tts.ready = true;
+        setTTSDot('tts-kokoro-ready');
+        setTimeout(() => setTTSDot(null), 2000);
       } catch (e) {
         console.warn('[TTS] Kokoro failed to load:', e);
         tts.ready = false;
         tts._loadPromise = null;
+        setTTSDot(null);
       } finally {
         tts.loading = false;
       }

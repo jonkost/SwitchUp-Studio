@@ -3648,7 +3648,7 @@ const RUN_THE_SHOW = {
       dom.quizBar.classList.add('quiz-visible');
       resetSwitcherState();
       dom.quizNameOverlay.classList.add('show');
-      if (!tts.muted) initKokoro();
+      if (!tts.muted) initTTS();
       updateUtilityMenuActions();
       scheduleLayout();
       if (!isFullscreenActive()) setTimeout(() => dom.quizNameInput.focus(), 50);
@@ -6169,7 +6169,7 @@ function bindQuizDialogFocusLoop() {
   }
 
   function startLesson(lessonId) {
-    if (!tts.muted) initKokoro();
+    if (!tts.muted) initTTS();
     lessonState._pendingConfirm = LESSON_TITLES[lessonId] || `Lesson ${lessonId}`;
     clearLessonTimer();
     lessonState.lessonId = lessonId;
@@ -6281,31 +6281,15 @@ function bindQuizDialogFocusLoop() {
   const TTS_SVG_ON  = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`;
   const TTS_SVG_OFF = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
 
-  const KOKORO_VOICES = [
-    { id: 'af_heart',     label: 'Heart (US Female)'     },
-    { id: 'af_bella',    label: 'Bella (US Female)'     },
-    { id: 'af_nicole',   label: 'Nicole (US Female)'    },
-    { id: 'af_sarah',    label: 'Sarah (US Female)'     },
-    { id: 'af_sky',      label: 'Sky (US Female)'       },
-    { id: 'am_adam',     label: 'Adam (US Male)'        },
-    { id: 'am_michael',  label: 'Michael (US Male)'     },
-    { id: 'bf_emma',     label: 'Emma (UK Female)'      },
-    { id: 'bf_isabella', label: 'Isabella (UK Female)'  },
-    { id: 'bm_george',   label: 'George (UK Male)'      },
-    { id: 'bm_lewis',    label: 'Lewis (UK Male)'       },
-  ];
-
-  const _savedVoice = localStorage.getItem('su-tts-voice') || 'af_heart';
+  const SYSTEM_VOICE_LABEL = 'System default';
+  const _savedVoiceRaw = localStorage.getItem('su-tts-voice') || '';
+  const _savedVoice = /^a[fm]_|^b[fm]_/.test(_savedVoiceRaw) ? '' : _savedVoiceRaw;
   const tts = {
     muted:        localStorage.getItem('su-tts-muted') === 'true',
     rate:         parseFloat(localStorage.getItem('su-tts-rate') || '1.0'),
-    voice:        KOKORO_VOICES.some(v => v.id === _savedVoice) ? _savedVoice : 'af_heart',
-    model:        null,
-    loading:      false,
-    ready:        false,
-    _ctx:         null,
-    _source:      null,
-    _loadPromise: null,
+    voice:        _savedVoice,
+    voices:       [],
+    _utterance:   null,
   };
 
   function ttsExpand(text) {
@@ -6346,17 +6330,33 @@ function bindQuizDialogFocusLoop() {
   }
 
   function ttsStop() {
-    if (tts._source) {
-      try { tts._source.stop(); } catch (_) {}
-      tts._source = null;
-    }
+    tts._utterance = null;
     if (window.speechSynthesis) window.speechSynthesis.cancel();
   }
 
-  function ttsSpeechFallback(text) {
+  function findPreferredVoice() {
+    if (!window.speechSynthesis) return null;
+    const voices = tts.voices.length ? tts.voices : window.speechSynthesis.getVoices();
+    if (!voices.length) return null;
+    return voices.find((voice) => voice.voiceURI === tts.voice)
+      || voices.find((voice) => voice.name === tts.voice)
+      || voices.find((voice) => /samantha|ava|allison|karen|zira|jenny|aria|natural/i.test(voice.name))
+      || voices.find((voice) => /^en[-_]/i.test(voice.lang))
+      || null;
+  }
+
+  function ttsNativeSpeak(text) {
     if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(text);
+    const voice = findPreferredVoice();
+    if (voice) utt.voice = voice;
     utt.rate = tts.rate;
+    utt.pitch = 1;
+    utt.volume = 1;
+    tts._utterance = utt;
+    utt.onend = () => { if (tts._utterance === utt) tts._utterance = null; };
+    utt.onerror = () => { if (tts._utterance === utt) tts._utterance = null; };
     window.speechSynthesis.speak(utt);
   }
 
@@ -6372,27 +6372,10 @@ function bindQuizDialogFocusLoop() {
     });
   }
 
-  function initKokoro() {
-    if (tts.model) return Promise.resolve();
-    if (tts._loadPromise) return tts._loadPromise;
-    tts.loading = true;
-    setTTSDot('tts-kokoro-loading');
-    tts._loadPromise = (async () => {
-      try {
-        const { KokoroTTS } = await import('https://esm.sh/kokoro-js');
-        tts.model = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8' });
-        tts.ready = true;
-        setTTSDot('tts-kokoro-ready');
-      } catch (e) {
-        console.warn('[TTS] Kokoro failed to load:', e);
-        tts.ready = false;
-        tts._loadPromise = null;
-        setTTSDot(null);
-      } finally {
-        tts.loading = false;
-      }
-    })();
-    return tts._loadPromise;
+  function initTTS() {
+    refreshSystemVoices();
+    setTTSDot(window.speechSynthesis ? 'tts-system-ready' : null);
+    return Promise.resolve();
   }
 
   async function ttsSpeak(text, priority) {
@@ -6400,44 +6383,7 @@ function bindQuizDialogFocusLoop() {
     const clean = ttsClean(text);
     if (!clean) return;
     if (priority) ttsStop();
-
-    if (tts.ready) {
-      // Kokoro is loaded — use it
-      if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const ctx = tts._ctx;
-      if (ctx.state === 'suspended') {
-        try { await ctx.resume(); } catch (_) {}
-      }
-      // Check BEFORE generate() — if ctx still not running, fall back now while
-      // we're still close to the user gesture (Safari needs this for speechSynthesis too)
-      if (ctx.state !== 'running') {
-        ttsSpeechFallback(clean);
-        return;
-      }
-      try {
-        const result = await tts.model.generate(clean, { voice: tts.voice });
-        if (ctx.state !== 'running') {
-          ttsSpeechFallback(clean);
-          return;
-        }
-        const buf = ctx.createBuffer(1, result.audio.length, result.sampling_rate);
-        buf.getChannelData(0).set(result.audio);
-        const source = ctx.createBufferSource();
-        source.buffer = buf;
-        source.playbackRate.value = tts.rate;
-        source.connect(ctx.destination);
-        tts._source = source;
-        source.onended = () => { if (tts._source === source) tts._source = null; };
-        source.start();
-      } catch (e) {
-        console.warn('[TTS] Kokoro playback failed, using speech synthesis:', e);
-        ttsSpeechFallback(clean);
-      }
-    } else {
-      // Kokoro not ready — speak immediately via Web Speech API, load Kokoro in background
-      ttsSpeechFallback(clean);
-      if (!tts._loadPromise) initKokoro();
-    }
+    ttsNativeSpeak(clean);
   }
 
   function ttsCancelAndSpeak(text) { ttsSpeak(text, true); }
@@ -6447,42 +6393,34 @@ function bindQuizDialogFocusLoop() {
     localStorage.setItem('su-tts-muted', String(tts.muted));
     if (tts.muted) {
       ttsStop();
-    } else if (!tts.ready && !tts.loading) {
-      initKokoro();
+    } else {
+      initTTS();
     }
     updateTTSButtons();
   }
 
   function setTTSVoice(voiceId) {
-    tts.voice = voiceId;
-    localStorage.setItem('su-tts-voice', voiceId);
+    tts.voice = voiceId || '';
+    localStorage.setItem('su-tts-voice', tts.voice);
   }
 
   async function previewTTS() {
     const btn = document.getElementById('tts-preview-btn');
     if (btn) btn.classList.add('previewing');
     ttsStop();
-    // Create / resume AudioContext before any await so it stays inside the user gesture
-    if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const ctx = tts._ctx;
-    if (ctx.state === 'suspended') await ctx.resume();
-    if (!tts.ready) {
-      await initKokoro();
-      if (!tts.ready) { if (btn) btn.classList.remove('previewing'); return; }
-    }
-    const result = await tts.model.generate('This is a preview of the selected voice.', { voice: tts.voice });
-    const buf = ctx.createBuffer(1, result.audio.length, result.sampling_rate);
-    buf.getChannelData(0).set(result.audio);
-    const source = ctx.createBufferSource();
-    source.buffer = buf;
-    source.playbackRate.value = tts.rate;
-    source.connect(ctx.destination);
-    tts._source = source;
-    source.onended = () => {
-      if (tts._source === source) tts._source = null;
+    const clean = ttsClean('This is a preview of the selected voice.');
+    if (!window.speechSynthesis) {
       if (btn) btn.classList.remove('previewing');
-    };
-    source.start();
+      return;
+    }
+    const utt = new SpeechSynthesisUtterance(clean);
+    const voice = findPreferredVoice();
+    if (voice) utt.voice = voice;
+    utt.rate = tts.rate;
+    utt.onend = () => { if (btn) btn.classList.remove('previewing'); };
+    utt.onerror = () => { if (btn) btn.classList.remove('previewing'); };
+    tts._utterance = utt;
+    window.speechSynthesis.speak(utt);
   }
 
   function setTTSRate(value) {
@@ -6492,12 +6430,43 @@ function bindQuizDialogFocusLoop() {
     if (label) label.textContent = tts.rate.toFixed(2) + '×';
   }
 
+  function refreshSystemVoices() {
+    if (!window.speechSynthesis) {
+      tts.voices = [];
+      return;
+    }
+    tts.voices = window.speechSynthesis.getVoices()
+      .filter((voice) => !voice.lang || /^en[-_]/i.test(voice.lang))
+      .sort((a, b) => {
+        const localDelta = Number(b.localService) - Number(a.localService);
+        if (localDelta) return localDelta;
+        return a.name.localeCompare(b.name);
+      });
+  }
+
+  function escapeOptionText(value) {
+    return String(value || '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[char]));
+  }
+
   function populateTTSVoices() {
     const sel = document.getElementById('tts-voice-select');
     if (!sel) return;
-    sel.innerHTML = KOKORO_VOICES.map(v =>
-      `<option value="${v.id}"${v.id === tts.voice ? ' selected' : ''}>${v.label}</option>`
-    ).join('');
+    refreshSystemVoices();
+    const options = [
+      `<option value=""${tts.voice ? '' : ' selected'}>${SYSTEM_VOICE_LABEL}</option>`,
+      ...tts.voices.map((voice) => {
+        const value = voice.voiceURI || voice.name;
+        const label = `${voice.name}${voice.lang ? ` (${voice.lang})` : ''}`;
+        return `<option value="${escapeOptionText(value)}"${value === tts.voice ? ' selected' : ''}>${escapeOptionText(label)}</option>`;
+      }),
+    ];
+    sel.innerHTML = options.join('');
   }
 
   function updateTTSButtons() {
@@ -6517,6 +6486,7 @@ function bindQuizDialogFocusLoop() {
     if (rateRange) rateRange.value = String(tts.rate);
     const rateLabel = document.getElementById('tts-rate-label');
     if (rateLabel) rateLabel.textContent = tts.rate.toFixed(2) + '×';
+    setTTSDot(window.speechSynthesis ? 'tts-system-ready' : null);
   }
 
   // ── Theme engine ───────────────────────────────────────────────────
@@ -6613,40 +6583,26 @@ function bindQuizDialogFocusLoop() {
   updateThemeButtons();
   updateTTSButtons();
   populateTTSVoices();
-  initKokoro();
+  initTTS();
 
-  // Unlock AudioContext AND Web Speech API on first user interaction (Safari requires both)
-  function _unlockAudio() {
-    document.removeEventListener('click', _unlockAudio, true);
-    document.removeEventListener('touchend', _unlockAudio, true);
+  if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = populateTTSVoices;
+  }
 
-    // Unlock Web Speech API — Safari needs a synchronous gesture-initiated speak() call
+  // Warm Web Speech on first user interaction. Safari is much happier when
+  // speech starts from a gesture once before lesson or quiz narration begins.
+  function _unlockSpeech() {
+    document.removeEventListener('click', _unlockSpeech, true);
+    document.removeEventListener('touchend', _unlockSpeech, true);
+
     if (window.speechSynthesis) {
       const silent = new SpeechSynthesisUtterance('');
       window.speechSynthesis.speak(silent);
       window.speechSynthesis.cancel();
     }
-
-    // Unlock AudioContext — play silent buffer after resume resolves
-    if (!tts._ctx) tts._ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const ctx = tts._ctx;
-    const playsilent = () => {
-      try {
-        const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
-        const src = ctx.createBufferSource();
-        src.buffer = buf;
-        src.connect(ctx.destination);
-        src.start(0);
-      } catch (_) {}
-    };
-    if (ctx.state === 'suspended') {
-      ctx.resume().then(playsilent).catch(() => {});
-    } else {
-      playsilent();
-    }
   }
-  document.addEventListener('click', _unlockAudio, true);
-  document.addEventListener('touchend', _unlockAudio, true);
+  document.addEventListener('click', _unlockSpeech, true);
+  document.addEventListener('touchend', _unlockSpeech, true);
 
   init();
 })();

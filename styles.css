@@ -10472,7 +10472,7 @@ body {
 .tts-toggle-btn:hover { opacity: 0.85; }
 .tts-toggle-btn.tts-active { opacity: 1; color: #FFB300; }
 
-/* Kokoro loading/ready dot — real span so Safari renders it */
+/* Voice narration ready dot - real span so Safari renders it */
 .tts-dot {
   position: absolute;
   top: 3px;
@@ -10482,11 +10482,11 @@ body {
   border-radius: 50%;
   pointer-events: none;
 }
-.tts-dot.tts-kokoro-loading {
+.tts-dot.tts-system-loading {
   background: #f5a623;
   animation: tts-dot-pulse 1.4s ease-in-out infinite;
 }
-.tts-dot.tts-kokoro-ready {
+.tts-dot.tts-system-ready {
   background: #4caf50;
 }
 @keyframes tts-dot-pulse {
@@ -11321,4 +11321,221 @@ body[data-theme="hc"] .shortcut-chip {
   background: rgba(255,255,255,0.15) !important;
   border-color: rgba(255,255,255,0.35) !important;
   color: #ffffff !important;
+}
+
+/* ==================================================================
+   v6.5.18 — LIGHT MODE + MOBILE STABILITY PATCH
+   Late overrides so older dark-theme rules cannot bleed through.
+   ================================================================== */
+body[data-theme="light"] {
+  background: #d7deeb !important;
+  color: #111827 !important;
+}
+
+body[data-theme="light"] #wrapper,
+body[data-theme="light"] #mode-bar,
+body[data-theme="light"] #quiz-bar,
+body[data-theme="light"] #lesson-bar,
+body[data-theme="light"] #macro-quick-bar,
+body[data-theme="light"] #surface-toggle-panel,
+body[data-theme="light"] #hotkey-splash,
+body[data-theme="light"] #media-modal-dialog,
+body[data-theme="light"] #quiz-name-dialog,
+body[data-theme="light"] #lesson-name-dialog,
+body[data-theme="light"] #quiz-level-dialog,
+body[data-theme="light"] #lesson-select-dialog,
+body[data-theme="light"] #quiz-results-dialog,
+body[data-theme="light"] #lesson-results-dialog,
+body[data-theme="light"] #welcome-dialog {
+  color: #111827 !important;
+}
+
+body[data-theme="light"] #mode-bar,
+body[data-theme="light"] #quiz-bar,
+body[data-theme="light"] #lesson-bar,
+body[data-theme="light"] #macro-quick-bar,
+body[data-theme="light"] #surface-toggle-panel,
+body[data-theme="light"] #hotkey-splash,
+body[data-theme="light"] #media-modal-dialog,
+body[data-theme="light"] #quiz-name-dialog,
+body[data-theme="light"] #lesson-name-dialog,
+body[data-theme="light"] #quiz-level-dialog,
+body[data-theme="light"] #lesson-select-dialog,
+body[data-theme="light"] #quiz-results-dialog,
+body[data-theme="light"] #lesson-results-dialog,
+body[data-theme="light"] #welcome-dialog {
+  background: linear-gradient(180deg, #f8fafc 0%, #e8edf6 100%) !important;
+  border-color: rgba(17,24,39,0.14) !important;
+  box-shadow: 0 14px 38px rgba(30,41,59,0.13), inset 0 1px 0 rgba(255,255,255,0.84) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body[data-theme="light"] #quiz-status,
+body[data-theme="light"] #lesson-status,
+body[data-theme="light"] #quiz-prompt,
+body[data-theme="light"] #lesson-instruction,
+body[data-theme="light"] #lesson-progress,
+body[data-theme="light"] .dialog-heading,
+body[data-theme="light"] .dialog-copy,
+body[data-theme="light"] .dialog-label,
+body[data-theme="light"] #quiz-results-title,
+body[data-theme="light"] #quiz-results-name,
+body[data-theme="light"] #quiz-results-score,
+body[data-theme="light"] #quiz-results-time,
+body[data-theme="light"] #quiz-results-code,
+body[data-theme="light"] #quiz-results-breakdown,
+body[data-theme="light"] #lesson-select-heading,
+body[data-theme="light"] .level-btn-title,
+body[data-theme="light"] .level-btn-sub,
+body[data-theme="light"] .media-modal-title,
+body[data-theme="light"] .media-modal-subtitle,
+body[data-theme="light"] .media-option-title,
+body[data-theme="light"] .media-option-meta,
+body[data-theme="light"] .macro-quick-bar-label {
+  color: #111827 !important;
+}
+
+body[data-theme="light"] .mode-btn,
+body[data-theme="light"] #fullscreen-btn,
+body[data-theme="light"] #menu-btn,
+body[data-theme="light"] .quiz-action-btn,
+body[data-theme="light"] .lesson-submode-btn,
+body[data-theme="light"] .level-btn,
+body[data-theme="light"] .media-nav-btn,
+body[data-theme="light"] .media-bank-picker-btn,
+body[data-theme="light"] .media-assign-btn,
+body[data-theme="light"] .macro-quick-btn,
+body[data-theme="light"] .row-action-btn,
+body[data-theme="light"] .dve-page-btn,
+body[data-theme="light"] .dve-reset-btn,
+body[data-theme="light"] .dve-more-close {
+  background: linear-gradient(180deg, #ffffff 0%, #eef3fb 100%) !important;
+  border-color: rgba(17,24,39,0.16) !important;
+  color: #111827 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 3px rgba(15,23,42,0.1) !important;
+}
+
+body[data-theme="light"] .mode-btn.mode-active,
+body[data-theme="light"] .lesson-submode-btn.lesson-submode-active,
+body[data-theme="light"] .quiz-check-btn,
+body[data-theme="light"] #quiz-name-btn,
+body[data-theme="light"] #lesson-name-btn,
+body[data-theme="light"] .level-btn.selected-level {
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%) !important;
+  border-color: rgba(37,99,235,0.56) !important;
+  color: #ffffff !important;
+}
+
+body[data-theme="light"] #freeplay-reset-btn,
+body[data-theme="light"] .quiz-exit-btn,
+body[data-theme="light"] .lesson-exit-btn,
+body[data-theme="light"] .menu-action-btn-danger {
+  background: linear-gradient(180deg, #fff5f5 0%, #fee2e2 100%) !important;
+  border-color: rgba(185,28,28,0.28) !important;
+  color: #991b1b !important;
+}
+
+body[data-theme="light"] .mv-cell,
+body[data-theme="light"] .media-option,
+body[data-theme="light"] .media-bank-status,
+body[data-theme="light"] .lesson-results-stat,
+body[data-theme="light"] .lesson-results-row,
+body[data-theme="light"] .quiz-breakdown-item {
+  background: rgba(255,255,255,0.68) !important;
+  border-color: rgba(17,24,39,0.12) !important;
+  color: #111827 !important;
+}
+
+body[data-theme="light"] #menu-btn span {
+  background: #111827 !important;
+}
+
+body[data-theme="light"] select,
+body[data-theme="light"] input,
+body[data-theme="light"] textarea {
+  color-scheme: light;
+}
+
+@media (max-width: 640px) {
+  html,
+  body {
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  #wrapper.layout-phone {
+    gap: 6px !important;
+  }
+
+  .layout-phone #mode-bar {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto !important;
+    align-items: stretch !important;
+    gap: 4px !important;
+    padding: 6px !important;
+  }
+
+  .layout-phone .mode-btn,
+  .layout-phone #fullscreen-btn,
+  .layout-phone #menu-btn {
+    min-height: 34px !important;
+    padding: 5px 6px !important;
+    font-size: 8px !important;
+    line-height: 1.05 !important;
+    white-space: normal !important;
+  }
+
+  .layout-phone #utility-menu {
+    margin-left: 0 !important;
+  }
+
+  .layout-phone #hotkey-splash {
+    left: auto !important;
+    right: 0 !important;
+    width: min(360px, calc(100vw - 16px)) !important;
+    max-height: 78vh !important;
+  }
+
+  .layout-phone #quiz-bar,
+  .layout-phone #lesson-bar {
+    max-height: 34vh !important;
+    overflow-y: auto !important;
+  }
+
+  .layout-phone #quiz-prompt,
+  .layout-phone #lesson-instruction {
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+    max-height: 18vh !important;
+    overflow-y: auto !important;
+  }
+
+  .layout-phone #quiz-status,
+  .layout-phone #lesson-status,
+  .layout-phone #quiz-actions,
+  .layout-phone #lesson-actions {
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+  }
+
+  .layout-phone .quiz-action-btn,
+  .layout-phone .lesson-submode-btn {
+    min-height: 32px !important;
+    padding: 5px 8px !important;
+    white-space: normal !important;
+  }
+
+  .layout-phone #quiz-name-dialog,
+  .layout-phone #lesson-name-dialog,
+  .layout-phone #quiz-level-dialog,
+  .layout-phone #lesson-select-dialog,
+  .layout-phone #quiz-results-dialog,
+  .layout-phone #lesson-results-dialog,
+  .layout-phone #media-modal-dialog {
+    width: min(94vw, 520px) !important;
+    max-width: min(94vw, 520px) !important;
+    max-height: 86vh !important;
+    padding: 18px !important;
+  }
 }

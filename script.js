@@ -6602,5 +6602,21 @@ function bindQuizDialogFocusLoop() {
   updateTTSButtons();
   populateTTSVoices();
   initKokoro();
+
+  // Unlock AudioContext on first user interaction so Safari allows playback
+  function _unlockAudio() {
+    if (!tts._ctx) tts._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (tts._ctx.state === 'suspended') tts._ctx.resume();
+    const buf = tts._ctx.createBuffer(1, 1, tts._ctx.sampleRate);
+    const src = tts._ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(tts._ctx.destination);
+    src.start(0);
+    document.removeEventListener('click', _unlockAudio, true);
+    document.removeEventListener('touchend', _unlockAudio, true);
+  }
+  document.addEventListener('click', _unlockAudio, true);
+  document.addEventListener('touchend', _unlockAudio, true);
+
   init();
 })();

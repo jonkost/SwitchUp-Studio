@@ -6586,6 +6586,6 @@ function bindQuizDialogFocusLoop() {
   updateThemeButtons();
   updateTTSButtons();
   populateTTSVoices();
-  if (!tts.muted) initKokoro();
+  initKokoro();
   init();
 })();

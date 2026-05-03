@@ -6408,10 +6408,14 @@ function bindQuizDialogFocusLoop() {
       if (ctx.state === 'suspended') {
         try { await ctx.resume(); } catch (_) {}
       }
+      // Check BEFORE generate() — if ctx still not running, fall back now while
+      // we're still close to the user gesture (Safari needs this for speechSynthesis too)
+      if (ctx.state !== 'running') {
+        ttsSpeechFallback(clean);
+        return;
+      }
       try {
         const result = await tts.model.generate(clean, { voice: tts.voice });
-        // After generate() (1–5s), check if AudioContext actually resumed.
-        // Safari may keep it suspended despite the resume() call above.
         if (ctx.state !== 'running') {
           ttsSpeechFallback(clean);
           return;
@@ -6611,17 +6615,35 @@ function bindQuizDialogFocusLoop() {
   populateTTSVoices();
   initKokoro();
 
-  // Unlock AudioContext on first user interaction so Safari allows playback
+  // Unlock AudioContext AND Web Speech API on first user interaction (Safari requires both)
   function _unlockAudio() {
-    if (!tts._ctx) tts._ctx = new (window.AudioContext || window.webkitAudioContext)();
-    if (tts._ctx.state === 'suspended') tts._ctx.resume();
-    const buf = tts._ctx.createBuffer(1, 1, tts._ctx.sampleRate);
-    const src = tts._ctx.createBufferSource();
-    src.buffer = buf;
-    src.connect(tts._ctx.destination);
-    src.start(0);
     document.removeEventListener('click', _unlockAudio, true);
     document.removeEventListener('touchend', _unlockAudio, true);
+
+    // Unlock Web Speech API — Safari needs a synchronous gesture-initiated speak() call
+    if (window.speechSynthesis) {
+      const silent = new SpeechSynthesisUtterance('');
+      window.speechSynthesis.speak(silent);
+      window.speechSynthesis.cancel();
+    }
+
+    // Unlock AudioContext — play silent buffer after resume resolves
+    if (!tts._ctx) tts._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = tts._ctx;
+    const playsilent = () => {
+      try {
+        const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        src.connect(ctx.destination);
+        src.start(0);
+      } catch (_) {}
+    };
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(playsilent).catch(() => {});
+    } else {
+      playsilent();
+    }
   }
   document.addEventListener('click', _unlockAudio, true);
   document.addEventListener('touchend', _unlockAudio, true);

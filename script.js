@@ -6405,9 +6405,17 @@ function bindQuizDialogFocusLoop() {
       // Kokoro is loaded — use it
       if (!tts._ctx || tts._ctx.state === 'closed') tts._ctx = new (window.AudioContext || window.webkitAudioContext)();
       const ctx = tts._ctx;
-      if (ctx.state === 'suspended') await ctx.resume();
+      if (ctx.state === 'suspended') {
+        try { await ctx.resume(); } catch (_) {}
+      }
       try {
         const result = await tts.model.generate(clean, { voice: tts.voice });
+        // After generate() (1–5s), check if AudioContext actually resumed.
+        // Safari may keep it suspended despite the resume() call above.
+        if (ctx.state !== 'running') {
+          ttsSpeechFallback(clean);
+          return;
+        }
         const buf = ctx.createBuffer(1, result.audio.length, result.sampling_rate);
         buf.getChannelData(0).set(result.audio);
         const source = ctx.createBufferSource();

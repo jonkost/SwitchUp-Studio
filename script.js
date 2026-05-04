@@ -51,6 +51,7 @@
   const LOCAL_NARRATION_VOICE = 'af_heart';
   const LOCAL_NARRATION_BASE = `assets/narration/${LOCAL_NARRATION_VOICE}`;
   const LOCAL_NARRATION_MANIFEST = `${LOCAL_NARRATION_BASE}/manifest.json`;
+  const VO_PREVIEW_REF_ID = 'UI-vo-preview.prompt';
 
   const SOURCE_IMAGES = Object.freeze({
     'CAM 1': 'assets/cam-1.png',
@@ -3722,6 +3723,7 @@ const RUN_THE_SHOW = {
       resetSwitcherState();
       dom.quizNameOverlay.classList.add('show');
       if (!tts.muted) initTTS();
+      ttsCancelAndSpeak('Quiz Mode. Enter your name and class, or choose Practice Quiz to continue without submitting results.', 'UI-quiz-name.prompt');
       updateUtilityMenuActions();
       scheduleLayout();
       if (!isFullscreenActive()) setTimeout(() => dom.quizNameInput.focus(), 50);
@@ -3763,7 +3765,7 @@ const RUN_THE_SHOW = {
     dom.quizNameOverlay.classList.remove('show');
     dom.quizLevelOverlay.classList.add('show');
     setTimeout(() => dom.quizLevelDialog.focus(), 50);
-    ttsCancelAndSpeak('Select a quiz level.');
+    ttsCancelAndSpeak('Select a quiz. Choose a Quiz Bank level, or choose Run the Show for live director calls.', 'UI-quiz-select.prompt');
   }
 
   function backToNameEntry() {
@@ -5867,7 +5869,7 @@ function bindQuizDialogFocusLoop() {
     const _confirm = lessonState._pendingConfirm;
     lessonState._pendingConfirm = null;
     const lessonRefId = `L${lessonState.lessonId}-${step.id}.instruction`;
-    ttsCancelAndSpeak(_confirm ? `${_confirm} selected. ${step.instruction}` : step.instruction, _confirm ? null : lessonRefId);
+    ttsCancelAndSpeak(step.instruction, lessonRefId);
     progress.textContent = `STEP ${current} OF ${total}`;
 
     // Bar colour classes
@@ -6132,6 +6134,7 @@ function bindQuizDialogFocusLoop() {
 
     const select = document.getElementById('lesson-select-overlay');
     if (select) select.classList.add('show');
+    ttsCancelAndSpeak('Guided Lessons. Choose a lesson to begin step-by-step training.', 'UI-lesson-select.prompt');
   }
 
   function completeLessonDrive() {
@@ -6329,6 +6332,7 @@ function bindQuizDialogFocusLoop() {
       const ol = document.getElementById('lesson-name-overlay');
       if (ol) {
         ol.classList.add('show');
+        ttsCancelAndSpeak('Guided Lessons. Enter your name and class, or leave either field blank to practice without submitting results.', 'UI-lesson-name.prompt');
         setTimeout(() => {
           const inp = document.getElementById('lesson-name-input');
           if (inp) inp.focus();
@@ -6337,7 +6341,7 @@ function bindQuizDialogFocusLoop() {
     } else {
       const overlay = document.getElementById('lesson-select-overlay');
       if (overlay) overlay.classList.add('show');
-      ttsCancelAndSpeak('Select a lesson.');
+      ttsCancelAndSpeak('Guided Lessons. Choose a lesson to begin step-by-step training.', 'UI-lesson-select.prompt');
     }
   }
 
@@ -6597,13 +6601,46 @@ function bindQuizDialogFocusLoop() {
 
   function ttsCancelAndSpeak(text, refId) { ttsSpeak(text, true, refId); }
 
+  function getCurrentLessonRefId() {
+    const step = currentLessonStep();
+    if (!lessonState.active || !step) return null;
+    return `L${lessonState.lessonId}-${step.id}.instruction`;
+  }
+
+  async function replayCurrentLessonVO() {
+    const step = currentLessonStep();
+    const refId = getCurrentLessonRefId();
+    if (!step || !refId) {
+      toggleTTS();
+      return;
+    }
+    if (tts.muted) {
+      tts.muted = false;
+      localStorage.setItem('su-tts-muted', 'false');
+      updateTTSButtons();
+    }
+    ttsStop();
+    await loadLocalNarrationManifest();
+    setTTSAssetStatus('Replaying lesson voice over.');
+    if (await playLocalNarration(refId)) {
+      setTTSAssetStatus('Heart voice ready');
+    } else {
+      setTTSAssetStatus('VO file pending for this lesson step.');
+    }
+  }
+
   function toggleTTS() {
     tts.muted = !tts.muted;
     localStorage.setItem('su-tts-muted', String(tts.muted));
     if (tts.muted) {
       ttsStop();
     } else {
-      initTTS();
+      initTTS().then(() => {
+        setTTSAssetStatus('Playing Heart voice preview.');
+        playLocalNarration(VO_PREVIEW_REF_ID).then((played) => {
+          if (played) setTTSAssetStatus('Heart voice ready');
+        });
+      });
     }
     updateTTSButtons();
   }
@@ -6618,9 +6655,13 @@ function bindQuizDialogFocusLoop() {
     if (btn) btn.classList.add('previewing');
     ttsStop();
     await loadLocalNarrationManifest();
-    const firstRef = Array.from(tts.localAssetRefs)[0];
+    const firstRef = tts.localAssetRefs.has(VO_PREVIEW_REF_ID)
+      ? VO_PREVIEW_REF_ID
+      : Array.from(tts.localAssetRefs)[0];
     if (firstRef) {
+      setTTSAssetStatus('Playing Heart voice preview.');
       await playLocalNarration(firstRef);
+      setTTSAssetStatus('Heart voice ready');
     } else {
       setTTSAssetStatus('VO MP3 generation pending.');
     }
@@ -6760,6 +6801,7 @@ function bindQuizDialogFocusLoop() {
     retryLessonDrive,
     hideConfirm,
     toggleTTS,
+    replayCurrentLessonVO,
     setTTSVoice,
     setTTSRate,
     previewTTS,

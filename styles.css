@@ -11796,6 +11796,84 @@ body[data-theme="light"] .me-memory-slot.me-memory-slot-target-recall {
   color: #92400e !important;
 }
 
+/* Final media modal cleanup: keep desktop widths two-column and remove dark bleed in light mode. */
+@media (min-width: 900px) {
+  #media-modal-dialog .media-modal-layout,
+  #media-modal-dialog .media-modal-layout-bank-first {
+    grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.72fr) !important;
+    align-items: start !important;
+  }
+
+  #media-modal-dialog #media-options-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+#media-modal-dialog .media-transition-compact-chip,
+#media-modal-dialog .media-bank-tag-live {
+  display: none !important;
+}
+
+#media-modal-dialog .media-transition-compact-card {
+  display: grid !important;
+  grid-template-columns: 56px minmax(0, 1fr) 24px !important;
+  align-items: center !important;
+  min-height: 72px !important;
+}
+
+#media-modal-dialog .media-transition-preview {
+  width: 56px !important;
+  height: 38px !important;
+}
+
+#media-modal-dialog .media-transition-compact-top {
+  justify-content: flex-start !important;
+}
+
+body[data-theme="light"] #media-modal-dialog {
+  background: linear-gradient(180deg, #ffffff 0%, #eef3fb 100%) !important;
+  border-color: rgba(17,24,39,0.16) !important;
+  color: #111827 !important;
+}
+
+body[data-theme="light"] #media-modal-dialog .media-status-card,
+body[data-theme="light"] #media-modal-dialog .media-panel,
+body[data-theme="light"] #media-modal-dialog .media-option-card,
+body[data-theme="light"] #media-modal-dialog .media-transition-summary,
+body[data-theme="light"] #media-modal-dialog .media-transition-summary-card,
+body[data-theme="light"] #media-modal-dialog .media-transition-compact-card,
+body[data-theme="light"] #media-modal-dialog .media-loaded-pill,
+body[data-theme="light"] #media-modal-dialog .media-bank-status-chip {
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5fb 100%) !important;
+  border-color: rgba(17,24,39,0.14) !important;
+  color: #111827 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 4px rgba(15,23,42,0.08) !important;
+}
+
+body[data-theme="light"] #media-modal-dialog .media-option-name,
+body[data-theme="light"] #media-modal-dialog .media-transition-summary-name,
+body[data-theme="light"] #media-modal-dialog .media-transition-compact-name,
+body[data-theme="light"] #media-modal-dialog .media-loaded-pill-name,
+body[data-theme="light"] #media-modal-dialog .media-bank-status-chip-name {
+  color: #111827 !important;
+}
+
+body[data-theme="light"] #media-modal-dialog .media-option-meta,
+body[data-theme="light"] #media-modal-dialog .media-transition-summary-meta,
+body[data-theme="light"] #media-modal-dialog .media-transition-compact-meta,
+body[data-theme="light"] #media-modal-dialog .media-loaded-pill-label,
+body[data-theme="light"] #media-modal-dialog .media-bank-status-chip-label,
+body[data-theme="light"] #media-modal-dialog .media-status-label,
+body[data-theme="light"] #media-modal-dialog .media-modal-section-label {
+  color: #64748b !important;
+}
+
+body[data-theme="light"] #media-modal-dialog .media-option-footer {
+  background: #e8eef7 !important;
+  border-color: rgba(17,24,39,0.12) !important;
+  color: #475569 !important;
+}
+
 @media (max-width: 640px) {
   html,
   body {

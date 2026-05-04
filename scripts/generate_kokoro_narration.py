@@ -25,6 +25,30 @@ VOICE = "af_heart"
 LANG_CODE = "a"
 
 
+def normalize_narration_text(text: str) -> str:
+    """Improve pronunciation while leaving the on-screen/reference copy unchanged."""
+    replacements = [
+        (r"\bMULTIVIEWER\b", "multi viewer"),
+        (r"\bmultiviewer\b", "multi viewer"),
+        (r"\bBLK\b", "black"),
+        (r"\bBLACK\b", "black"),
+        (r"\bBARS\b", "bars"),
+        (r"\bLive Bug\b", "live, on-air bug"),
+        (r"\blive bug\b", "live, on-air bug"),
+        (r"\blive on air\b", "live, on air"),
+        (r"\blive right now\b", "live, on air right now"),
+        (r"\bswitcher is live\b", "switcher is on air"),
+        (r"\ba live key\b", "an on-air key"),
+        (r"\blive key\b", "on-air key"),
+        (r"\blive DVE key\b", "on-air digital video effect key"),
+        (r"\blive key sources\b", "on-air key sources"),
+        (r"\btakes it live\b", "takes it live, on air"),
+    ]
+    for pattern, replacement in replacements:
+        text = re.sub(pattern, replacement, text)
+    return text
+
+
 def strip_cell(value: str) -> str:
     value = value.strip()
     if value.startswith("`") and value.endswith("`"):
@@ -76,14 +100,17 @@ def write_manifest(files: list[str]) -> None:
     MANIFEST.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
-def generate_one(model, ref_id: str, text: str, speed: float) -> bool:
+def generate_one(model, ref_id: str, text: str, speed: float, force: bool = False) -> bool:
     target = OUT_DIR / f"{ref_id}.mp3"
-    if target.exists():
+    if target.exists() and not force:
         return False
 
-    print(f"Generating {ref_id}: {text}")
+    narration_text = normalize_narration_text(text)
+    print(f"Generating {ref_id}: {narration_text}")
+    if target.exists() and force:
+        target.unlink()
     generate_audio(
-        text=text,
+        text=narration_text,
         model=model,
         voice=VOICE,
         speed=speed,
@@ -101,6 +128,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=0, help="Generate only the first N missing files.")
     parser.add_argument("--speed", type=float, default=1.0)
+    parser.add_argument("--force-ref", action="append", default=[], help="Regenerate a specific reference ID.")
+    parser.add_argument("--force-all", action="store_true", help="Regenerate every reference ID.")
     args = parser.parse_args()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -110,7 +139,8 @@ def main() -> None:
     existing_files = {path.stem for path in OUT_DIR.glob("*.mp3")}
     known_files = (manifest_files | existing_files) & row_ids
 
-    missing = [row for row in rows if row["refId"] not in known_files]
+    force_refs = set(args.force_ref)
+    missing = [row for row in rows if args.force_all or row["refId"] in force_refs or row["refId"] not in known_files]
     if args.limit:
       missing = missing[: args.limit]
 
@@ -124,7 +154,8 @@ def main() -> None:
 
     generated: list[str] = []
     for row in missing:
-        if generate_one(model, row["refId"], row["text"], args.speed):
+        force = args.force_all or row["refId"] in force_refs
+        if generate_one(model, row["refId"], row["text"], args.speed, force=force):
             generated.append(row["refId"])
 
     final_files = sorted(known_files | set(generated))

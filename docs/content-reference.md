@@ -471,6 +471,16 @@ Notes:
 | `Q-RTS4-17.prompt` | Switch back to ME P/P. |
 | `Q-RTS4-18.prompt` | Set ME1. Dissolve to ME1. |
 
+## UI Prompts
+
+| Ref ID | Text |
+| --- | --- |
+| `UI-vo-preview.prompt` | Voice over is on. Heart voice is ready. |
+| `UI-quiz-name.prompt` | Quiz Mode. Enter your name and class, or choose Practice Quiz to continue without submitting results. |
+| `UI-quiz-select.prompt` | Select a quiz. Choose a Quiz Bank level, or choose Run the Show for live director calls. |
+| `UI-lesson-name.prompt` | Guided Lessons. Enter your name and class, or leave either field blank to practice without submitting results. |
+| `UI-lesson-select.prompt` | Guided Lessons. Choose a lesson to begin step-by-step training. |
+
 ## Backend Direction
 
 A full backend would be useful once this text needs non-technical editing. The cleanest next step would be to move lessons and quiz banks from `script.js` into versioned JSON files first. After that, an admin backend can edit the JSON and the app can validate each item against its required check logic. This keeps instructional text editable without risking the simulator mechanics.

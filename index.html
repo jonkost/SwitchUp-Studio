@@ -173,7 +173,7 @@
 					</div>
 					<div class="menu-group menu-group-admin">
 						<div class="menu-group-head">
-							<div class="menu-group-label">ADMIN</div>
+							<div class="menu-group-label">CONTENT</div>
 							<div class="menu-group-copy">Lesson text, quiz prompts, and content controls</div>
 						</div>
 						<div class="menu-action-list">
@@ -192,7 +192,7 @@
 								<li><strong>NonCommercial</strong> — No commercial use</li>
 								<li><strong>NoDerivatives</strong> — No modified versions may be distributed</li>
 							</ul>
-							<a class="menu-license-link" href="https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode" target="_blank" rel="noopener noreferrer">Full license text ↗</a>
+							<a class="menu-license-link" href="https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode" target="_blank" rel="noopener noreferrer">Full license text</a>
 						</div>
 					</div>
 
@@ -236,7 +236,7 @@
 					<button class="lesson-submode-btn lesson-submode-active" id="lesson-watch-btn" onclick="setLessonSubMode(true)" aria-pressed="true">WATCH</button>
 					<button class="lesson-submode-btn" id="lesson-drive-btn" onclick="setLessonSubMode(false)" aria-pressed="false">DRIVE</button>
 				</div>
-				<button class="quiz-action-btn tts-toggle-btn" id="lesson-tts-btn" onclick="toggleTTS()" aria-label="Turn on voice" aria-pressed="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg></button>
+				<button class="quiz-action-btn tts-toggle-btn" id="lesson-tts-btn" onclick="replayCurrentLessonVO()" aria-label="Replay current lesson voice over" aria-pressed="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg></button>
 				<button class="quiz-action-btn lesson-exit-btn" onclick="exitLessonMode()" aria-label="Exit lesson">← EXIT LESSON</button>
 			</div>
 			<div id="lesson-instruction" aria-live="polite" aria-atomic="true">Welcome to lessons.</div>

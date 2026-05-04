@@ -4,7 +4,7 @@ SwitchUp Studio is a browser-based broadcast production simulator for higher edu
 
 ## What's New in v6.5.18
 
-1. Voice narration now uses native browser speech for smoother cross-browser playback.
+1. Voice over now uses local Kokoro Heart MP3 files for lessons and quizzes.
 2. Added `docs/content-reference.md` with lesson, hint, quiz, and Run the Show reference IDs.
 3. Light mode now has stronger late overrides for dialogs, panels, buttons, and text.
 4. Phone layouts get tighter wrapping and safer scrolling for lesson, quiz, menu, and dialog surfaces.

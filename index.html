@@ -66,15 +66,6 @@
 							<button class="menu-action-btn" id="menu-action-banners" type="button"></button>
 						</div>
 					</div>
-					<div class="menu-group menu-group-admin">
-						<div class="menu-group-head">
-							<div class="menu-group-label">ADMIN</div>
-							<div class="menu-group-copy">Lesson text, quiz prompts, and content controls</div>
-						</div>
-						<div class="menu-action-list">
-							<button class="menu-action-btn" id="menu-action-dashboard" type="button"></button>
-						</div>
-					</div>
 					<div class="menu-group menu-group-practice">
 						<div class="menu-group-head">
 							<div class="menu-group-label">PRACTICE</div>
@@ -151,24 +142,15 @@
 					<div class="menu-group menu-group-accessibility">
 						<div class="menu-group-head">
 							<div class="menu-group-label">ACCESSIBILITY</div>
-							<div class="menu-group-copy">Voice narration, speed, and display themes</div>
+							<div class="menu-group-copy">Voice over and display themes</div>
 						</div>
 						<div class="menu-accessibility-body">
 							<div class="menu-access-row">
 								<div class="menu-access-row-label">
-									<span class="menu-access-row-title">Voice Narration</span>
-									<span class="menu-access-row-meta">Read lesson and quiz prompts aloud</span>
+									<span class="menu-access-row-title">VO Assist</span>
+									<span class="menu-access-row-meta" id="tts-asset-status">Heart voice ready</span>
 								</div>
-								<button type="button" class="tts-toggle-btn menu-tts-btn" id="menu-tts-btn" onclick="toggleTTS()" aria-label="Turn on voice" aria-pressed="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg></button>
-							</div>
-							<div class="menu-access-row" id="menu-access-voice-row">
-								<div class="menu-access-row-label">
-									<label class="menu-access-row-title" for="tts-voice-select">Voice</label>
-								</div>
-								<select id="tts-voice-select" class="menu-access-select" onchange="setTTSVoice(this.value)">
-									<option value="af_heart">Heart (US Female)</option>
-								</select>
-								<button type="button" class="tts-voice-preview-btn" id="tts-preview-btn" onclick="previewTTS()" aria-label="Preview selected voice">▶ Preview</button>
+								<button type="button" class="tts-toggle-btn menu-tts-btn" id="menu-tts-btn" onclick="toggleTTS()" aria-label="Turn on voice over" aria-pressed="false">Voice over off</button>
 							</div>
 							<div class="menu-access-row">
 								<div class="menu-access-row-label">
@@ -187,6 +169,15 @@
 									<button type="button" class="menu-theme-btn" data-theme-btn="light" onclick="setTheme('light')" aria-pressed="false">Light</button>
 								</div>
 							</div>
+						</div>
+					</div>
+					<div class="menu-group menu-group-admin">
+						<div class="menu-group-head">
+							<div class="menu-group-label">ADMIN</div>
+							<div class="menu-group-copy">Lesson text, quiz prompts, and content controls</div>
+						</div>
+						<div class="menu-action-list">
+							<button class="menu-action-btn" id="menu-action-dashboard" type="button"></button>
 						</div>
 					</div>
 					<div class="menu-group menu-group-license">

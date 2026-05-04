@@ -50,6 +50,7 @@
   const LEGACY_MACRO_STORAGE_KEYS = Object.freeze(['virtual_switcher_macro_slots_v642', 'virtual_switcher_macro_slots_v641', 'virtual_switcher_macro_slots_v6218', 'virtual_switcher_macro_slots_v6217']);
   const LOCAL_NARRATION_VOICE = 'af_heart';
   const LOCAL_NARRATION_BASE = `assets/narration/${LOCAL_NARRATION_VOICE}`;
+  const LOCAL_NARRATION_MANIFEST = `${LOCAL_NARRATION_BASE}/manifest.json`;
 
   const SOURCE_IMAGES = Object.freeze({
     'CAM 1': 'assets/cam-1.png',
@@ -1090,9 +1091,7 @@
       const transition = getMediaTransitionOption(getMediaTransitionSlotId('MT1'));
       dom.mediaTransitionSlots.innerHTML = `
         <div class="media-transition-summary-card">
-          <div class="media-transition-summary-top">
-            <span class="media-transition-summary-label">Live</span>
-          </div>
+          <div class="media-transition-summary-top"></div>
           <div class="media-transition-summary-name">${escapeHtml(transition.name)}</div>
           <div class="media-transition-summary-meta">${escapeHtml(getTransitionMetaLabel(transition))}</div>
         </div>`;
@@ -1136,7 +1135,6 @@
             <span class="media-transition-compact-copy">
               <span class="media-transition-compact-top">
                 <span class="media-transition-compact-name">${escapeHtml(transition.name)}</span>
-                ${isActive ? '<span class="media-transition-compact-chip">LIVE</span>' : ''}
               </span>
               <span class="media-transition-compact-meta">${escapeHtml(getTransitionMetaLabel(transition))}</span>
             </span>
@@ -2855,7 +2853,7 @@
     }
 
     if (dom.menuDashboardAction) {
-      setMenuActionCopy(dom.menuDashboardAction, 'Content Dashboard', 'Edit lesson text, quiz prompts, and Run the Show copy', 'ADMIN');
+      setMenuActionCopy(dom.menuDashboardAction, 'Content Dashboard', 'Edit lesson text, quiz prompts, and Run the Show copy');
       setPressed(dom.menuDashboardAction, false);
     }
   }
@@ -6387,16 +6385,19 @@ function bindQuizDialogFocusLoop() {
   const TTS_SVG_ON  = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`;
   const TTS_SVG_OFF = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
 
-  const SYSTEM_VOICE_LABEL = 'System default';
-  const _savedVoiceRaw = localStorage.getItem('su-tts-voice') || '';
-  const _savedVoice = /^a[fm]_|^b[fm]_/.test(_savedVoiceRaw) ? '' : _savedVoiceRaw;
   const tts = {
     muted:        localStorage.getItem('su-tts-muted') === 'true',
     rate:         parseFloat(localStorage.getItem('su-tts-rate') || '1.0'),
-    voice:        _savedVoice,
+    voice:        LOCAL_NARRATION_VOICE,
     voices:       [],
     _utterance:   null,
     _audio:       null,
+    _speechTimer:  null,
+    localManifestLoaded: false,
+    localManifestPromise: null,
+    localAssetRefs: new Set(),
+    localMissingRefs: new Set(),
+    audioUnlocked: false,
   };
 
   function ttsExpand(text) {
@@ -6438,6 +6439,10 @@ function bindQuizDialogFocusLoop() {
 
   function ttsStop() {
     tts._utterance = null;
+    if (tts._speechTimer) {
+      clearTimeout(tts._speechTimer);
+      tts._speechTimer = null;
+    }
     if (tts._audio) {
       try {
         tts._audio.pause();
@@ -6453,12 +6458,61 @@ function bindQuizDialogFocusLoop() {
     return `${LOCAL_NARRATION_BASE}/${encodeURIComponent(refId)}.mp3`;
   }
 
+  function browserCanPlayMp3() {
+    const probe = document.createElement('audio');
+    return !!probe.canPlayType && probe.canPlayType('audio/mpeg') !== '';
+  }
+
+  function setTTSAssetStatus(text) {
+    const status = document.getElementById('tts-asset-status');
+    if (status) status.textContent = text;
+  }
+
+  async function loadLocalNarrationManifest() {
+    if (tts.localManifestLoaded) return tts.localAssetRefs;
+    if (tts.localManifestPromise) return tts.localManifestPromise;
+    tts.localManifestPromise = (async () => {
+      tts.localManifestLoaded = true;
+    try {
+      const response = await fetch(LOCAL_NARRATION_MANIFEST, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Narration manifest unavailable.');
+      const manifest = await response.json();
+      if (!browserCanPlayMp3()) {
+        tts.localAssetRefs = new Set();
+        setTTSAssetStatus('MP3 playback unavailable in this browser.');
+        setTTSDot(null);
+        return tts.localAssetRefs;
+      }
+      const files = Array.isArray(manifest.files) ? manifest.files : [];
+      tts.localAssetRefs = new Set(files.map((item) => String(item).replace(/\.mp3$/i, '')));
+      if (tts.localAssetRefs.size) {
+        setTTSAssetStatus('Heart voice ready');
+        setTTSDot(tts.muted ? null : 'tts-system-ready');
+      } else {
+        setTTSAssetStatus('VO files are being generated.');
+        setTTSDot(null);
+      }
+    } catch (error) {
+      tts.localAssetRefs = new Set();
+      setTTSAssetStatus(window.location.protocol === 'file:'
+        ? 'Use the preview URL or hosted site for VO.'
+        : 'VO files are being generated.');
+      setTTSDot(null);
+    }
+      return tts.localAssetRefs;
+    })();
+    return tts.localManifestPromise;
+  }
+
   function playLocalNarration(refId) {
+    if (tts.localMissingRefs.has(refId)) return Promise.resolve(false);
+    if (!tts.localAssetRefs.has(refId)) return Promise.resolve(false);
     const url = getLocalNarrationUrl(refId);
     if (!url) return Promise.resolve(false);
 
     return new Promise((resolve) => {
       const audio = new Audio(url);
+      audio.playsInline = true;
       let settled = false;
       const finish = (result) => {
         if (settled) return;
@@ -6470,40 +6524,48 @@ function bindQuizDialogFocusLoop() {
       audio.onended = () => {
         if (tts._audio === audio) tts._audio = null;
       };
-      audio.onerror = () => finish(false);
+      audio.onerror = () => {
+        tts.localMissingRefs.add(refId);
+        setTTSAssetStatus('VO file pending for this prompt.');
+        finish(false);
+      };
       audio.play()
         .then(() => {
           tts._audio = audio;
           finish(true);
         })
-        .catch(() => finish(false));
+        .catch(() => {
+          setTTSAssetStatus('Tap once, then try VO again.');
+          finish(false);
+        });
     });
   }
 
   function findPreferredVoice() {
-    if (!window.speechSynthesis) return null;
-    const voices = tts.voices.length ? tts.voices : window.speechSynthesis.getVoices();
-    if (!voices.length) return null;
-    return voices.find((voice) => voice.voiceURI === tts.voice)
-      || voices.find((voice) => voice.name === tts.voice)
-      || voices.find((voice) => /samantha|ava|allison|karen|zira|jenny|aria|natural/i.test(voice.name))
-      || voices.find((voice) => /^en[-_]/i.test(voice.lang))
-      || null;
+    return null;
+  }
+
+  async function unlockKokoroAudio() {
+    if (tts.audioUnlocked) return;
+    await loadLocalNarrationManifest();
+    const firstRef = Array.from(tts.localAssetRefs)[0];
+    if (!firstRef) return;
+    const audio = new Audio(getLocalNarrationUrl(firstRef));
+    audio.playsInline = true;
+    audio.muted = true;
+    try {
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+      tts.audioUnlocked = true;
+      setTTSAssetStatus('Heart voice ready');
+    } catch (error) {
+      setTTSAssetStatus('Tap once, then try VO again.');
+    }
   }
 
   function ttsNativeSpeak(text) {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    const voice = findPreferredVoice();
-    if (voice) utt.voice = voice;
-    utt.rate = tts.rate;
-    utt.pitch = 1;
-    utt.volume = 1;
-    tts._utterance = utt;
-    utt.onend = () => { if (tts._utterance === utt) tts._utterance = null; };
-    utt.onerror = () => { if (tts._utterance === utt) tts._utterance = null; };
-    window.speechSynthesis.speak(utt);
+    setTTSAssetStatus('VO file pending for this prompt.');
   }
 
   function setTTSDot(state) {
@@ -6519,8 +6581,7 @@ function bindQuizDialogFocusLoop() {
   }
 
   function initTTS() {
-    refreshSystemVoices();
-    setTTSDot(window.speechSynthesis ? 'tts-system-ready' : null);
+    loadLocalNarrationManifest();
     return Promise.resolve();
   }
 
@@ -6529,6 +6590,7 @@ function bindQuizDialogFocusLoop() {
     const clean = ttsClean(text);
     if (!clean) return;
     if (priority) ttsStop();
+    if (refId && !tts.localManifestLoaded) await loadLocalNarrationManifest();
     if (refId && await playLocalNarration(refId)) return;
     ttsNativeSpeak(clean);
   }
@@ -6547,27 +6609,22 @@ function bindQuizDialogFocusLoop() {
   }
 
   function setTTSVoice(voiceId) {
-    tts.voice = voiceId || '';
-    localStorage.setItem('su-tts-voice', tts.voice);
+    tts.voice = LOCAL_NARRATION_VOICE;
+    localStorage.setItem('su-tts-voice', LOCAL_NARRATION_VOICE);
   }
 
   async function previewTTS() {
     const btn = document.getElementById('tts-preview-btn');
     if (btn) btn.classList.add('previewing');
     ttsStop();
-    const clean = ttsClean('This is a preview of the selected voice.');
-    if (!window.speechSynthesis) {
-      if (btn) btn.classList.remove('previewing');
-      return;
+    await loadLocalNarrationManifest();
+    const firstRef = Array.from(tts.localAssetRefs)[0];
+    if (firstRef) {
+      await playLocalNarration(firstRef);
+    } else {
+      setTTSAssetStatus('VO MP3 generation pending.');
     }
-    const utt = new SpeechSynthesisUtterance(clean);
-    const voice = findPreferredVoice();
-    if (voice) utt.voice = voice;
-    utt.rate = tts.rate;
-    utt.onend = () => { if (btn) btn.classList.remove('previewing'); };
-    utt.onerror = () => { if (btn) btn.classList.remove('previewing'); };
-    tts._utterance = utt;
-    window.speechSynthesis.speak(utt);
+    if (btn) btn.classList.remove('previewing');
   }
 
   function setTTSRate(value) {
@@ -6578,17 +6635,7 @@ function bindQuizDialogFocusLoop() {
   }
 
   function refreshSystemVoices() {
-    if (!window.speechSynthesis) {
-      tts.voices = [];
-      return;
-    }
-    tts.voices = window.speechSynthesis.getVoices()
-      .filter((voice) => !voice.lang || /^en[-_]/i.test(voice.lang))
-      .sort((a, b) => {
-        const localDelta = Number(b.localService) - Number(a.localService);
-        if (localDelta) return localDelta;
-        return a.name.localeCompare(b.name);
-      });
+    tts.voices = [];
   }
 
   function escapeOptionText(value) {
@@ -6604,22 +6651,18 @@ function bindQuizDialogFocusLoop() {
   function populateTTSVoices() {
     const sel = document.getElementById('tts-voice-select');
     if (!sel) return;
-    refreshSystemVoices();
-    const options = [
-      `<option value=""${tts.voice ? '' : ' selected'}>${SYSTEM_VOICE_LABEL}</option>`,
-      ...tts.voices.map((voice) => {
-        const value = voice.voiceURI || voice.name;
-        const label = `${voice.name}${voice.lang ? ` (${voice.lang})` : ''}`;
-        return `<option value="${escapeOptionText(value)}"${value === tts.voice ? ' selected' : ''}>${escapeOptionText(label)}</option>`;
-      }),
-    ];
-    sel.innerHTML = options.join('');
+    sel.innerHTML = `<option value="${LOCAL_NARRATION_VOICE}" selected>Kokoro Heart (${LOCAL_NARRATION_VOICE})</option>`;
+    sel.disabled = true;
   }
 
   function updateTTSButtons() {
     const svgIcon = tts.muted ? TTS_SVG_OFF : TTS_SVG_ON;
     document.querySelectorAll('.tts-toggle-btn').forEach(btn => {
-      btn.innerHTML = svgIcon;
+      if (btn.id === 'menu-tts-btn') {
+        btn.textContent = tts.muted ? 'Voice over off' : 'Voice over on';
+      } else {
+        btn.innerHTML = svgIcon;
+      }
       btn.setAttribute('aria-label', tts.muted ? 'Turn on voice' : 'Turn off voice');
       btn.setAttribute('aria-pressed', String(!tts.muted));
       btn.classList.toggle('tts-active', !tts.muted);
@@ -6633,7 +6676,7 @@ function bindQuizDialogFocusLoop() {
     if (rateRange) rateRange.value = String(tts.rate);
     const rateLabel = document.getElementById('tts-rate-label');
     if (rateLabel) rateLabel.textContent = tts.rate.toFixed(2) + '×';
-    setTTSDot(window.speechSynthesis ? 'tts-system-ready' : null);
+    setTTSDot(!tts.muted && tts.localAssetRefs.size ? 'tts-system-ready' : null);
   }
 
   // ── Theme engine ───────────────────────────────────────────────────
@@ -6732,24 +6775,9 @@ function bindQuizDialogFocusLoop() {
   populateTTSVoices();
   initTTS();
 
-  if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = populateTTSVoices;
-  }
-
-  // Warm Web Speech on first user interaction. Safari is much happier when
-  // speech starts from a gesture once before lesson or quiz narration begins.
-  function _unlockSpeech() {
-    document.removeEventListener('click', _unlockSpeech, true);
-    document.removeEventListener('touchend', _unlockSpeech, true);
-
-    if (window.speechSynthesis) {
-      const silent = new SpeechSynthesisUtterance('');
-      window.speechSynthesis.speak(silent);
-      window.speechSynthesis.cancel();
-    }
-  }
-  document.addEventListener('click', _unlockSpeech, true);
-  document.addEventListener('touchend', _unlockSpeech, true);
+  document.addEventListener('pointerdown', unlockKokoroAudio, { once: true, passive: true });
+  document.addEventListener('touchend', unlockKokoroAudio, { once: true, passive: true });
+  document.addEventListener('keydown', unlockKokoroAudio, { once: true });
 
   attachFirestoreContentOverrides();
   init();

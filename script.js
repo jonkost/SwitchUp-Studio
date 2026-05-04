@@ -48,6 +48,8 @@
   const MACRO_STORAGE_KEY = 'switchup_studio_macro_slots_v6517';
   const ME_MEMORY_SLOT_COUNT = 4;
   const LEGACY_MACRO_STORAGE_KEYS = Object.freeze(['virtual_switcher_macro_slots_v642', 'virtual_switcher_macro_slots_v641', 'virtual_switcher_macro_slots_v6218', 'virtual_switcher_macro_slots_v6217']);
+  const LOCAL_NARRATION_VOICE = 'af_heart';
+  const LOCAL_NARRATION_BASE = `assets/narration/${LOCAL_NARRATION_VOICE}`;
 
   const SOURCE_IMAGES = Object.freeze({
     'CAM 1': 'assets/cam-1.png',
@@ -577,6 +579,7 @@
     menuUndoDveAction: $('menu-action-undo-dve'),
     menuResetDveAction: $('menu-action-reset-dve'),
     menuBannersAction: $('menu-action-banners'),
+    menuDashboardAction: $('menu-action-dashboard'),
     meMemoryStoreButtons: {
       ME_PP: $('me-pp-store'),
       ME1: $('me-1-store'),
@@ -2850,6 +2853,11 @@
       setMenuActionCopy(dom.menuBannersAction, state.bannersVisible ? 'Hide PGM/PVW Labels' : 'Show PGM/PVW Labels', state.bannersVisible ? 'Hide the PROGRAM and PREVIEW banners from the multiviewer' : 'Show the PROGRAM and PREVIEW banners on the multiviewer', '', { toggle: true, on: !state.bannersVisible });
       setPressed(dom.menuBannersAction, !state.bannersVisible);
     }
+
+    if (dom.menuDashboardAction) {
+      setMenuActionCopy(dom.menuDashboardAction, 'Content Dashboard', 'Edit lesson text, quiz prompts, and Run the Show copy', 'ADMIN');
+      setPressed(dom.menuDashboardAction, false);
+    }
   }
 
   function dismissHotkeySplash() {
@@ -2868,6 +2876,10 @@
       return;
     }
     showHotkeySplash();
+  }
+
+  function openAdminDashboard() {
+    window.open('dashboard/', '_blank', 'noopener,noreferrer');
   }
 
   function handleUtilityMenuAction(action) {
@@ -2918,6 +2930,10 @@
       case 'banners':
         dismissHotkeySplash();
         toggleBannerVisibility();
+        break;
+      case 'dashboard':
+        dismissHotkeySplash();
+        openAdminDashboard();
         break;
       default:
         break;
@@ -3572,6 +3588,65 @@ const RUN_THE_SHOW = {
   RUN_THE_SHOW['rts-3'] = buildAdvancedRunTheShow();
   RUN_THE_SHOW['rts-4'] = buildExpertRunTheShow();
 
+  function getPromptTargetFromRef(refId) {
+    const bankMatch = /^Q-B([1-4])-(\d{2})\.prompt$/.exec(refId);
+    if (bankMatch) {
+      const bank = QUIZ_BANK[`bank-${bankMatch[1]}`];
+      return bank ? bank[Number(bankMatch[2]) - 1] : null;
+    }
+
+    const rtsMatch = /^Q-RTS([1-4])-(\d{2})\.prompt$/.exec(refId);
+    if (rtsMatch) {
+      const sequence = RUN_THE_SHOW[`rts-${rtsMatch[1]}`];
+      return sequence ? sequence[Number(rtsMatch[2]) - 1] : null;
+    }
+
+    return null;
+  }
+
+  function applyContentOverride(item) {
+    if (!item || !item.refId || typeof item.text !== 'string') return false;
+
+    const lessonMatch = /^L(\d+)-(.+)\.(instruction|hint)$/.exec(item.refId);
+    if (lessonMatch) {
+      const lesson = LESSON_STEPS[Number(lessonMatch[1])];
+      const step = lesson ? lesson.find((candidate) => candidate.id === lessonMatch[2]) : null;
+      if (!step) return false;
+      step[lessonMatch[3]] = item.text;
+      return true;
+    }
+
+    const promptTarget = getPromptTargetFromRef(item.refId);
+    if (!promptTarget) return false;
+    promptTarget.prompt = item.text;
+    return true;
+  }
+
+  async function loadFirestoreContentOverrides(firebaseApi) {
+    if (!firebaseApi || typeof firebaseApi.getContentCollection !== 'function') return;
+    try {
+      const collections = await Promise.all([
+        firebaseApi.getContentCollection('content_lessons'),
+        firebaseApi.getContentCollection('content_quiz_bank'),
+        firebaseApi.getContentCollection('content_run_the_show'),
+      ]);
+      const appliedCount = collections.flat().reduce((count, item) => count + (applyContentOverride(item) ? 1 : 0), 0);
+      if (appliedCount && lessonState.active) updateLessonBar();
+      if (appliedCount && state.quizMode && state.quizQuestions.length) showQuestion();
+    } catch (error) {
+      console.warn('[SwitchUp] Firestore content overrides unavailable:', error);
+    }
+  }
+
+  function attachFirestoreContentOverrides() {
+    if (window.SwitchUpFirebase) {
+      loadFirestoreContentOverrides(window.SwitchUpFirebase);
+      return;
+    }
+    window.addEventListener('switchup:firebase-ready', (event) => {
+      loadFirestoreContentOverrides(event.detail);
+    }, { once: true });
+  }
 
   function resolveRunTheShowStep() {
     const question = state.quizQuestions[state.quizCurrent];
@@ -3723,6 +3798,23 @@ const RUN_THE_SHOW = {
     return prefix.length ? `${prefix.join(' ')} ${prompt}` : prompt;
   }
 
+  function padQuizRef(index) {
+    return String(index + 1).padStart(2, '0');
+  }
+
+  function getQuizReferencePrefix(level) {
+    return {
+      'bank-1': 'Q-B1',
+      'bank-2': 'Q-B2',
+      'bank-3': 'Q-B3',
+      'bank-4': 'Q-B4',
+      'rts-1': 'Q-RTS1',
+      'rts-2': 'Q-RTS2',
+      'rts-3': 'Q-RTS3',
+      'rts-4': 'Q-RTS4',
+    }[level] || 'Q';
+  }
+
   function getQuizPromptText(question) {
     if (!question) return '';
     const basePrompt = question.prompt || '';
@@ -3739,11 +3831,22 @@ const RUN_THE_SHOW = {
   }
 
   function buildQuizQuestions() {
+    const prefix = getQuizReferencePrefix(state.quizLevel);
     if (isRunTheShow()) {
-      return RUN_THE_SHOW[state.quizLevel].map((q) => ({ ...q, prompt: addDefaultMediaLoadInstructions(q.prompt), skipCount: 0 }));
+      return RUN_THE_SHOW[state.quizLevel].map((q, index) => ({
+        ...q,
+        refId: `${prefix}-${padQuizRef(index)}.prompt`,
+        prompt: addDefaultMediaLoadInstructions(q.prompt),
+        skipCount: 0,
+      }));
     }
 
-    const pool = QUIZ_BANK[state.quizLevel].map((q) => ({ ...q, prompt: addDefaultMediaLoadInstructions(q.prompt), skipCount: 0 }));
+    const pool = QUIZ_BANK[state.quizLevel].map((q, index) => ({
+      ...q,
+      refId: `${prefix}-${padQuizRef(index)}.prompt`,
+      prompt: addDefaultMediaLoadInstructions(q.prompt),
+      skipCount: 0,
+    }));
     shuffleArray(pool);
     return pool.slice(0, 10);
   }
@@ -3782,7 +3885,7 @@ const RUN_THE_SHOW = {
 
     dom.quizPrompt.textContent = getQuizPromptText(question);
     dom.quizPrompt.style.color = '#f5a623';
-    ttsCancelAndSpeak(getQuizPromptText(question));
+    ttsCancelAndSpeak(getQuizPromptText(question), question.refId);
   }
 
   function checkAnswer() {
@@ -4192,6 +4295,7 @@ function bindQuizDialogFocusLoop() {
       [dom.menuResetDveAction, 'reset-dve'],
       [dom.menuResetAction, 'reset'],
       [dom.menuBannersAction, 'banners'],
+      [dom.menuDashboardAction, 'dashboard'],
     ].forEach(([button, action]) => {
       if (!button) return;
       button.addEventListener('click', (event) => {
@@ -5764,7 +5868,8 @@ function bindQuizDialogFocusLoop() {
     instruction.textContent = step.instruction;
     const _confirm = lessonState._pendingConfirm;
     lessonState._pendingConfirm = null;
-    ttsCancelAndSpeak(_confirm ? `${_confirm} selected. ${step.instruction}` : step.instruction);
+    const lessonRefId = `L${lessonState.lessonId}-${step.id}.instruction`;
+    ttsCancelAndSpeak(_confirm ? `${_confirm} selected. ${step.instruction}` : step.instruction, _confirm ? null : lessonRefId);
     progress.textContent = `STEP ${current} OF ${total}`;
 
     // Bar colour classes
@@ -5966,6 +6071,7 @@ function bindQuizDialogFocusLoop() {
     const instruction = document.getElementById('lesson-instruction');
     if (instruction) {
       instruction.textContent = `💡 ${step.hint}`;
+      ttsCancelAndSpeak(step.hint, `L${lessonState.lessonId}-${step.id}.hint`);
     }
     (step.highlight || []).forEach((id) => {
       lessonWiggle(document.getElementById(id));
@@ -6290,6 +6396,7 @@ function bindQuizDialogFocusLoop() {
     voice:        _savedVoice,
     voices:       [],
     _utterance:   null,
+    _audio:       null,
   };
 
   function ttsExpand(text) {
@@ -6331,7 +6438,46 @@ function bindQuizDialogFocusLoop() {
 
   function ttsStop() {
     tts._utterance = null;
+    if (tts._audio) {
+      try {
+        tts._audio.pause();
+        tts._audio.currentTime = 0;
+      } catch (_) {}
+      tts._audio = null;
+    }
     if (window.speechSynthesis) window.speechSynthesis.cancel();
+  }
+
+  function getLocalNarrationUrl(refId) {
+    if (!refId) return '';
+    return `${LOCAL_NARRATION_BASE}/${encodeURIComponent(refId)}.mp3`;
+  }
+
+  function playLocalNarration(refId) {
+    const url = getLocalNarrationUrl(refId);
+    if (!url) return Promise.resolve(false);
+
+    return new Promise((resolve) => {
+      const audio = new Audio(url);
+      let settled = false;
+      const finish = (result) => {
+        if (settled) return;
+        settled = true;
+        resolve(result);
+      };
+
+      audio.preload = 'auto';
+      audio.onended = () => {
+        if (tts._audio === audio) tts._audio = null;
+      };
+      audio.onerror = () => finish(false);
+      audio.play()
+        .then(() => {
+          tts._audio = audio;
+          finish(true);
+        })
+        .catch(() => finish(false));
+    });
   }
 
   function findPreferredVoice() {
@@ -6378,15 +6524,16 @@ function bindQuizDialogFocusLoop() {
     return Promise.resolve();
   }
 
-  async function ttsSpeak(text, priority) {
+  async function ttsSpeak(text, priority, refId) {
     if (tts.muted) return;
     const clean = ttsClean(text);
     if (!clean) return;
     if (priority) ttsStop();
+    if (refId && await playLocalNarration(refId)) return;
     ttsNativeSpeak(clean);
   }
 
-  function ttsCancelAndSpeak(text) { ttsSpeak(text, true); }
+  function ttsCancelAndSpeak(text, refId) { ttsSpeak(text, true, refId); }
 
   function toggleTTS() {
     tts.muted = !tts.muted;
@@ -6604,5 +6751,6 @@ function bindQuizDialogFocusLoop() {
   document.addEventListener('click', _unlockSpeech, true);
   document.addEventListener('touchend', _unlockSpeech, true);
 
+  attachFirestoreContentOverrides();
   init();
 })();

@@ -15,7 +15,7 @@
 </head>
 
 <body>
-	<!-- Build: SwitchUp Studio v6.5.17 -->
+	<!-- Build: SwitchUp Studio v6.5.18 -->
 
 
 	<a href="#multiviewer" id="skip-link">Skip to switcher</a>
@@ -64,6 +64,15 @@
 							<button class="menu-action-btn" id="menu-action-media" type="button"></button>
 							<button class="menu-action-btn" id="menu-action-hotkeys" type="button"></button>
 							<button class="menu-action-btn" id="menu-action-banners" type="button"></button>
+						</div>
+					</div>
+					<div class="menu-group menu-group-admin">
+						<div class="menu-group-head">
+							<div class="menu-group-label">ADMIN</div>
+							<div class="menu-group-copy">Lesson text, quiz prompts, and content controls</div>
+						</div>
+						<div class="menu-action-list">
+							<button class="menu-action-btn" id="menu-action-dashboard" type="button"></button>
 						</div>
 					</div>
 					<div class="menu-group menu-group-practice">
@@ -770,7 +779,8 @@
 		</div>
 	</div>
 
-	  <script src="script.js?v=2"></script>
+	  <script type="module" src="firebase-client.js?v=1"></script>
+	  <script src="script.js?v=3"></script>
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
   </script>

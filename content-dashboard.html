@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SwitchUp Studio Content Dashboard</title>
+  <style>
+    :root {
+      --page: #edf1f5;
+      --ink: #15171c;
+      --muted: #616977;
+      --panel: #ffffff;
+      --panel-soft: #f7f9fc;
+      --line: #d9e0ea;
+      --chrome: #101116;
+      --chrome-2: #1b1d24;
+      --blue: #2563eb;
+      --green: #0f766e;
+      --purple: #7c3aed;
+      --amber: #b45309;
+      --red: #b42318;
+      --shadow: 0 14px 34px rgba(19, 24, 32, 0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--page);
+      color: var(--ink);
+    }
+
+    body.locked {
+      overflow: hidden;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .access-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      place-items: center;
+      padding: 22px;
+      background:
+        linear-gradient(180deg, rgba(16, 17, 22, 0.92), rgba(16, 17, 22, 0.84)),
+        radial-gradient(circle at 30% 10%, rgba(37, 99, 235, 0.28), transparent 34%),
+        #101116;
+    }
+
+    body.locked .access-screen {
+      display: grid;
+    }
+
+    .access-card {
+      width: min(440px, 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+      overflow: hidden;
+    }
+
+    .access-card-top {
+      padding: 18px 20px;
+      background: linear-gradient(180deg, #1c1f27, #101116);
+      color: #fff;
+    }
+
+    .brand-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background:
+        linear-gradient(135deg, #33d6a6 0 38%, transparent 38%),
+        linear-gradient(135deg, transparent 0 42%, #2563eb 42% 72%, #f59e0b 72%);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+    }
+
+    .access-title {
+      margin: 18px 0 6px;
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: 0;
+    }
+
+    .access-copy {
+      color: #c9ced8;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .access-card-body {
+      display: grid;
+      gap: 12px;
+      padding: 18px 20px 20px;
+    }
+
+    .access-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .access-input {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: #fff;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .access-btn,
+    .primary-btn,
+    .ghost-btn,
+    .filter-btn,
+    .copy-btn,
+    .save-btn {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .access-btn,
+    .primary-btn {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .ghost-btn,
+    .copy-btn,
+    .save-btn {
+      color: var(--blue);
+    }
+
+    .access-error {
+      min-height: 18px;
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: linear-gradient(180deg, var(--chrome-2), var(--chrome));
+      color: #fff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .topbar-inner,
+    main {
+      width: min(1240px, calc(100vw - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar-inner {
+      display: grid;
+      gap: 18px;
+      padding: 20px 0;
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 900;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .hero-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: end;
+    }
+
+    h1 {
+      margin: 12px 0 8px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+
+    .hero-copy {
+      max-width: 720px;
+      color: #c9ced8;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .workflow-card {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 14px;
+    }
+
+    .workflow-title {
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #9aa4b6;
+    }
+
+    .workflow-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .workflow-step {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      color: #eef2f7;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 750;
+    }
+
+    .step-num {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: #eef2f7;
+      color: #111827;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    main {
+      padding: 18px 0 46px;
+    }
+
+    .control-panel {
+      display: grid;
+      gap: 12px;
+      margin-top: -4px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-wrap::before {
+      content: "SEARCH";
+      position: absolute;
+      left: 13px;
+      top: 8px;
+      color: #8b95a5;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      min-height: 52px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px 14px 6px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 750;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .filter-btn[aria-pressed="true"] {
+      border-color: var(--chrome);
+      background: var(--chrome);
+      color: #fff;
+    }
+
+    .auth-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-soft);
+    }
+
+    .auth-status-title {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .auth-status-copy {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .auth-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: var(--panel);
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .stat-label {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .results-line {
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .section {
+      margin-top: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #f7f9fc;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 950;
+    }
+
+    .section-count {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 290px minmax(0, 1fr) 112px;
+      gap: 14px;
+      align-items: stretch;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .item:last-child { border-bottom: none; }
+
+    .item-meta {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    code {
+      display: inline-block;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      color: #0f172a;
+      background: #eef2ff;
+      border: 1px solid #dbe4ff;
+      border-radius: 6px;
+      padding: 5px 7px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .type-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .type,
+    .source-pill {
+      width: fit-content;
+      border-radius: 999px;
+      padding: 5px 8px;
+      background: #f1f5f9;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .source-pill.firestore {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .item.lesson code { background: #ecfdf5; border-color: #c7f2df; }
+    .item.quiz code { background: #f3e8ff; border-color: #e3d1ff; }
+    .item.rts code { background: #fff7ed; border-color: #fed7aa; }
+
+    .edit-label {
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    textarea.text-edit {
+      width: 100%;
+      min-height: 86px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fff;
+      color: #1f2937;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    textarea.text-edit:focus,
+    input:focus {
+      outline: 3px solid rgba(37, 99, 235, 0.16);
+      border-color: var(--blue);
+    }
+
+    .row-actions {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .save-btn:disabled,
+    .primary-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .empty,
+    .error {
+      padding: 28px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--muted);
+      text-align: center;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .error a {
+      color: var(--blue);
+      font-weight: 900;
+    }
+
+    @media (max-width: 940px) {
+      .hero-row,
+      .toolbar,
+      .auth-row,
+      .item {
+        grid-template-columns: 1fr;
+      }
+
+      .workflow-card {
+        display: none;
+      }
+
+      .filters,
+      .auth-actions,
+      .nav-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar-inner,
+      main {
+        width: min(100vw - 20px, 1240px);
+      }
+
+      .nav-row {
+        display: grid;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      h1 {
+        font-size: 34px;
+      }
+
+      .filter-btn,
+      .ghost-btn,
+      .primary-btn {
+        flex: 1 1 140px;
+      }
+    }
+  </style>
+</head>
+<body class="locked">
+  <div class="access-screen" role="dialog" aria-modal="true" aria-labelledby="access-title">
+    <form class="access-card" id="access-form">
+      <div class="access-card-top">
+        <div class="brand-line"><span class="brand-mark"></span> SwitchUp Studio</div>
+        <div class="access-title" id="access-title">Dashboard Access</div>
+        <div class="access-copy">Enter the admin code to review and edit lesson copy, quiz prompts, and Run the Show text.</div>
+      </div>
+      <div class="access-card-body">
+        <label class="access-label" for="access-code">Admin Code</label>
+        <input class="access-input" id="access-code" type="password" autocomplete="current-password" inputmode="text">
+        <button class="access-btn" type="submit">Open Dashboard</button>
+        <div class="access-error" id="access-error" role="alert"></div>
+      </div>
+    </form>
+  </div>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="nav-row">
+          <div class="brand-line"><span class="brand-mark"></span> SwitchUp Studio</div>
+          <div class="nav-actions">
+            <a class="nav-link" href="index.html">Open Simulator</a>
+            <a class="nav-link" href="docs/content-reference.md">Reference Doc</a>
+          </div>
+        </div>
+        <div class="hero-row">
+          <div>
+            <h1>Content Dashboard</h1>
+            <div class="hero-copy">A clean control room for every lesson line, hint, quiz prompt, and Run the Show step. Search by reference ID, make edits, then save the exact text the simulator should use.</div>
+          </div>
+          <div class="workflow-card" aria-label="Dashboard workflow">
+            <div class="workflow-title">Recommended Flow</div>
+            <div class="workflow-list">
+              <div class="workflow-step"><span class="step-num">1</span><span>Find the line by lesson, quiz bank, or reference ID.</span></div>
+              <div class="workflow-step"><span class="step-num">2</span><span>Edit the text directly in the field.</span></div>
+              <div class="workflow-step"><span class="step-num">3</span><span>Sign in and save to Firestore when ready.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="control-panel" aria-label="Dashboard controls">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <input id="search" type="search" placeholder="Type a reference ID, lesson name, or exact text..." autocomplete="off">
+          </div>
+          <div class="filters" aria-label="Content filters">
+            <button class="filter-btn" data-filter="all" aria-pressed="true">All</button>
+            <button class="filter-btn" data-filter="lesson" aria-pressed="false">Lessons</button>
+            <button class="filter-btn" data-filter="quiz" aria-pressed="false">Quiz Banks</button>
+            <button class="filter-btn" data-filter="rts" aria-pressed="false">Run The Show</button>
+          </div>
+        </div>
+        <div class="auth-row">
+          <div>
+            <div class="auth-status-title" id="auth-title">Firestore Editing</div>
+            <div class="auth-status-copy" id="auth-status">Firebase is loading. You can still review and copy IDs.</div>
+          </div>
+          <div class="auth-actions">
+            <button class="ghost-btn" id="sign-in-btn" type="button">Sign In</button>
+            <button class="ghost-btn" id="sign-out-btn" type="button" hidden>Sign Out</button>
+            <button class="primary-btn" id="save-all-btn" type="button" disabled>Save Visible</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="stats" id="stats"></div>
+      <div class="results-line" id="results-line">Loading content...</div>
+      <div id="content"></div>
+    </main>
+  </div>
+
+  <script type="module" src="firebase-client.js?v=1"></script>
+  <script>
+    const ADMIN_DASHBOARD_CODE = 'SWITCHUP';
+    const CONTENT_COLLECTIONS = {
+      lesson: 'content_lessons',
+      quiz: 'content_quiz_bank',
+      rts: 'content_run_the_show',
+    };
+
+    const state = {
+      rows: [],
+      filter: 'all',
+      query: '',
+      firebase: null,
+      user: null,
+      loadedFirestore: false,
+    };
+
+    const statsEl = document.getElementById('stats');
+    const contentEl = document.getElementById('content');
+    const resultsLineEl = document.getElementById('results-line');
+    const searchEl = document.getElementById('search');
+    const authTitleEl = document.getElementById('auth-title');
+    const authStatusEl = document.getElementById('auth-status');
+    const signInBtn = document.getElementById('sign-in-btn');
+    const signOutBtn = document.getElementById('sign-out-btn');
+    const saveAllBtn = document.getElementById('save-all-btn');
+    const accessForm = document.getElementById('access-form');
+    const accessCodeEl = document.getElementById('access-code');
+    const accessErrorEl = document.getElementById('access-error');
+
+    function unlockDashboard() {
+      document.body.classList.remove('locked');
+      localStorage.setItem('switchup_admin_dashboard_unlocked', 'true');
+      searchEl.focus({ preventScroll: true });
+    }
+
+    function setupAccessGate() {
+      if (localStorage.getItem('switchup_admin_dashboard_unlocked') === 'true') {
+        document.body.classList.remove('locked');
+        return;
+      }
+      accessCodeEl.focus();
+      accessForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (accessCodeEl.value.trim().toUpperCase() === ADMIN_DASHBOARD_CODE) {
+          unlockDashboard();
+          return;
+        }
+        accessErrorEl.textContent = 'That code did not open the dashboard.';
+        accessCodeEl.select();
+      });
+    }
+
+    function stripCode(value) {
+      return value.replace(/^`|`$/g, '').replace(/\\\|/g, '|').trim();
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[char]));
+    }
+
+    function classify(refId, section) {
+      if (refId.startsWith('Q-RTS')) return 'rts';
+      if (refId.startsWith('Q-')) return 'quiz';
+      if (refId.startsWith('L')) return 'lesson';
+      if (/Run The Show/i.test(section)) return 'rts';
+      if (/Quiz/i.test(section)) return 'quiz';
+      return 'lesson';
+    }
+
+    function parseMarkdown(markdown) {
+      const rows = [];
+      let section = 'Content';
+      markdown.split(/\r?\n/).forEach((line) => {
+        const heading = line.match(/^#{2,3}\s+(.+)/);
+        if (heading) {
+          section = heading[1].trim();
+          return;
+        }
+
+        if (!line.startsWith('| `')) return;
+        const cells = line.split(/(?<!\\)\|/).slice(1, -1).map((cell) => cell.trim());
+        if (cells.length < 2) return;
+
+        const refId = stripCode(cells[0]);
+        const type = cells.length === 3 ? cells[1] : 'Prompt';
+        const text = stripCode(cells.length === 3 ? cells[2] : cells[1]);
+        rows.push({
+          refId,
+          type,
+          text,
+          section,
+          group: classify(refId, section),
+          source: 'reference',
+        });
+      });
+      return rows;
+    }
+
+    function collectionForRow(row) {
+      return CONTENT_COLLECTIONS[row.group] || CONTENT_COLLECTIONS.lesson;
+    }
+
+    function renderStats(rows) {
+      const stats = [
+        ['Total', rows.length],
+        ['Lessons', rows.filter((row) => row.group === 'lesson').length],
+        ['Quiz Banks', rows.filter((row) => row.group === 'quiz').length],
+        ['Run The Show', rows.filter((row) => row.group === 'rts').length],
+      ];
+      statsEl.innerHTML = stats.map(([label, value]) => `
+        <div class="stat">
+          <div class="stat-value">${value}</div>
+          <div class="stat-label">${label}</div>
+        </div>
+      `).join('');
+    }
+
+    function getVisibleRows() {
+      const query = state.query.toLowerCase();
+      return state.rows.filter((row) => {
+        if (state.filter !== 'all' && row.group !== state.filter) return false;
+        if (!query) return true;
+        return row.refId.toLowerCase().includes(query)
+          || row.text.toLowerCase().includes(query)
+          || row.section.toLowerCase().includes(query)
+          || row.type.toLowerCase().includes(query);
+      });
+    }
+
+    function getRowByRef(refId) {
+      return state.rows.find((row) => row.refId === refId);
+    }
+
+    function updateResultsLine(count) {
+      const label = count === 1 ? 'item' : 'items';
+      const filterLabel = state.filter === 'all' ? 'all content' : state.filter === 'rts' ? 'Run The Show' : state.filter;
+      resultsLineEl.textContent = `Showing ${count} ${label} from ${filterLabel}.`;
+    }
+
+    function copyId(refId, button) {
+      navigator.clipboard.writeText(refId).then(() => {
+        const old = button.textContent;
+        button.textContent = 'Copied';
+        setTimeout(() => { button.textContent = old; }, 900);
+      });
+    }
+
+    function updateAuthStatus() {
+      if (!state.firebase) {
+        authTitleEl.textContent = 'Firestore Editing';
+        authStatusEl.textContent = 'Firebase is loading. You can still review and copy IDs.';
+        saveAllBtn.disabled = true;
+        return;
+      }
+      if (!state.user) {
+        authTitleEl.textContent = 'Signed Out';
+        authStatusEl.textContent = 'Sign in to save text. Your UID must also be added to the Firestore admins collection.';
+        signInBtn.hidden = false;
+        signOutBtn.hidden = true;
+        saveAllBtn.disabled = true;
+        return;
+      }
+      authTitleEl.textContent = 'Signed In';
+      authStatusEl.textContent = `Signed in as ${state.user.email || state.user.uid}. Admin UID: ${state.user.uid}`;
+      signInBtn.hidden = true;
+      signOutBtn.hidden = false;
+      saveAllBtn.disabled = false;
+    }
+
+    function contentPayload(row) {
+      return {
+        refId: row.refId,
+        type: row.type,
+        text: row.text,
+        section: row.section,
+        group: row.group,
+        collectionName: collectionForRow(row),
+      };
+    }
+
+    async function saveRow(refId, button) {
+      const row = getRowByRef(refId);
+      if (!row || !state.firebase) return;
+      const old = button.textContent;
+      button.textContent = 'Saving';
+      button.disabled = true;
+      try {
+        await state.firebase.saveContentItem(contentPayload(row));
+        row.source = 'firestore';
+        button.textContent = 'Saved';
+        render();
+      } catch (error) {
+        button.textContent = 'Blocked';
+        authTitleEl.textContent = 'Save Blocked';
+        authStatusEl.textContent = `Add your UID to Firestore admins, then try again: ${state.user ? state.user.uid : 'not signed in'}`;
+      } finally {
+        button.disabled = false;
+        setTimeout(() => { button.textContent = old; }, 1200);
+      }
+    }
+
+    async function saveVisibleRows() {
+      const rows = getVisibleRows();
+      if (!rows.length || !state.firebase || !state.user) return;
+      const old = saveAllBtn.textContent;
+      saveAllBtn.textContent = 'Saving';
+      saveAllBtn.disabled = true;
+      try {
+        await state.firebase.saveContentItems(rows.map(contentPayload));
+        rows.forEach((row) => { row.source = 'firestore'; });
+        saveAllBtn.textContent = `Saved ${rows.length}`;
+        render();
+      } catch (error) {
+        saveAllBtn.textContent = 'Blocked';
+        authTitleEl.textContent = 'Save Blocked';
+        authStatusEl.textContent = `Add your UID to Firestore admins, then try again: ${state.user ? state.user.uid : 'not signed in'}`;
+      } finally {
+        updateAuthStatus();
+        setTimeout(() => { saveAllBtn.textContent = old; }, 1400);
+      }
+    }
+
+    async function loadFirestoreOverrides() {
+      if (!state.firebase || !state.rows.length || state.loadedFirestore) return;
+      state.loadedFirestore = true;
+      const byRef = new Map(state.rows.map((row) => [row.refId, row]));
+      try {
+        const collections = Object.values(CONTENT_COLLECTIONS);
+        const results = await Promise.all(collections.map((name) => state.firebase.getContentCollection(name)));
+        results.flat().forEach((item) => {
+          const row = byRef.get(item.refId);
+          if (!row || typeof item.text !== 'string') return;
+          row.text = item.text;
+          row.source = 'firestore';
+        });
+        render();
+      } catch (error) {
+        authStatusEl.textContent = 'Firestore content could not load. The reference document is still available.';
+      }
+    }
+
+    function render() {
+      renderStats(state.rows);
+      const rows = getVisibleRows();
+      updateResultsLine(rows.length);
+      if (!rows.length) {
+        contentEl.innerHTML = '<div class="empty">No matching content found.</div>';
+        return;
+      }
+
+      const bySection = new Map();
+      rows.forEach((row) => {
+        if (!bySection.has(row.section)) bySection.set(row.section, []);
+        bySection.get(row.section).push(row);
+      });
+
+      contentEl.innerHTML = Array.from(bySection.entries()).map(([section, items]) => `
+        <section class="section">
+          <div class="section-head">
+            <div class="section-title">${escapeHtml(section)}</div>
+            <div class="section-count">${items.length} item${items.length === 1 ? '' : 's'}</div>
+          </div>
+          ${items.map((item) => `
+            <article class="item ${item.group}">
+              <div class="item-meta">
+                <code>${escapeHtml(item.refId)}</code>
+                <div class="type-row">
+                  <div class="type">${escapeHtml(item.type)}</div>
+                  <div class="source-pill ${item.source === 'firestore' ? 'firestore' : ''}">${item.source === 'firestore' ? 'Firestore' : 'Reference'}</div>
+                </div>
+              </div>
+              <label>
+                <div class="edit-label">Editable Text</div>
+                <textarea class="text-edit" data-edit="${escapeHtml(item.refId)}">${escapeHtml(item.text)}</textarea>
+              </label>
+              <div class="row-actions">
+                <button class="copy-btn" data-copy="${escapeHtml(item.refId)}" type="button">Copy ID</button>
+                <button class="save-btn" data-save="${escapeHtml(item.refId)}" type="button" ${state.user ? '' : 'disabled'}>Save Row</button>
+              </div>
+            </article>
+          `).join('')}
+        </section>
+      `).join('');
+
+      contentEl.querySelectorAll('[data-edit]').forEach((field) => {
+        field.addEventListener('input', () => {
+          const row = getRowByRef(field.dataset.edit);
+          if (row) row.text = field.value;
+        });
+      });
+      contentEl.querySelectorAll('[data-copy]').forEach((button) => {
+        button.addEventListener('click', () => copyId(button.dataset.copy, button));
+      });
+      contentEl.querySelectorAll('[data-save]').forEach((button) => {
+        button.addEventListener('click', () => saveRow(button.dataset.save, button));
+      });
+    }
+
+    function initFirebase(firebaseApi) {
+      if (!firebaseApi || state.firebase) return;
+      state.firebase = firebaseApi;
+      updateAuthStatus();
+      loadFirestoreOverrides();
+      state.firebase.onAuthStateChanged((user) => {
+        state.user = user;
+        updateAuthStatus();
+        render();
+      });
+    }
+
+    document.querySelectorAll('[data-filter]').forEach((button) => {
+      button.addEventListener('click', () => {
+        state.filter = button.dataset.filter;
+        document.querySelectorAll('[data-filter]').forEach((filterButton) => {
+          filterButton.setAttribute('aria-pressed', String(filterButton === button));
+        });
+        render();
+      });
+    });
+
+    searchEl.addEventListener('input', () => {
+      state.query = searchEl.value.trim();
+      render();
+    });
+
+    signInBtn.addEventListener('click', () => {
+      if (state.firebase) state.firebase.signInWithGoogle();
+    });
+
+    signOutBtn.addEventListener('click', () => {
+      if (state.firebase) state.firebase.signOutUser();
+    });
+
+    saveAllBtn.addEventListener('click', saveVisibleRows);
+
+    window.addEventListener('switchup:firebase-ready', (event) => {
+      initFirebase(event.detail);
+    });
+
+    setupAccessGate();
+
+    fetch('docs/content-reference.md')
+      .then((response) => {
+        if (!response.ok) throw new Error('Could not load content-reference.md');
+        return response.text();
+      })
+      .then((markdown) => {
+        state.rows = parseMarkdown(markdown);
+        render();
+        loadFirestoreOverrides();
+      })
+      .catch(() => {
+        resultsLineEl.textContent = 'Content reference unavailable.';
+        contentEl.innerHTML = '<div class="error">Could not load the content reference. Open the dashboard from the simulator menu, a local server, or the hosted site instead of opening the HTML file directly.</div>';
+      });
+
+    if (window.SwitchUpFirebase) initFirebase(window.SwitchUpFirebase);
+  </script>
+</body>
+</html>

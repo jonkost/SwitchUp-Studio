@@ -3731,6 +3731,7 @@ const RUN_THE_SHOW = {
     }
 
     showWhen(dom.freeplayResetButton, true);
+    ttsStop();
     dom.quizBar.classList.remove('quiz-visible');
     dom.quizNameOverlay.classList.remove('show');
     dom.quizLevelOverlay.classList.remove('show');
@@ -6306,6 +6307,7 @@ function bindQuizDialogFocusLoop() {
   }
 
   function endLesson() {
+    ttsStop();
     clearLessonTimer();
     lessonClearHighlights();
     lessonState.active = false;
@@ -6346,6 +6348,7 @@ function bindQuizDialogFocusLoop() {
   }
 
   function _teardownLesson() {
+    ttsStop();
     clearLessonTimer();
     lessonClearHighlights();
     lessonState.active = false;

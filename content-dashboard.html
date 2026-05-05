@@ -6,20 +6,24 @@
   <title>SwitchUp Studio Content Dashboard</title>
   <style>
     :root {
-      --page: #edf1f5;
-      --ink: #15171c;
-      --muted: #616977;
+      --page: #dbe5f2;
+      --page-2: #eef4fb;
+      --ink: #101827;
+      --muted: #566276;
       --panel: #ffffff;
-      --panel-soft: #f7f9fc;
-      --line: #d9e0ea;
-      --chrome: #101116;
-      --chrome-2: #1b1d24;
-      --blue: #2563eb;
-      --green: #0f766e;
-      --purple: #7c3aed;
-      --amber: #b45309;
-      --red: #b42318;
-      --shadow: 0 14px 34px rgba(19, 24, 32, 0.12);
+      --panel-soft: #f6f9fd;
+      --line: #c3cedd;
+      --chrome: #151b26;
+      --chrome-2: #252c3a;
+      --blue: #1f8df5;
+      --blue-deep: #1168d8;
+      --green: #17a34a;
+      --green-deep: #0d7f36;
+      --purple: #7b4cf5;
+      --amber: #f4b000;
+      --red: #e73333;
+      --shadow: 0 16px 34px rgba(46, 61, 82, 0.16);
+      --button-shadow: 0 3px 0 rgba(40, 54, 74, 0.22), 0 10px 20px rgba(40, 54, 74, 0.12);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
@@ -28,7 +32,9 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: var(--page);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0) 220px),
+        var(--page);
       color: var(--ink);
     }
 
@@ -141,30 +147,42 @@
     .access-btn,
     .primary-btn,
     .ghost-btn,
+    .ghost-link-btn,
     .filter-btn,
     .copy-btn,
-    .save-btn {
+    .save-btn,
+    .dashboard-tab,
+    .section-toggle {
       min-height: 40px;
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 0 12px;
-      background: #fff;
+      background: linear-gradient(180deg, #ffffff, #f4f7fb);
       color: var(--ink);
       font-size: 13px;
       font-weight: 900;
+      box-shadow: var(--button-shadow);
     }
 
     .access-btn,
     .primary-btn {
-      background: var(--blue);
-      border-color: var(--blue);
+      background: linear-gradient(180deg, #36a3ff, var(--blue-deep));
+      border-color: #0f67d7;
       color: #fff;
     }
 
     .ghost-btn,
+    .ghost-link-btn,
     .copy-btn,
     .save-btn {
       color: var(--blue);
+    }
+
+    .ghost-link-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
     }
 
     .danger-btn {
@@ -183,7 +201,9 @@
     }
 
     .topbar {
-      background: linear-gradient(180deg, var(--chrome-2), var(--chrome));
+      background:
+        linear-gradient(90deg, rgba(30, 141, 245, 0.18), transparent 32%, rgba(231, 51, 51, 0.16)),
+        linear-gradient(180deg, var(--chrome-2), var(--chrome));
       color: #fff;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
@@ -233,6 +253,44 @@
       grid-template-columns: minmax(0, 1fr) 340px;
       gap: 18px;
       align-items: end;
+    }
+
+    .signal-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+      max-width: 720px;
+    }
+
+    .signal-box {
+      min-height: 42px;
+      border: 2px solid var(--green);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #050608;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .signal-box.program {
+      border-color: var(--red);
+    }
+
+    .signal-label {
+      min-height: 20px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      color: #fff;
+      background: linear-gradient(180deg, var(--green), var(--green-deep));
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .signal-box.program .signal-label {
+      background: linear-gradient(180deg, #ff4d4a, #9f0808);
     }
 
     h1 {
@@ -304,7 +362,8 @@
       padding: 14px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: var(--panel);
+      background: rgba(255,255,255,0.86);
+      backdrop-filter: blur(12px);
       box-shadow: var(--shadow);
     }
 
@@ -326,7 +385,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 0 14px;
-      background: #fff;
+      background: linear-gradient(180deg, #ffffff, #f4f7fb);
       color: var(--ink);
       font-size: 13px;
       font-weight: 950;
@@ -334,8 +393,8 @@
 
     .dashboard-tab[aria-pressed="true"] {
       color: #fff;
-      background: var(--chrome);
-      border-color: var(--chrome);
+      background: linear-gradient(180deg, #36a3ff, var(--blue-deep));
+      border-color: #0f67d7;
     }
 
     .search-wrap {
@@ -372,8 +431,8 @@
     }
 
     .filter-btn[aria-pressed="true"] {
-      border-color: var(--chrome);
-      background: var(--chrome);
+      border-color: #0f67d7;
+      background: linear-gradient(180deg, #36a3ff, var(--blue-deep));
       color: #fff;
     }
 
@@ -385,7 +444,7 @@
       padding: 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: var(--panel-soft);
+      background: linear-gradient(180deg, #f7fbff, #edf3fb);
     }
 
     .auth-status-title {
@@ -420,7 +479,8 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 14px;
-      background: var(--panel);
+      background: linear-gradient(180deg, #ffffff, #f7faff);
+      box-shadow: 0 8px 20px rgba(46, 61, 82, 0.08);
     }
 
     .stat-value {
@@ -451,7 +511,16 @@
       border-radius: 8px;
       background: var(--panel);
       overflow: hidden;
+      box-shadow: 0 10px 24px rgba(46, 61, 82, 0.1);
     }
+
+    .section[open] {
+      border-color: #9db1ca;
+    }
+
+    .section.lesson { border-left: 5px solid var(--green); }
+    .section.quiz { border-left: 5px solid var(--purple); }
+    .section.rts { border-left: 5px solid var(--amber); }
 
     .section-head {
       display: flex;
@@ -460,18 +529,52 @@
       align-items: center;
       padding: 14px 16px;
       border-bottom: 1px solid var(--line);
-      background: #f7f9fc;
+      background: linear-gradient(180deg, #ffffff, #eef4fb);
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .section-head::-webkit-details-marker {
+      display: none;
     }
 
     .section-title {
+      display: flex;
+      gap: 10px;
+      align-items: center;
       font-size: 17px;
       font-weight: 950;
+    }
+
+    .section-caret {
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #e9f0f8);
+      border: 1px solid var(--line);
+      color: var(--blue-deep);
+      font-weight: 950;
+      transition: transform 0.16s ease;
+    }
+
+    .section[open] .section-caret {
+      transform: rotate(90deg);
     }
 
     .section-count {
       color: var(--muted);
       font-size: 12px;
       font-weight: 900;
+    }
+
+    .section-body {
+      border-top: 1px solid var(--line);
+    }
+
+    .section:not([open]) .section-head {
+      border-bottom: none;
     }
 
     .item {
@@ -720,6 +823,10 @@
         display: none;
       }
 
+      .signal-strip {
+        grid-template-columns: 1fr;
+      }
+
       .filters,
       .auth-actions,
       .nav-actions {
@@ -757,7 +864,7 @@
   <div class="access-screen" role="dialog" aria-modal="true" aria-labelledby="access-title">
     <form class="access-card" id="access-form">
       <div class="access-card-top">
-        <div class="brand-line"><span class="brand-mark"></span> SwitchUp Studio</div>
+        <div class="brand-line">SwitchUp Studio</div>
         <div class="access-title" id="access-title">Dashboard Access</div>
         <div class="access-copy">Enter the admin code to review and edit lesson copy, quiz prompts, and Run the Show text.</div>
       </div>
@@ -773,17 +880,14 @@
   <div class="app-shell">
     <header class="topbar">
       <div class="topbar-inner">
-        <div class="nav-row">
-          <div class="brand-line"><span class="brand-mark"></span> SwitchUp Studio</div>
-          <div class="nav-actions">
-            <a class="nav-link" href="index.html">Open Simulator</a>
-            <a class="nav-link" href="docs/content-reference.md">Reference Doc</a>
-          </div>
-        </div>
         <div class="hero-row">
           <div>
             <h1>Content Dashboard</h1>
             <div class="hero-copy">A clean control room for every lesson line, hint, quiz prompt, and Run the Show step. Search by reference ID, make edits, then save the exact text the simulator should use.</div>
+            <div class="signal-strip" aria-hidden="true">
+              <div class="signal-box preview"><div class="signal-label">Preview</div></div>
+              <div class="signal-box program"><div class="signal-label">Program</div></div>
+            </div>
           </div>
           <div class="workflow-card" aria-label="Dashboard workflow">
             <div class="workflow-title">Recommended Flow</div>
@@ -837,6 +941,7 @@
   <script type="module" src="firebase-client.js?v=1"></script>
   <script>
     const ADMIN_DASHBOARD_CODE = 'SWITCHUP';
+    const FORMSPREE_SUBMISSIONS_URL = 'https://formspree.io/forms/xdawpdkp/submissions';
     const CONTENT_COLLECTIONS = {
       lesson: 'content_lessons',
       quiz: 'content_quiz_bank',
@@ -1008,6 +1113,17 @@
       });
     }
 
+    function signInWithGoogleFromDashboard() {
+      if (state.firebase) state.firebase.signInWithGoogle();
+      else authStatusEl.textContent = 'Firebase is still loading. Try again in a moment.';
+    }
+
+    function bindSignInCtas() {
+      contentEl.querySelectorAll('[data-sign-in-cta]').forEach((button) => {
+        button.addEventListener('click', signInWithGoogleFromDashboard);
+      });
+    }
+
     function updateAuthStatus() {
       if (!state.firebase) {
         authTitleEl.textContent = 'Firestore Editing';
@@ -1140,7 +1256,16 @@
       renderStats(state.rows);
       resultsLineEl.textContent = 'Manage dashboard access with Google sign-in and one-time admin codes.';
       if (!state.user) {
-        contentEl.innerHTML = '<div class="empty">Sign in with Google to manage admin access.</div>';
+        contentEl.innerHTML = `
+          <div class="admin-grid">
+            <article class="admin-card">
+              <h2>Google Sign-In Required</h2>
+              <p>Use Google sign-in so Firebase knows which person is editing the dashboard. After you sign in, your super admin account can create admin codes for other people.</p>
+              <button class="primary-btn" data-sign-in-cta type="button">Sign In with Google</button>
+            </article>
+          </div>
+        `;
+        bindSignInCtas();
         return;
       }
 
@@ -1229,15 +1354,35 @@
     function renderGradesView() {
       renderStats(state.rows);
       resultsLineEl.textContent = isAdmin()
-        ? `Showing ${state.grades.length} recent student submission${state.grades.length === 1 ? '' : 's'}.`
-        : 'Student grades are available to admins only.';
+        ? `Showing ${state.grades.length} Firestore grade mirror item${state.grades.length === 1 ? '' : 's'}.`
+        : 'Grades currently live in Formspree. The dashboard can also show new results after Firestore mirroring is active.';
 
       if (!state.user) {
-        contentEl.innerHTML = '<div class="empty">Sign in with Google to view student grades.</div>';
+        contentEl.innerHTML = `
+          <div class="admin-grid">
+            <article class="admin-card">
+              <h2>Student Grades</h2>
+              <p>Right now your existing student results are in Formspree. This dashboard can show new results once they are mirrored into Firestore, but it will not pull old Formspree inbox items directly from a public GitHub page.</p>
+              <div class="form-row">
+                <button class="primary-btn" data-sign-in-cta type="button">Sign In with Google</button>
+                <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Open Formspree Results</a>
+              </div>
+            </article>
+          </div>
+        `;
+        bindSignInCtas();
         return;
       }
       if (!isAdmin()) {
-        contentEl.innerHTML = '<div class="empty">Redeem an admin code before viewing student grades.</div>';
+        contentEl.innerHTML = `
+          <div class="admin-grid">
+            <article class="admin-card">
+              <h2>Admin Access Needed</h2>
+              <p>You are signed in, but this Google account is not an admin yet. Redeem an admin code in Admin Accounts to view the Firestore grade mirror.</p>
+              <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Open Formspree Results</a>
+            </article>
+          </div>
+        `;
         return;
       }
       if (!state.grades.length) {
@@ -1245,8 +1390,11 @@
           <div class="admin-grid">
             <article class="admin-card">
               <h2>Student Grades</h2>
-              <p>No Firestore quiz submissions are available yet. New non-practice quiz results will appear here after students finish.</p>
-              <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh Grades</button>
+              <p>No Firestore grade mirror items are available yet. Existing results remain in Formspree. New non-practice quiz results will appear here after Firestore rules are deployed and students finish a quiz.</p>
+              <div class="form-row">
+                <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh Grades</button>
+                <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Open Formspree Results</a>
+              </div>
             </article>
           </div>
         `;
@@ -1255,8 +1403,11 @@
           <div class="grades-grid">
             <article class="admin-card">
               <h2>Student Grades</h2>
-              <p>These results are saved from the simulator into Firestore. Formspree can still receive the email copy.</p>
-              <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh Grades</button>
+              <p>These are the Firestore copies of quiz results. Formspree is still the inbox for existing submissions and email delivery.</p>
+              <div class="form-row">
+                <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh Grades</button>
+                <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Open Formspree Results</a>
+              </div>
             </article>
             ${state.grades.map((grade) => {
               const passed = /PASS|^\d+\s*\/\s*\d+/.test(grade.score || '') && !/NEEDS REVIEW/i.test(grade.score || '');
@@ -1347,31 +1498,33 @@
       });
 
       contentEl.innerHTML = Array.from(bySection.entries()).map(([section, items]) => `
-        <section class="section">
-          <div class="section-head">
-            <div class="section-title">${escapeHtml(section)}</div>
+        <details class="section ${items[0] ? items[0].group : ''}" ${state.query ? 'open' : ''}>
+          <summary class="section-head">
+            <div class="section-title"><span class="section-caret">›</span>${escapeHtml(section)}</div>
             <div class="section-count">${items.length} item${items.length === 1 ? '' : 's'}</div>
-          </div>
-          ${items.map((item) => `
-            <article class="item ${item.group}">
-              <div class="item-meta">
-                <code>${escapeHtml(item.refId)}</code>
-                <div class="type-row">
-                  <div class="type">${escapeHtml(item.type)}</div>
-                  <div class="source-pill ${item.source === 'firestore' ? 'firestore' : ''}">${item.source === 'firestore' ? 'Firestore' : 'Reference'}</div>
+          </summary>
+          <div class="section-body">
+            ${items.map((item) => `
+              <article class="item ${item.group}">
+                <div class="item-meta">
+                  <code>${escapeHtml(item.refId)}</code>
+                  <div class="type-row">
+                    <div class="type">${escapeHtml(item.type)}</div>
+                    <div class="source-pill ${item.source === 'firestore' ? 'firestore' : ''}">${item.source === 'firestore' ? 'Firestore' : 'Reference'}</div>
+                  </div>
                 </div>
-              </div>
-              <label>
-                <div class="edit-label">Editable Text</div>
-                <textarea class="text-edit" data-edit="${escapeHtml(item.refId)}">${escapeHtml(item.text)}</textarea>
-              </label>
-              <div class="row-actions">
-                <button class="copy-btn" data-copy="${escapeHtml(item.refId)}" type="button">Copy ID</button>
-                <button class="save-btn" data-save="${escapeHtml(item.refId)}" type="button" ${isAdmin() ? '' : 'disabled'}>Save Row</button>
-              </div>
-            </article>
-          `).join('')}
-        </section>
+                <label>
+                  <div class="edit-label">Editable Text</div>
+                  <textarea class="text-edit" data-edit="${escapeHtml(item.refId)}">${escapeHtml(item.text)}</textarea>
+                </label>
+                <div class="row-actions">
+                  <button class="copy-btn" data-copy="${escapeHtml(item.refId)}" type="button">Copy ID</button>
+                  <button class="save-btn" data-save="${escapeHtml(item.refId)}" type="button" ${isAdmin() ? '' : 'disabled'}>Save Row</button>
+                </div>
+              </article>
+            `).join('')}
+          </div>
+        </details>
       `).join('');
 
       contentEl.querySelectorAll('[data-edit]').forEach((field) => {
@@ -1433,7 +1586,7 @@
     });
 
     signInBtn.addEventListener('click', () => {
-      if (state.firebase) state.firebase.signInWithGoogle();
+      signInWithGoogleFromDashboard();
     });
 
     signOutBtn.addEventListener('click', () => {

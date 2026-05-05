@@ -13,8 +13,12 @@ import {
   getDoc,
   getDocs,
   getFirestore,
+  limit,
+  orderBy,
+  query,
   serverTimestamp,
   setDoc,
+  updateDoc,
 } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 import { getDownloadURL, getStorage, ref } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js';
 
@@ -37,6 +41,18 @@ const googleProvider = new GoogleAuthProvider();
 const analyticsPromise = analyticsIsSupported()
   .then((supported) => (supported ? getAnalytics(app) : null))
   .catch(() => null);
+
+function currentUser() {
+  return auth.currentUser;
+}
+
+async function sha256(value) {
+  const bytes = new TextEncoder().encode(String(value || '').trim().toUpperCase());
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 async function getContentItem(collectionName, referenceId) {
   if (!collectionName || !referenceId) return null;
@@ -82,6 +98,90 @@ async function saveContentItems(items) {
   return results;
 }
 
+async function getAdminProfile(uid) {
+  if (!uid) return null;
+  const snapshot = await getDoc(doc(db, 'admins', uid));
+  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+}
+
+async function createAdminInvite(code) {
+  const user = currentUser();
+  if (!user) throw new Error('Sign in before creating an invite code.');
+  const trimmedCode = String(code || '').trim();
+  if (trimmedCode.length < 6) throw new Error('Use at least 6 characters for an admin code.');
+  const inviteHash = await sha256(trimmedCode);
+  const payload = {
+    inviteHash,
+    role: 'admin',
+    active: true,
+    createdBy: user.uid,
+    createdByEmail: user.email || '',
+    createdAt: serverTimestamp(),
+    usedBy: '',
+    usedByEmail: '',
+  };
+  await setDoc(doc(db, 'admin_invites', inviteHash), payload, { merge: true });
+  return payload;
+}
+
+async function redeemAdminInvite(code) {
+  const user = currentUser();
+  if (!user) throw new Error('Sign in before redeeming an admin code.');
+  const inviteHash = await sha256(code);
+  const inviteRef = doc(db, 'admin_invites', inviteHash);
+  const inviteSnapshot = await getDoc(inviteRef);
+  if (!inviteSnapshot.exists()) throw new Error('That admin code was not found.');
+  const invite = inviteSnapshot.data();
+  if (!invite.active || invite.usedBy) throw new Error('That admin code has already been used.');
+  const adminPayload = {
+    uid: user.uid,
+    email: user.email || '',
+    displayName: user.displayName || '',
+    role: 'admin',
+    inviteHash,
+    invitedBy: invite.createdBy || '',
+    createdAt: serverTimestamp(),
+  };
+  await setDoc(doc(db, 'admins', user.uid), adminPayload, { merge: true });
+  await updateDoc(inviteRef, {
+    active: false,
+    usedBy: user.uid,
+    usedByEmail: user.email || '',
+    usedAt: serverTimestamp(),
+  });
+  return adminPayload;
+}
+
+async function getAdminInvites() {
+  const snapshot = await getDocs(collection(db, 'admin_invites'));
+  return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+}
+
+async function getAdmins() {
+  const snapshot = await getDocs(collection(db, 'admins'));
+  return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+}
+
+async function saveQuizSubmission(summary) {
+  if (!summary || !summary.confirmation_code) throw new Error('Quiz submission needs a confirmation code.');
+  const payload = {
+    ...summary,
+    createdAt: serverTimestamp(),
+  };
+  await setDoc(doc(db, 'quiz_submissions', summary.confirmation_code), payload, { merge: true });
+  return payload;
+}
+
+async function getQuizSubmissions(maxCount = 100) {
+  const submissionQuery = query(
+    collection(db, 'quiz_submissions'),
+    orderBy('createdAt', 'desc'),
+    limit(maxCount)
+  );
+  const snapshot = await getDocs(submissionQuery);
+  return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+}
+
 async function getNarration(referenceId, voice, rate, textHash) {
   const pieces = [referenceId, voice, rate, textHash].filter(Boolean);
   if (!pieces.length) return null;
@@ -114,6 +214,13 @@ window.SwitchUpFirebase = {
   getContentCollection,
   saveContentItem,
   saveContentItems,
+  getAdminProfile,
+  createAdminInvite,
+  redeemAdminInvite,
+  getAdminInvites,
+  getAdmins,
+  saveQuizSubmission,
+  getQuizSubmissions,
   getNarration,
   onAuthStateChanged: (callback) => onAuthStateChanged(auth, callback),
   signInWithGoogle,

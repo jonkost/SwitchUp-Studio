@@ -84,7 +84,29 @@ Deploy with:
 firebase deploy --only firestore:rules
 ```
 
-Before using an admin editor, create an `admins/{uid}` document for your Firebase Auth user.
+Before using the admin editor, create one `admins/{uid}` document for your own Firebase Auth user. This first account is the super admin.
+
+Example document:
+
+```text
+Collection: admins
+Document ID: your Firebase Auth UID
+
+uid: your Firebase Auth UID
+email: your email address
+role: super_admin
+createdAt: 2026-05-05T00:00:00Z
+```
+
+After that, sign into the dashboard with Google and open **Admin Accounts**. The super admin can create one-time admin codes for other instructors. The dashboard stores those codes as SHA-256 hashes in `admin_invites`, so the original code is not shown again after creation.
+
+Suggested additional collections:
+
+```text
+admins/{uid}
+admin_invites/{codeHash}
+quiz_submissions/{confirmationCode}
+```
 
 ## 6. Storage Rules
 
@@ -150,3 +172,13 @@ Recommended first pass:
 5. Add static Kokoro audio lookup by reference ID.
 6. Keep browser speech as fallback.
 7. Add admin editing screen after content loading is stable.
+
+## 10. Student Grades
+
+The simulator still sends non-practice quiz results to Formspree, but it also writes the same result payload to Firestore:
+
+```text
+quiz_submissions/{confirmationCode}
+```
+
+The dashboard **Student Grades** tab reads that collection for signed-in admins. This avoids putting a private Formspree API token into GitHub Pages. If you later want true Formspree inbox sync, use a small server-side function or scheduled job so the Formspree API token stays private.

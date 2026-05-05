@@ -167,6 +167,10 @@
       color: var(--blue);
     }
 
+    .danger-btn {
+      color: var(--red);
+    }
+
     .access-error {
       min-height: 18px;
       color: var(--red);
@@ -309,6 +313,29 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
       align-items: center;
+    }
+
+    .dashboard-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .dashboard-tab {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 14px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .dashboard-tab[aria-pressed="true"] {
+      color: #fff;
+      background: var(--chrome);
+      border-color: var(--chrome);
     }
 
     .search-wrap {
@@ -558,6 +585,124 @@
       line-height: 1.45;
     }
 
+    .admin-grid,
+    .grades-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .admin-card,
+    .grade-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: var(--panel);
+      box-shadow: 0 10px 24px rgba(19, 24, 32, 0.08);
+    }
+
+    .admin-card h2,
+    .grade-card h2 {
+      margin: 0 0 8px;
+      font-size: 21px;
+      letter-spacing: 0;
+    }
+
+    .admin-card p,
+    .grade-card p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .form-row input {
+      flex: 1 1 260px;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: #fff;
+      font-weight: 800;
+    }
+
+    .status-note {
+      margin-top: 10px;
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .mini-table {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .mini-row {
+      display: grid;
+      grid-template-columns: minmax(160px, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: var(--panel-soft);
+    }
+
+    .mini-main {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .mini-title {
+      overflow-wrap: anywhere;
+      font-weight: 950;
+    }
+
+    .mini-copy {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .role-pill,
+    .grade-pill {
+      justify-self: end;
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: #e0efff;
+      color: #1d4ed8;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .role-pill.super {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .grade-pill.pass {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .grade-pill.review {
+      background: #ffedd5;
+      color: #9a3412;
+    }
+
     .error a {
       color: var(--blue);
       font-weight: 900;
@@ -654,6 +799,11 @@
 
     <main>
       <section class="control-panel" aria-label="Dashboard controls">
+        <div class="dashboard-tabs" aria-label="Dashboard sections">
+          <button class="dashboard-tab" data-view="content" type="button" aria-pressed="true">Content</button>
+          <button class="dashboard-tab" data-view="grades" type="button" aria-pressed="false">Student Grades</button>
+          <button class="dashboard-tab" data-view="admins" type="button" aria-pressed="false">Admin Accounts</button>
+        </div>
         <div class="toolbar">
           <div class="search-wrap">
             <input id="search" type="search" placeholder="Type a reference ID, lesson name, or exact text..." autocomplete="off">
@@ -699,7 +849,12 @@
       query: '',
       firebase: null,
       user: null,
+      adminProfile: null,
+      admins: [],
+      adminInvites: [],
+      grades: [],
       loadedFirestore: false,
+      activeView: 'content',
     };
 
     const statsEl = document.getElementById('stats');
@@ -831,6 +986,20 @@
       resultsLineEl.textContent = `Showing ${count} ${label} from ${filterLabel}.`;
     }
 
+    function isAdmin() {
+      return !!(state.adminProfile && (state.adminProfile.role === 'admin' || state.adminProfile.role === 'super_admin'));
+    }
+
+    function isSuperAdmin() {
+      return !!(state.adminProfile && state.adminProfile.role === 'super_admin');
+    }
+
+    function roleLabel() {
+      if (!state.user) return 'signed out';
+      if (!state.adminProfile) return 'viewer';
+      return state.adminProfile.role === 'super_admin' ? 'super admin' : 'admin';
+    }
+
     function copyId(refId, button) {
       navigator.clipboard.writeText(refId).then(() => {
         const old = button.textContent;
@@ -848,17 +1017,19 @@
       }
       if (!state.user) {
         authTitleEl.textContent = 'Signed Out';
-        authStatusEl.textContent = 'Sign in to save text. Your UID must also be added to the Firestore admins collection.';
+        authStatusEl.textContent = 'Sign in to save text, manage admin access, and view student grades.';
         signInBtn.hidden = false;
         signOutBtn.hidden = true;
         saveAllBtn.disabled = true;
         return;
       }
-      authTitleEl.textContent = 'Signed In';
-      authStatusEl.textContent = `Signed in as ${state.user.email || state.user.uid}. Admin UID: ${state.user.uid}`;
+      authTitleEl.textContent = isAdmin() ? `Signed In as ${roleLabel()}` : 'Signed In as Viewer';
+      authStatusEl.textContent = isAdmin()
+        ? `${state.user.email || state.user.uid}. UID: ${state.user.uid}`
+        : `Signed in as ${state.user.email || state.user.uid}. Redeem an admin code to save content or view grades.`;
       signInBtn.hidden = true;
       signOutBtn.hidden = false;
-      saveAllBtn.disabled = false;
+      saveAllBtn.disabled = !isAdmin();
     }
 
     function contentPayload(row) {
@@ -874,7 +1045,7 @@
 
     async function saveRow(refId, button) {
       const row = getRowByRef(refId);
-      if (!row || !state.firebase) return;
+      if (!row || !state.firebase || !isAdmin()) return;
       const old = button.textContent;
       button.textContent = 'Saving';
       button.disabled = true;
@@ -886,7 +1057,7 @@
       } catch (error) {
         button.textContent = 'Blocked';
         authTitleEl.textContent = 'Save Blocked';
-        authStatusEl.textContent = `Add your UID to Firestore admins, then try again: ${state.user ? state.user.uid : 'not signed in'}`;
+        authStatusEl.textContent = 'This Google account is not an admin yet. Redeem an admin code or use the super admin account.';
       } finally {
         button.disabled = false;
         setTimeout(() => { button.textContent = old; }, 1200);
@@ -895,7 +1066,7 @@
 
     async function saveVisibleRows() {
       const rows = getVisibleRows();
-      if (!rows.length || !state.firebase || !state.user) return;
+      if (!rows.length || !state.firebase || !isAdmin()) return;
       const old = saveAllBtn.textContent;
       saveAllBtn.textContent = 'Saving';
       saveAllBtn.disabled = true;
@@ -907,7 +1078,7 @@
       } catch (error) {
         saveAllBtn.textContent = 'Blocked';
         authTitleEl.textContent = 'Save Blocked';
-        authStatusEl.textContent = `Add your UID to Firestore admins, then try again: ${state.user ? state.user.uid : 'not signed in'}`;
+        authStatusEl.textContent = 'This Google account is not an admin yet. Redeem an admin code or use the super admin account.';
       } finally {
         updateAuthStatus();
         setTimeout(() => { saveAllBtn.textContent = old; }, 1400);
@@ -933,7 +1104,234 @@
       }
     }
 
+    async function refreshAdminData() {
+      if (!state.firebase || !isAdmin()) return;
+      try {
+        const loaders = [state.firebase.getAdmins()];
+        if (isSuperAdmin()) loaders.push(state.firebase.getAdminInvites());
+        const [admins, invites = []] = await Promise.all(loaders);
+        state.admins = admins;
+        state.adminInvites = invites;
+      } catch (error) {
+        state.admins = [];
+        state.adminInvites = [];
+      }
+    }
+
+    async function refreshGrades() {
+      if (!state.firebase || !isAdmin()) return;
+      try {
+        state.grades = await state.firebase.getQuizSubmissions(100);
+      } catch (error) {
+        state.grades = [];
+        resultsLineEl.textContent = 'Student grades could not load. Check Firestore rules and indexes.';
+      }
+    }
+
+    function formatFirestoreDate(value) {
+      if (!value) return 'No date';
+      if (typeof value.toDate === 'function') return value.toDate().toLocaleString();
+      if (typeof value === 'string') return value;
+      if (value.seconds) return new Date(value.seconds * 1000).toLocaleString();
+      return 'No date';
+    }
+
+    function renderAdminView() {
+      renderStats(state.rows);
+      resultsLineEl.textContent = 'Manage dashboard access with Google sign-in and one-time admin codes.';
+      if (!state.user) {
+        contentEl.innerHTML = '<div class="empty">Sign in with Google to manage admin access.</div>';
+        return;
+      }
+
+      const superTools = isSuperAdmin() ? `
+        <article class="admin-card">
+          <h2>Create Admin Code</h2>
+          <p>Create a one-time code for someone you want to make an admin. Give them the code, then they sign in and redeem it here.</p>
+          <div class="form-row">
+            <input id="new-admin-code" type="text" placeholder="Example: SWITCHUP-TEACHER-01" autocomplete="off">
+            <button class="primary-btn" id="create-admin-code-btn" type="button">Create Code</button>
+          </div>
+          <div class="status-note" id="create-admin-code-status"></div>
+        </article>
+      ` : '';
+
+      const redeemTools = !isAdmin() ? `
+        <article class="admin-card">
+          <h2>Redeem Admin Code</h2>
+          <p>Enter the code from the super admin to unlock dashboard editing and student grades for this Google account.</p>
+          <div class="form-row">
+            <input id="redeem-admin-code" type="password" placeholder="Admin code" autocomplete="one-time-code">
+            <button class="primary-btn" id="redeem-admin-code-btn" type="button">Redeem Code</button>
+          </div>
+          <div class="status-note" id="redeem-admin-code-status"></div>
+        </article>
+      ` : '';
+
+      const adminRows = state.admins.length ? state.admins.map((admin) => `
+        <div class="mini-row">
+          <div class="mini-main">
+            <div class="mini-title">${escapeHtml(admin.email || admin.uid || admin.id)}</div>
+            <div class="mini-copy">${escapeHtml(admin.uid || admin.id)}${admin.createdAt ? ` • ${escapeHtml(formatFirestoreDate(admin.createdAt))}` : ''}</div>
+          </div>
+          <div class="role-pill ${admin.role === 'super_admin' ? 'super' : ''}">${escapeHtml(admin.role || 'admin')}</div>
+        </div>
+      `).join('') : '<div class="empty">No admin list available yet.</div>';
+
+      const inviteRows = isSuperAdmin() && state.adminInvites.length ? state.adminInvites.map((invite) => `
+        <div class="mini-row">
+          <div class="mini-main">
+            <div class="mini-title">${escapeHtml(invite.usedByEmail || invite.createdByEmail || invite.id)}</div>
+            <div class="mini-copy">${escapeHtml(invite.id)} • ${escapeHtml(formatFirestoreDate(invite.createdAt))}</div>
+          </div>
+          <div class="role-pill">${invite.active && !invite.usedBy ? 'open' : 'used'}</div>
+        </div>
+      `).join('') : '';
+
+      contentEl.innerHTML = `
+        <div class="admin-grid">
+          <article class="admin-card">
+            <h2>Your Access</h2>
+            <p>${escapeHtml(state.user.email || state.user.uid)}</p>
+            <div class="mini-row">
+              <div class="mini-main">
+                <div class="mini-title">${escapeHtml(roleLabel())}</div>
+                <div class="mini-copy">UID: ${escapeHtml(state.user.uid)}</div>
+              </div>
+              <div class="role-pill ${isSuperAdmin() ? 'super' : ''}">${escapeHtml(roleLabel())}</div>
+            </div>
+          </article>
+          ${redeemTools}
+          ${superTools}
+          ${isAdmin() ? `
+            <article class="admin-card">
+              <h2>Admin Accounts</h2>
+              <p>Accounts that can edit content and view student grades.</p>
+              <div class="mini-table">${adminRows}</div>
+            </article>
+          ` : ''}
+          ${isSuperAdmin() ? `
+            <article class="admin-card">
+              <h2>Invite Codes</h2>
+              <p>Codes are stored as hashes, so the dashboard can verify them without showing the original code later.</p>
+              <div class="mini-table">${inviteRows || '<div class="empty">No invite codes created yet.</div>'}</div>
+            </article>
+          ` : ''}
+        </div>
+      `;
+
+      const createBtn = document.getElementById('create-admin-code-btn');
+      if (createBtn) createBtn.addEventListener('click', createAdminCodeFromDashboard);
+      const redeemBtn = document.getElementById('redeem-admin-code-btn');
+      if (redeemBtn) redeemBtn.addEventListener('click', redeemAdminCodeFromDashboard);
+    }
+
+    function renderGradesView() {
+      renderStats(state.rows);
+      resultsLineEl.textContent = isAdmin()
+        ? `Showing ${state.grades.length} recent student submission${state.grades.length === 1 ? '' : 's'}.`
+        : 'Student grades are available to admins only.';
+
+      if (!state.user) {
+        contentEl.innerHTML = '<div class="empty">Sign in with Google to view student grades.</div>';
+        return;
+      }
+      if (!isAdmin()) {
+        contentEl.innerHTML = '<div class="empty">Redeem an admin code before viewing student grades.</div>';
+        return;
+      }
+      if (!state.grades.length) {
+        contentEl.innerHTML = `
+          <div class="admin-grid">
+            <article class="admin-card">
+              <h2>Student Grades</h2>
+              <p>No Firestore quiz submissions are available yet. New non-practice quiz results will appear here after students finish.</p>
+              <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh Grades</button>
+            </article>
+          </div>
+        `;
+      } else {
+        contentEl.innerHTML = `
+          <div class="grades-grid">
+            <article class="admin-card">
+              <h2>Student Grades</h2>
+              <p>These results are saved from the simulator into Firestore. Formspree can still receive the email copy.</p>
+              <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh Grades</button>
+            </article>
+            ${state.grades.map((grade) => {
+              const passed = /PASS|^\d+\s*\/\s*\d+/.test(grade.score || '') && !/NEEDS REVIEW/i.test(grade.score || '');
+              return `
+                <article class="grade-card">
+                  <div class="mini-row">
+                    <div class="mini-main">
+                      <div class="mini-title">${escapeHtml(grade.student_name || 'Unnamed student')}</div>
+                      <div class="mini-copy">${escapeHtml(grade.class_name || 'No class')} • ${escapeHtml(grade.quiz_level || 'Quiz')} • ${escapeHtml(formatFirestoreDate(grade.createdAt || grade.date))}</div>
+                    </div>
+                    <div class="grade-pill ${passed ? 'pass' : 'review'}">${escapeHtml(grade.score || 'Score')}</div>
+                  </div>
+                  <p style="margin-top:12px;">Confirmation: <strong>${escapeHtml(grade.confirmation_code || grade.id)}</strong></p>
+                  <textarea class="text-edit" readonly>${escapeHtml(grade.breakdown || '')}</textarea>
+                </article>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      const refreshBtn = document.getElementById('refresh-grades-btn');
+      if (refreshBtn) refreshBtn.addEventListener('click', async () => {
+        refreshBtn.textContent = 'Refreshing';
+        await refreshGrades();
+        render();
+      });
+    }
+
+    async function createAdminCodeFromDashboard() {
+      const input = document.getElementById('new-admin-code');
+      const status = document.getElementById('create-admin-code-status');
+      if (!input || !status || !state.firebase) return;
+      status.textContent = 'Creating code...';
+      try {
+        await state.firebase.createAdminInvite(input.value);
+        status.textContent = 'Admin code created. Give that exact code to the new admin.';
+        input.value = '';
+        await refreshAdminData();
+        render();
+      } catch (error) {
+        status.textContent = error.message || 'Could not create that admin code.';
+      }
+    }
+
+    async function redeemAdminCodeFromDashboard() {
+      const input = document.getElementById('redeem-admin-code');
+      const status = document.getElementById('redeem-admin-code-status');
+      if (!input || !status || !state.firebase) return;
+      status.textContent = 'Checking code...';
+      try {
+        state.adminProfile = await state.firebase.redeemAdminInvite(input.value);
+        status.textContent = 'Admin access added.';
+        await refreshAdminData();
+        updateAuthStatus();
+        render();
+      } catch (error) {
+        status.textContent = error.message || 'That code did not work.';
+      }
+    }
+
     function render() {
+      document.querySelectorAll('[data-view]').forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.view === state.activeView));
+      });
+
+      if (state.activeView === 'admins') {
+        renderAdminView();
+        return;
+      }
+      if (state.activeView === 'grades') {
+        renderGradesView();
+        return;
+      }
+
       renderStats(state.rows);
       const rows = getVisibleRows();
       updateResultsLine(rows.length);
@@ -969,7 +1367,7 @@
               </label>
               <div class="row-actions">
                 <button class="copy-btn" data-copy="${escapeHtml(item.refId)}" type="button">Copy ID</button>
-                <button class="save-btn" data-save="${escapeHtml(item.refId)}" type="button" ${state.user ? '' : 'disabled'}>Save Row</button>
+                <button class="save-btn" data-save="${escapeHtml(item.refId)}" type="button" ${isAdmin() ? '' : 'disabled'}>Save Row</button>
               </div>
             </article>
           `).join('')}
@@ -995,12 +1393,29 @@
       state.firebase = firebaseApi;
       updateAuthStatus();
       loadFirestoreOverrides();
-      state.firebase.onAuthStateChanged((user) => {
+      state.firebase.onAuthStateChanged(async (user) => {
         state.user = user;
+        state.adminProfile = user ? await state.firebase.getAdminProfile(user.uid) : null;
+        if (isAdmin()) {
+          await Promise.all([refreshAdminData(), refreshGrades()]);
+        } else {
+          state.admins = [];
+          state.adminInvites = [];
+          state.grades = [];
+        }
         updateAuthStatus();
         render();
       });
     }
+
+    document.querySelectorAll('[data-view]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        state.activeView = button.dataset.view;
+        if (state.activeView === 'grades') await refreshGrades();
+        if (state.activeView === 'admins') await refreshAdminData();
+        render();
+      });
+    });
 
     document.querySelectorAll('[data-filter]').forEach((button) => {
       button.addEventListener('click', () => {

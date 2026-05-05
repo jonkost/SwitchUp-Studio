@@ -3992,6 +3992,13 @@ const RUN_THE_SHOW = {
       breakdown: summary.breakdownText,
     };
 
+    if (window.SwitchUpFirebase && typeof window.SwitchUpFirebase.saveQuizSubmission === 'function') {
+      window.SwitchUpFirebase.saveQuizSubmission(formData)
+        .catch((error) => {
+          console.error('Firestore quiz submission failed:', error);
+        });
+    }
+
     fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',
       headers: {

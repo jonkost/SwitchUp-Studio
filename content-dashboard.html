@@ -6,24 +6,24 @@
   <title>SwitchUp Studio Content Dashboard</title>
   <style>
     :root {
-      --page: #dbe5f2;
-      --page-2: #eef4fb;
-      --ink: #101827;
-      --muted: #566276;
-      --panel: #ffffff;
-      --panel-soft: #f6f9fd;
-      --line: #c3cedd;
-      --chrome: #151b26;
-      --chrome-2: #252c3a;
-      --blue: #1f8df5;
-      --blue-deep: #1168d8;
-      --green: #17a34a;
-      --green-deep: #0d7f36;
-      --purple: #7b4cf5;
-      --amber: #f4b000;
-      --red: #e73333;
-      --shadow: 0 16px 34px rgba(46, 61, 82, 0.16);
-      --button-shadow: 0 3px 0 rgba(40, 54, 74, 0.22), 0 10px 20px rgba(40, 54, 74, 0.12);
+      --page: #0a0a0c;
+      --page-2: #101116;
+      --ink: #f2f2f6;
+      --muted: #9a9da8;
+      --panel: #15161d;
+      --panel-soft: #101116;
+      --line: #31323c;
+      --chrome: #0d0e13;
+      --chrome-2: #191a22;
+      --blue: #6aa9ff;
+      --blue-deep: #1f65d6;
+      --green: #24b36b;
+      --green-deep: #128047;
+      --purple: #a891ff;
+      --amber: #f4b63f;
+      --red: #ef4a4a;
+      --shadow: 0 16px 38px rgba(0, 0, 0, 0.34);
+      --button-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 8px 18px rgba(0, 0, 0, 0.22);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
@@ -33,13 +33,9 @@
       margin: 0;
       min-height: 100vh;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.42), rgba(255,255,255,0) 220px),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 260px),
         var(--page);
       color: var(--ink);
-    }
-
-    body.locked {
-      overflow: hidden;
     }
 
     button,
@@ -52,99 +48,6 @@
       cursor: pointer;
     }
 
-    .access-screen {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      display: none;
-      place-items: center;
-      padding: 22px;
-      background:
-        linear-gradient(180deg, rgba(16, 17, 22, 0.92), rgba(16, 17, 22, 0.84)),
-        radial-gradient(circle at 30% 10%, rgba(37, 99, 235, 0.28), transparent 34%),
-        #101116;
-    }
-
-    body.locked .access-screen {
-      display: grid;
-    }
-
-    .access-card {
-      width: min(440px, 100%);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      background: #ffffff;
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
-      overflow: hidden;
-    }
-
-    .access-card-top {
-      padding: 18px 20px;
-      background: linear-gradient(180deg, #1c1f27, #101116);
-      color: #fff;
-    }
-
-    .brand-line {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    .brand-mark {
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
-      background:
-        linear-gradient(135deg, #33d6a6 0 38%, transparent 38%),
-        linear-gradient(135deg, transparent 0 42%, #2563eb 42% 72%, #f59e0b 72%);
-      border: 1px solid rgba(255, 255, 255, 0.24);
-    }
-
-    .access-title {
-      margin: 18px 0 6px;
-      font-size: 30px;
-      line-height: 1;
-      font-weight: 950;
-      letter-spacing: 0;
-    }
-
-    .access-copy {
-      color: #c9ced8;
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .access-card-body {
-      display: grid;
-      gap: 12px;
-      padding: 18px 20px 20px;
-    }
-
-    .access-label {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .access-input {
-      width: 100%;
-      min-height: 46px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 0 12px;
-      color: var(--ink);
-      background: #fff;
-      font-size: 17px;
-      font-weight: 800;
-    }
-
-    .access-btn,
     .primary-btn,
     .ghost-btn,
     .ghost-link-btn,
@@ -157,17 +60,16 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 0 12px;
-      background: linear-gradient(180deg, #ffffff, #f4f7fb);
+      background: linear-gradient(180deg, #1b1c24, #111218);
       color: var(--ink);
       font-size: 13px;
       font-weight: 900;
       box-shadow: var(--button-shadow);
     }
 
-    .access-btn,
     .primary-btn {
-      background: linear-gradient(180deg, #36a3ff, var(--blue-deep));
-      border-color: #0f67d7;
+      background: linear-gradient(180deg, #2f7ef0, #174aaf);
+      border-color: #2f7ef0;
       color: #fff;
     }
 
@@ -189,11 +91,148 @@
       color: var(--red);
     }
 
-    .access-error {
+    .admin-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background: #0a0a0c;
+      backdrop-filter: blur(14px);
+    }
+
+    .admin-gate[hidden] {
+      display: none;
+    }
+
+    .admin-login-card {
+      width: min(460px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+      overflow: hidden;
+    }
+
+    .admin-login-top {
+      padding: 18px 20px;
+      background: linear-gradient(180deg, var(--chrome-2), var(--chrome));
+      border-bottom: 1px solid var(--line);
+    }
+
+    .admin-login-kicker,
+    .admin-session-kicker {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .admin-login-title {
+      margin-top: 8px;
+      font-size: 28px;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .admin-login-copy {
+      margin-top: 8px;
+      color: #c9ced8;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .admin-login-body {
+      display: grid;
+      gap: 12px;
+      padding: 18px 20px 20px;
+    }
+
+    .admin-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .admin-field[hidden] {
+      display: none;
+    }
+
+    .admin-field label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .admin-field input {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      background: #0d0e13;
+      color: var(--ink);
+      font-weight: 850;
+    }
+
+    .admin-login-error {
       min-height: 18px;
       color: var(--red);
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 850;
+    }
+
+    .admin-session-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #171820, #101116);
+    }
+
+    .admin-session-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .admin-session-name {
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    .level-chip {
+      width: fit-content;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .level-chip.standard {
+      background: rgba(36, 179, 107, 0.16);
+      color: #65d99d;
+    }
+
+    .level-chip.full {
+      background: rgba(106, 169, 255, 0.16);
+      color: #9ec5ff;
+    }
+
+    .level-chip.super {
+      background: rgba(244, 182, 63, 0.16);
+      color: #ffd475;
     }
 
     .app-shell {
@@ -202,7 +241,7 @@
 
     .topbar {
       background:
-        linear-gradient(90deg, rgba(30, 141, 245, 0.18), transparent 32%, rgba(231, 51, 51, 0.16)),
+        linear-gradient(90deg, rgba(30, 141, 245, 0.12), transparent 42%, rgba(239, 74, 74, 0.1)),
         linear-gradient(180deg, var(--chrome-2), var(--chrome));
       color: #fff;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -250,47 +289,9 @@
 
     .hero-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 340px;
+      grid-template-columns: minmax(0, 1fr) 330px;
       gap: 18px;
       align-items: end;
-    }
-
-    .signal-strip {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 16px;
-      max-width: 720px;
-    }
-
-    .signal-box {
-      min-height: 42px;
-      border: 2px solid var(--green);
-      border-radius: 8px;
-      overflow: hidden;
-      background: #050608;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
-    }
-
-    .signal-box.program {
-      border-color: var(--red);
-    }
-
-    .signal-label {
-      min-height: 20px;
-      display: flex;
-      align-items: center;
-      padding: 0 10px;
-      color: #fff;
-      background: linear-gradient(180deg, var(--green), var(--green-deep));
-      font-size: 11px;
-      font-weight: 950;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    .signal-box.program .signal-label {
-      background: linear-gradient(180deg, #ff4d4a, #9f0808);
     }
 
     h1 {
@@ -333,7 +334,7 @@
       grid-template-columns: 26px minmax(0, 1fr);
       gap: 10px;
       align-items: start;
-      color: #eef2f7;
+      color: var(--ink);
       font-size: 13px;
       line-height: 1.35;
       font-weight: 750;
@@ -345,8 +346,8 @@
       width: 24px;
       height: 24px;
       border-radius: 8px;
-      background: #eef2f7;
-      color: #111827;
+      background: linear-gradient(180deg, #21222b, #15161d);
+      color: var(--blue);
       font-size: 12px;
       font-weight: 950;
     }
@@ -362,7 +363,7 @@
       padding: 14px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: rgba(255,255,255,0.86);
+      background: rgba(21, 22, 29, 0.92);
       backdrop-filter: blur(12px);
       box-shadow: var(--shadow);
     }
@@ -372,6 +373,15 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
       align-items: center;
+    }
+
+    .content-controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .content-controls[hidden] {
+      display: none;
     }
 
     .dashboard-tabs {
@@ -385,7 +395,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 0 14px;
-      background: linear-gradient(180deg, #ffffff, #f4f7fb);
+      background: linear-gradient(180deg, #1b1c24, #111218);
       color: var(--ink);
       font-size: 13px;
       font-weight: 950;
@@ -393,7 +403,7 @@
 
     .dashboard-tab[aria-pressed="true"] {
       color: #fff;
-      background: linear-gradient(180deg, #36a3ff, var(--blue-deep));
+      background: linear-gradient(180deg, #2f7ef0, #174aaf);
       border-color: #0f67d7;
     }
 
@@ -418,7 +428,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 20px 14px 6px;
-      background: #fff;
+      background: #0d0e13;
       color: var(--ink);
       font-weight: 750;
     }
@@ -432,40 +442,8 @@
 
     .filter-btn[aria-pressed="true"] {
       border-color: #0f67d7;
-      background: linear-gradient(180deg, #36a3ff, var(--blue-deep));
+      background: linear-gradient(180deg, #2f7ef0, #174aaf);
       color: #fff;
-    }
-
-    .auth-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 12px;
-      align-items: center;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: linear-gradient(180deg, #f7fbff, #edf3fb);
-    }
-
-    .auth-status-title {
-      color: var(--ink);
-      font-size: 14px;
-      font-weight: 900;
-    }
-
-    .auth-status-copy {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-      overflow-wrap: anywhere;
-    }
-
-    .auth-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
     }
 
     .stats {
@@ -479,8 +457,8 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 14px;
-      background: linear-gradient(180deg, #ffffff, #f7faff);
-      box-shadow: 0 8px 20px rgba(46, 61, 82, 0.08);
+      background: linear-gradient(180deg, #171820, #101116);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
     }
 
     .stat-value {
@@ -511,11 +489,11 @@
       border-radius: 8px;
       background: var(--panel);
       overflow: hidden;
-      box-shadow: 0 10px 24px rgba(46, 61, 82, 0.1);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
     }
 
     .section[open] {
-      border-color: #9db1ca;
+      border-color: #4a4c58;
     }
 
     .section.lesson { border-left: 5px solid var(--green); }
@@ -529,7 +507,7 @@
       align-items: center;
       padding: 14px 16px;
       border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, #ffffff, #eef4fb);
+      background: linear-gradient(180deg, #1b1c24, #12131a);
       cursor: pointer;
       list-style: none;
     }
@@ -552,9 +530,9 @@
       width: 26px;
       height: 26px;
       border-radius: 8px;
-      background: linear-gradient(180deg, #ffffff, #e9f0f8);
+      background: linear-gradient(180deg, #21222b, #15161d);
       border: 1px solid var(--line);
-      color: var(--blue-deep);
+      color: var(--blue);
       font-weight: 950;
       transition: transform 0.16s ease;
     }
@@ -598,9 +576,9 @@
       display: inline-block;
       max-width: 100%;
       overflow-wrap: anywhere;
-      color: #0f172a;
-      background: #eef2ff;
-      border: 1px solid #dbe4ff;
+      color: #e9edf7;
+      background: #111827;
+      border: 1px solid #2a3448;
       border-radius: 6px;
       padding: 5px 7px;
       font-size: 12px;
@@ -619,7 +597,7 @@
       width: fit-content;
       border-radius: 999px;
       padding: 5px 8px;
-      background: #f1f5f9;
+      background: #20222b;
       color: var(--muted);
       font-size: 11px;
       font-weight: 950;
@@ -628,13 +606,13 @@
     }
 
     .source-pill.firestore {
-      background: #dcfce7;
-      color: #166534;
+      background: rgba(36, 179, 107, 0.16);
+      color: #65d99d;
     }
 
-    .item.lesson code { background: #ecfdf5; border-color: #c7f2df; }
-    .item.quiz code { background: #f3e8ff; border-color: #e3d1ff; }
-    .item.rts code { background: #fff7ed; border-color: #fed7aa; }
+    .item.lesson code { background: rgba(36, 179, 107, 0.12); border-color: rgba(36, 179, 107, 0.32); }
+    .item.quiz code { background: rgba(168, 145, 255, 0.12); border-color: rgba(168, 145, 255, 0.32); }
+    .item.rts code { background: rgba(244, 182, 63, 0.12); border-color: rgba(244, 182, 63, 0.32); }
 
     .edit-label {
       margin-bottom: 6px;
@@ -652,15 +630,15 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 10px 12px;
-      background: #fff;
-      color: #1f2937;
+      background: #0d0e13;
+      color: var(--ink);
       font-size: 14px;
       line-height: 1.45;
     }
 
     textarea.text-edit:focus,
     input:focus {
-      outline: 3px solid rgba(37, 99, 235, 0.16);
+      outline: 3px solid rgba(106, 169, 255, 0.18);
       border-color: var(--blue);
     }
 
@@ -700,7 +678,7 @@
       border-radius: 8px;
       padding: 16px;
       background: var(--panel);
-      box-shadow: 0 10px 24px rgba(19, 24, 32, 0.08);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
     }
 
     .admin-card h2,
@@ -731,7 +709,7 @@
       border-radius: 8px;
       padding: 0 12px;
       color: var(--ink);
-      background: #fff;
+      background: #0d0e13;
       font-weight: 800;
     }
 
@@ -760,6 +738,23 @@
       background: var(--panel-soft);
     }
 
+    .mini-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .role-select {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 8px;
+      background: #0d0e13;
+      color: var(--ink);
+      font-weight: 850;
+    }
+
     .mini-main {
       display: grid;
       gap: 3px;
@@ -782,8 +777,8 @@
       justify-self: end;
       border-radius: 999px;
       padding: 5px 9px;
-      background: #e0efff;
-      color: #1d4ed8;
+      background: rgba(106, 169, 255, 0.16);
+      color: #9ec5ff;
       font-size: 11px;
       font-weight: 950;
       letter-spacing: 0.08em;
@@ -792,18 +787,18 @@
     }
 
     .role-pill.super {
-      background: #fef3c7;
-      color: #92400e;
+      background: rgba(244, 182, 63, 0.16);
+      color: #ffd475;
     }
 
     .grade-pill.pass {
-      background: #dcfce7;
-      color: #166534;
+      background: rgba(36, 179, 107, 0.16);
+      color: #65d99d;
     }
 
     .grade-pill.review {
-      background: #ffedd5;
-      color: #9a3412;
+      background: rgba(244, 182, 63, 0.16);
+      color: #ffd475;
     }
 
     .error a {
@@ -814,7 +809,6 @@
     @media (max-width: 940px) {
       .hero-row,
       .toolbar,
-      .auth-row,
       .item {
         grid-template-columns: 1fr;
       }
@@ -823,12 +817,7 @@
         display: none;
       }
 
-      .signal-strip {
-        grid-template-columns: 1fr;
-      }
-
       .filters,
-      .auth-actions,
       .nav-actions {
         justify-content: flex-start;
       }
@@ -860,19 +849,25 @@
     }
   </style>
 </head>
-<body class="locked">
-  <div class="access-screen" role="dialog" aria-modal="true" aria-labelledby="access-title">
-    <form class="access-card" id="access-form">
-      <div class="access-card-top">
-        <div class="brand-line">SwitchUp Studio</div>
-        <div class="access-title" id="access-title">Dashboard Access</div>
-        <div class="access-copy">Enter the admin code to review and edit lesson copy, quiz prompts, and Run the Show text.</div>
+<body>
+  <div class="admin-gate" id="admin-gate" role="dialog" aria-modal="true" aria-labelledby="admin-login-title">
+    <form class="admin-login-card" id="admin-login-form">
+      <div class="admin-login-top">
+        <div class="admin-login-kicker">SwitchUp Admin</div>
+        <div class="admin-login-title" id="admin-login-title">Admin Sign In</div>
+        <div class="admin-login-copy" id="admin-login-copy">Enter your admin code to manage content, grades, and dashboard accounts.</div>
       </div>
-      <div class="access-card-body">
-        <label class="access-label" for="access-code">Admin Code</label>
-        <input class="access-input" id="access-code" type="password" autocomplete="current-password" inputmode="text">
-        <button class="access-btn" type="submit">Open Dashboard</button>
-        <div class="access-error" id="access-error" role="alert"></div>
+      <div class="admin-login-body">
+        <div class="admin-field" id="admin-setup-name-field" hidden>
+          <label for="admin-setup-name">Your Name</label>
+          <input id="admin-setup-name" type="text" autocomplete="name" placeholder="e.g. Jordan">
+        </div>
+        <div class="admin-field">
+          <label for="admin-code-input">Admin Code</label>
+          <input id="admin-code-input" type="password" autocomplete="current-password" placeholder="Enter admin code">
+        </div>
+        <div class="admin-login-error" id="admin-login-error" role="alert"></div>
+        <button class="primary-btn" id="admin-login-submit" type="submit">Sign In</button>
       </div>
     </form>
   </div>
@@ -884,17 +879,13 @@
           <div>
             <h1>Content Dashboard</h1>
             <div class="hero-copy">A clean control room for every lesson line, hint, quiz prompt, and Run the Show step. Search by reference ID, make edits, then save the exact text the simulator should use.</div>
-            <div class="signal-strip" aria-hidden="true">
-              <div class="signal-box preview"><div class="signal-label">Preview</div></div>
-              <div class="signal-box program"><div class="signal-label">Program</div></div>
-            </div>
           </div>
           <div class="workflow-card" aria-label="Dashboard workflow">
             <div class="workflow-title">Recommended Flow</div>
             <div class="workflow-list">
               <div class="workflow-step"><span class="step-num">1</span><span>Find the line by lesson, quiz bank, or reference ID.</span></div>
               <div class="workflow-step"><span class="step-num">2</span><span>Edit the text directly in the field.</span></div>
-              <div class="workflow-step"><span class="step-num">3</span><span>Sign in and save to Firestore when ready.</span></div>
+              <div class="workflow-step"><span class="step-num">3</span><span>Firestore keeps content, grades, and admin access in sync.</span></div>
             </div>
           </div>
         </div>
@@ -903,12 +894,23 @@
 
     <main>
       <section class="control-panel" aria-label="Dashboard controls">
+        <div class="admin-session-row" id="admin-session-row">
+          <div>
+            <div class="admin-session-kicker">Admin Session</div>
+            <div class="admin-session-main">
+              <span class="admin-session-name" id="admin-session-name">Loading admins...</span>
+              <span class="level-chip standard" id="admin-session-level">LOCKED</span>
+            </div>
+          </div>
+          <button class="ghost-btn" id="admin-switch-btn" type="button">Switch Admin</button>
+        </div>
         <div class="dashboard-tabs" aria-label="Dashboard sections">
           <button class="dashboard-tab" data-view="content" type="button" aria-pressed="true">Content</button>
           <button class="dashboard-tab" data-view="grades" type="button" aria-pressed="false">Student Grades</button>
           <button class="dashboard-tab" data-view="admins" type="button" aria-pressed="false">Admin Accounts</button>
         </div>
-        <div class="toolbar">
+        <div class="content-controls" id="content-controls">
+          <div class="toolbar">
           <div class="search-wrap">
             <input id="search" type="search" placeholder="Type a reference ID, lesson name, or exact text..." autocomplete="off">
           </div>
@@ -918,15 +920,8 @@
             <button class="filter-btn" data-filter="quiz" aria-pressed="false">Quiz Banks</button>
             <button class="filter-btn" data-filter="rts" aria-pressed="false">Run The Show</button>
           </div>
-        </div>
-        <div class="auth-row">
-          <div>
-            <div class="auth-status-title" id="auth-title">Firestore Editing</div>
-            <div class="auth-status-copy" id="auth-status">Firebase is loading. You can still review and copy IDs.</div>
           </div>
-          <div class="auth-actions">
-            <button class="ghost-btn" id="sign-in-btn" type="button">Sign In</button>
-            <button class="ghost-btn" id="sign-out-btn" type="button" hidden>Sign Out</button>
+          <div class="form-row">
             <button class="primary-btn" id="save-all-btn" type="button" disabled>Save Visible</button>
           </div>
         </div>
@@ -938,9 +933,11 @@
     </main>
   </div>
 
-  <script type="module" src="firebase-client.js?v=1"></script>
+  <script type="module" src="firebase-client.js?v=4"></script>
   <script>
-    const ADMIN_DASHBOARD_CODE = 'SWITCHUP';
+    const ADMIN_SESSION_KEY = 'switchup_admin_session_v1';
+    const OWNER_ADMIN_NAME = 'Jon Kost';
+    const OWNER_ADMIN_CODE = 'Kost7';
     const FORMSPREE_SUBMISSIONS_URL = 'https://formspree.io/forms/xdawpdkp/submissions';
     const CONTENT_COLLECTIONS = {
       lesson: 'content_lessons',
@@ -953,10 +950,8 @@
       filter: 'all',
       query: '',
       firebase: null,
-      user: null,
-      adminProfile: null,
       admins: [],
-      adminInvites: [],
+      adminSession: null,
       grades: [],
       loadedFirestore: false,
       activeView: 'content',
@@ -966,38 +961,20 @@
     const contentEl = document.getElementById('content');
     const resultsLineEl = document.getElementById('results-line');
     const searchEl = document.getElementById('search');
-    const authTitleEl = document.getElementById('auth-title');
-    const authStatusEl = document.getElementById('auth-status');
-    const signInBtn = document.getElementById('sign-in-btn');
-    const signOutBtn = document.getElementById('sign-out-btn');
+    const contentControlsEl = document.getElementById('content-controls');
     const saveAllBtn = document.getElementById('save-all-btn');
-    const accessForm = document.getElementById('access-form');
-    const accessCodeEl = document.getElementById('access-code');
-    const accessErrorEl = document.getElementById('access-error');
-
-    function unlockDashboard() {
-      document.body.classList.remove('locked');
-      localStorage.setItem('switchup_admin_dashboard_unlocked', 'true');
-      searchEl.focus({ preventScroll: true });
-    }
-
-    function setupAccessGate() {
-      if (localStorage.getItem('switchup_admin_dashboard_unlocked') === 'true') {
-        document.body.classList.remove('locked');
-        return;
-      }
-      accessCodeEl.focus();
-      accessForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        if (accessCodeEl.value.trim().toUpperCase() === ADMIN_DASHBOARD_CODE) {
-          unlockDashboard();
-          return;
-        }
-        accessErrorEl.textContent = 'That code did not open the dashboard.';
-        accessCodeEl.select();
-      });
-    }
-
+    const adminGateEl = document.getElementById('admin-gate');
+    const adminLoginForm = document.getElementById('admin-login-form');
+    const adminLoginTitleEl = document.getElementById('admin-login-title');
+    const adminLoginCopyEl = document.getElementById('admin-login-copy');
+    const adminSetupNameField = document.getElementById('admin-setup-name-field');
+    const adminSetupNameInput = document.getElementById('admin-setup-name');
+    const adminCodeInput = document.getElementById('admin-code-input');
+    const adminLoginErrorEl = document.getElementById('admin-login-error');
+    const adminLoginSubmitEl = document.getElementById('admin-login-submit');
+    const adminSessionNameEl = document.getElementById('admin-session-name');
+    const adminSessionLevelEl = document.getElementById('admin-session-level');
+    const adminSwitchBtn = document.getElementById('admin-switch-btn');
     function stripCode(value) {
       return value.replace(/^`|`$/g, '').replace(/\\\|/g, '|').trim();
     }
@@ -1091,18 +1068,152 @@
       resultsLineEl.textContent = `Showing ${count} ${label} from ${filterLabel}.`;
     }
 
-    function isAdmin() {
-      return !!(state.adminProfile && (state.adminProfile.role === 'admin' || state.adminProfile.role === 'super_admin'));
+    function normalizeAdminLevel(level) {
+      if (level === 'super' || level === 'super_admin') return 'super';
+      if (level === 'full' || level === 'full_access') return 'full';
+      return 'standard';
     }
 
-    function isSuperAdmin() {
-      return !!(state.adminProfile && state.adminProfile.role === 'super_admin');
+    function adminLevel(admin) {
+      return normalizeAdminLevel(admin && (admin.level || admin.role));
     }
 
-    function roleLabel() {
-      if (!state.user) return 'signed out';
-      if (!state.adminProfile) return 'viewer';
-      return state.adminProfile.role === 'super_admin' ? 'super admin' : 'admin';
+    function adminName(admin) {
+      return (admin && (admin.name || admin.displayName || admin.email || admin.uid || admin.id)) || 'Admin';
+    }
+
+    function adminId(admin) {
+      return admin && (admin.id || admin.uid);
+    }
+
+    function hasSuperAdmin() {
+      return state.admins.some((admin) => adminLevel(admin) === 'super');
+    }
+
+    function canEditContent() {
+      return ['full', 'super'].includes(adminLevel(state.adminSession));
+    }
+
+    function canManageAdmins() {
+      return adminLevel(state.adminSession) === 'super';
+    }
+
+    function syncStoredAdminSession() {
+      let stored = null;
+      try {
+        stored = JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+      } catch {
+        stored = null;
+      }
+      if (!stored || !stored.id) {
+        state.adminSession = null;
+        return;
+      }
+      const current = state.admins.find((admin) => adminId(admin) === stored.id);
+      state.adminSession = current ? {
+        id: adminId(current),
+        name: adminName(current),
+        level: adminLevel(current),
+      } : null;
+      if (!state.adminSession) localStorage.removeItem(ADMIN_SESSION_KEY);
+    }
+
+    function saveAdminSession(admin) {
+      state.adminSession = {
+        id: adminId(admin),
+        name: adminName(admin),
+        level: adminLevel(admin),
+      };
+      localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(state.adminSession));
+    }
+
+    function renderAdminSession() {
+      if (!state.adminSession) {
+        adminSessionNameEl.textContent = state.firebase ? 'Admin code required' : 'Loading admins...';
+        adminSessionLevelEl.textContent = 'LOCKED';
+        adminSessionLevelEl.className = 'level-chip standard';
+        adminSwitchBtn.textContent = 'Sign In';
+        return;
+      }
+      const level = adminLevel(state.adminSession);
+      adminSessionNameEl.textContent = adminName(state.adminSession);
+      adminSessionLevelEl.textContent = level.toUpperCase();
+      adminSessionLevelEl.className = `level-chip ${level}`;
+      adminSwitchBtn.textContent = 'Switch Admin';
+    }
+
+    function openAdminGate() {
+      const firstRun = state.firebase && !hasSuperAdmin();
+      adminLoginTitleEl.textContent = firstRun ? 'Create Super Admin' : 'Admin Sign In';
+      adminLoginCopyEl.textContent = firstRun
+        ? 'No super admin exists yet. Enter the owner code to create the owner account.'
+        : 'Enter your admin code to manage content, grades, and dashboard accounts.';
+      adminSetupNameField.hidden = !firstRun;
+      if (firstRun && !adminSetupNameInput.value) adminSetupNameInput.value = OWNER_ADMIN_NAME;
+      adminLoginSubmitEl.textContent = firstRun ? 'Create Super Admin' : 'Sign In';
+      adminLoginErrorEl.textContent = '';
+      adminCodeInput.value = '';
+      adminGateEl.hidden = false;
+      setTimeout(() => (firstRun ? adminSetupNameInput : adminCodeInput).focus(), 50);
+    }
+
+    function closeAdminGate() {
+      adminGateEl.hidden = true;
+    }
+
+    async function submitAdminLogin(event) {
+      event.preventDefault();
+      if (!state.firebase) return;
+      const code = adminCodeInput.value.trim();
+      if (!code) {
+        adminLoginErrorEl.textContent = 'Please enter an admin code.';
+        return;
+      }
+      const firstRun = !hasSuperAdmin();
+      adminLoginSubmitEl.disabled = true;
+      try {
+        if (firstRun) {
+          const name = adminSetupNameInput.value.trim() || OWNER_ADMIN_NAME;
+          if (!name) {
+            adminLoginErrorEl.textContent = 'Please enter your name.';
+            return;
+          }
+          await state.firebase.createAdminAccount({ name, code, level: 'super' });
+          await refreshAdminData();
+          const created = state.admins.find((admin) => adminName(admin) === name && adminLevel(admin) === 'super');
+          if (created) saveAdminSession(created);
+        } else {
+          const codeHash = await state.firebase.hashAdminCode(code);
+          const admin = state.admins.find((item) => item.codeHash === codeHash);
+          if (!admin) {
+            if (code === OWNER_ADMIN_CODE) {
+              await state.firebase.createAdminAccount({ name: OWNER_ADMIN_NAME, code: OWNER_ADMIN_CODE, level: 'super' });
+              await refreshAdminData();
+              admin = state.admins.find((item) => adminName(item) === OWNER_ADMIN_NAME && adminLevel(item) === 'super');
+            }
+            if (!admin) {
+              adminLoginErrorEl.textContent = 'Incorrect code. Try again.';
+              return;
+            }
+          }
+          saveAdminSession(admin);
+        }
+        closeAdminGate();
+        renderAdminSession();
+        render();
+      } catch (error) {
+        adminLoginErrorEl.textContent = error.message || 'Could not complete admin sign in.';
+      } finally {
+        adminLoginSubmitEl.disabled = false;
+      }
+    }
+
+    function switchAdmin() {
+      state.adminSession = null;
+      localStorage.removeItem(ADMIN_SESSION_KEY);
+      renderAdminSession();
+      openAdminGate();
+      render();
     }
 
     function copyId(refId, button) {
@@ -1113,39 +1224,8 @@
       });
     }
 
-    function signInWithGoogleFromDashboard() {
-      if (state.firebase) state.firebase.signInWithGoogle();
-      else authStatusEl.textContent = 'Firebase is still loading. Try again in a moment.';
-    }
-
-    function bindSignInCtas() {
-      contentEl.querySelectorAll('[data-sign-in-cta]').forEach((button) => {
-        button.addEventListener('click', signInWithGoogleFromDashboard);
-      });
-    }
-
-    function updateAuthStatus() {
-      if (!state.firebase) {
-        authTitleEl.textContent = 'Firestore Editing';
-        authStatusEl.textContent = 'Firebase is loading. You can still review and copy IDs.';
-        saveAllBtn.disabled = true;
-        return;
-      }
-      if (!state.user) {
-        authTitleEl.textContent = 'Signed Out';
-        authStatusEl.textContent = 'Sign in to save text, manage admin access, and view student grades.';
-        signInBtn.hidden = false;
-        signOutBtn.hidden = true;
-        saveAllBtn.disabled = true;
-        return;
-      }
-      authTitleEl.textContent = isAdmin() ? `Signed In as ${roleLabel()}` : 'Signed In as Viewer';
-      authStatusEl.textContent = isAdmin()
-        ? `${state.user.email || state.user.uid}. UID: ${state.user.uid}`
-        : `Signed in as ${state.user.email || state.user.uid}. Redeem an admin code to save content or view grades.`;
-      signInBtn.hidden = true;
-      signOutBtn.hidden = false;
-      saveAllBtn.disabled = !isAdmin();
+    function updateFirestoreStatus() {
+      saveAllBtn.disabled = !state.firebase || !canEditContent();
     }
 
     function contentPayload(row) {
@@ -1161,7 +1241,7 @@
 
     async function saveRow(refId, button) {
       const row = getRowByRef(refId);
-      if (!row || !state.firebase || !isAdmin()) return;
+      if (!row || !state.firebase || !canEditContent()) return;
       const old = button.textContent;
       button.textContent = 'Saving';
       button.disabled = true;
@@ -1172,8 +1252,7 @@
         render();
       } catch (error) {
         button.textContent = 'Blocked';
-        authTitleEl.textContent = 'Save Blocked';
-        authStatusEl.textContent = 'This Google account is not an admin yet. Redeem an admin code or use the super admin account.';
+        resultsLineEl.textContent = 'Firestore blocked that save. Check deployed Firestore rules.';
       } finally {
         button.disabled = false;
         setTimeout(() => { button.textContent = old; }, 1200);
@@ -1182,7 +1261,7 @@
 
     async function saveVisibleRows() {
       const rows = getVisibleRows();
-      if (!rows.length || !state.firebase || !isAdmin()) return;
+      if (!rows.length || !state.firebase || !canEditContent()) return;
       const old = saveAllBtn.textContent;
       saveAllBtn.textContent = 'Saving';
       saveAllBtn.disabled = true;
@@ -1193,10 +1272,9 @@
         render();
       } catch (error) {
         saveAllBtn.textContent = 'Blocked';
-        authTitleEl.textContent = 'Save Blocked';
-        authStatusEl.textContent = 'This Google account is not an admin yet. Redeem an admin code or use the super admin account.';
+        resultsLineEl.textContent = 'Firestore blocked that save. Check deployed Firestore rules.';
       } finally {
-        updateAuthStatus();
+        updateFirestoreStatus();
         setTimeout(() => { saveAllBtn.textContent = old; }, 1400);
       }
     }
@@ -1216,26 +1294,26 @@
         });
         render();
       } catch (error) {
-        authStatusEl.textContent = 'Firestore content could not load. The reference document is still available.';
+        resultsLineEl.textContent = 'Firestore content could not load. The reference document is still available.';
       }
     }
 
     async function refreshAdminData() {
-      if (!state.firebase || !isAdmin()) return;
+      if (!state.firebase) return;
       try {
-        const loaders = [state.firebase.getAdmins()];
-        if (isSuperAdmin()) loaders.push(state.firebase.getAdminInvites());
-        const [admins, invites = []] = await Promise.all(loaders);
+        const admins = await state.firebase.getAdmins();
         state.admins = admins;
-        state.adminInvites = invites;
+        syncStoredAdminSession();
+        renderAdminSession();
       } catch (error) {
         state.admins = [];
-        state.adminInvites = [];
+        state.adminSession = null;
+        renderAdminSession();
       }
     }
 
     async function refreshGrades() {
-      if (!state.firebase || !isAdmin()) return;
+      if (!state.firebase) return;
       try {
         state.grades = await state.firebase.getQuizSubmissions(100);
       } catch (error) {
@@ -1254,143 +1332,83 @@
 
     function renderAdminView() {
       renderStats(state.rows);
-      resultsLineEl.textContent = 'Manage dashboard access with Google sign-in and one-time admin codes.';
-      if (!state.user) {
-        contentEl.innerHTML = `
-          <div class="admin-grid">
-            <article class="admin-card">
-              <h2>Google Sign-In Required</h2>
-              <p>Use Google sign-in so Firebase knows which person is editing the dashboard. After you sign in, your super admin account can create admin codes for other people.</p>
-              <button class="primary-btn" data-sign-in-cta type="button">Sign In with Google</button>
-            </article>
-          </div>
-        `;
-        bindSignInCtas();
-        return;
-      }
+      resultsLineEl.textContent = canManageAdmins()
+        ? 'Manage SwitchUp admin codes and dashboard access.'
+        : 'Only super admins can add, remove, or change admin accounts.';
 
-      const superTools = isSuperAdmin() ? `
+      const adminTools = canManageAdmins() ? `
         <article class="admin-card">
-          <h2>Create Admin Code</h2>
-          <p>Create a one-time code for someone you want to make an admin. Give them the code, then they sign in and redeem it here.</p>
+          <h2>Add Admin</h2>
+          <p>Create a code-based dashboard admin account.</p>
           <div class="form-row">
-            <input id="new-admin-code" type="text" placeholder="Example: SWITCHUP-TEACHER-01" autocomplete="off">
-            <button class="primary-btn" id="create-admin-code-btn" type="button">Create Code</button>
+            <input id="new-admin-name" type="text" placeholder="Name" autocomplete="off">
+            <input id="new-admin-code" type="password" placeholder="Admin code" autocomplete="new-password">
+            <select class="role-select" id="new-admin-role" aria-label="New admin role">
+              <option value="standard">standard</option>
+              <option value="full">full access</option>
+              <option value="super">super admin</option>
+            </select>
+            <button class="primary-btn" id="create-admin-account-btn" type="button">Add Admin</button>
           </div>
-          <div class="status-note" id="create-admin-code-status"></div>
-        </article>
-      ` : '';
-
-      const redeemTools = !isAdmin() ? `
-        <article class="admin-card">
-          <h2>Redeem Admin Code</h2>
-          <p>Enter the code from the super admin to unlock dashboard editing and student grades for this Google account.</p>
-          <div class="form-row">
-            <input id="redeem-admin-code" type="password" placeholder="Admin code" autocomplete="one-time-code">
-            <button class="primary-btn" id="redeem-admin-code-btn" type="button">Redeem Code</button>
-          </div>
-          <div class="status-note" id="redeem-admin-code-status"></div>
+          <div class="status-note" id="create-admin-account-status"></div>
         </article>
       ` : '';
 
       const adminRows = state.admins.length ? state.admins.map((admin) => `
         <div class="mini-row">
           <div class="mini-main">
-            <div class="mini-title">${escapeHtml(admin.email || admin.uid || admin.id)}</div>
-            <div class="mini-copy">${escapeHtml(admin.uid || admin.id)}${admin.createdAt ? ` • ${escapeHtml(formatFirestoreDate(admin.createdAt))}` : ''}</div>
+            <div class="mini-title">${escapeHtml(adminName(admin))}</div>
+            <div class="mini-copy">${escapeHtml(adminId(admin))}${admin.createdAt ? ` • ${escapeHtml(formatFirestoreDate(admin.createdAt))}` : ''}</div>
           </div>
-          <div class="role-pill ${admin.role === 'super_admin' ? 'super' : ''}">${escapeHtml(admin.role || 'admin')}</div>
+          ${canManageAdmins() ? `
+            <div class="mini-actions">
+              <select class="role-select" data-admin-role="${escapeHtml(adminId(admin))}" aria-label="Role for ${escapeHtml(adminName(admin))}">
+                <option value="standard" ${adminLevel(admin) === 'standard' ? 'selected' : ''}>standard</option>
+                <option value="full" ${adminLevel(admin) === 'full' ? 'selected' : ''}>full access</option>
+                <option value="super" ${adminLevel(admin) === 'super' ? 'selected' : ''}>super admin</option>
+              </select>
+              <button class="ghost-btn" data-admin-save="${escapeHtml(adminId(admin))}" type="button">Save</button>
+              <button class="ghost-btn" data-admin-code="${escapeHtml(adminId(admin))}" type="button">Edit Code</button>
+              <button class="ghost-btn danger-btn" data-admin-remove="${escapeHtml(adminId(admin))}" type="button" ${adminId(admin) === state.adminSession?.id ? 'disabled' : ''}>Remove</button>
+            </div>
+          ` : `<div class="level-chip ${adminLevel(admin)}">${adminLevel(admin).toUpperCase()}</div>`}
         </div>
       `).join('') : '<div class="empty">No admin list available yet.</div>';
 
-      const inviteRows = isSuperAdmin() && state.adminInvites.length ? state.adminInvites.map((invite) => `
-        <div class="mini-row">
-          <div class="mini-main">
-            <div class="mini-title">${escapeHtml(invite.usedByEmail || invite.createdByEmail || invite.id)}</div>
-            <div class="mini-copy">${escapeHtml(invite.id)} • ${escapeHtml(formatFirestoreDate(invite.createdAt))}</div>
-          </div>
-          <div class="role-pill">${invite.active && !invite.usedBy ? 'open' : 'used'}</div>
-        </div>
-      `).join('') : '';
-
       contentEl.innerHTML = `
         <div class="admin-grid">
+          ${adminTools}
           <article class="admin-card">
-            <h2>Your Access</h2>
-            <p>${escapeHtml(state.user.email || state.user.uid)}</p>
-            <div class="mini-row">
-              <div class="mini-main">
-                <div class="mini-title">${escapeHtml(roleLabel())}</div>
-                <div class="mini-copy">UID: ${escapeHtml(state.user.uid)}</div>
-              </div>
-              <div class="role-pill ${isSuperAdmin() ? 'super' : ''}">${escapeHtml(roleLabel())}</div>
-            </div>
+            <h2>Admin Accounts</h2>
+            <p>Standard admins can review. Full access admins can save content. Super admins can manage accounts.</p>
+            <div class="mini-table">${adminRows}</div>
           </article>
-          ${redeemTools}
-          ${superTools}
-          ${isAdmin() ? `
-            <article class="admin-card">
-              <h2>Admin Accounts</h2>
-              <p>Accounts that can edit content and view student grades.</p>
-              <div class="mini-table">${adminRows}</div>
-            </article>
-          ` : ''}
-          ${isSuperAdmin() ? `
-            <article class="admin-card">
-              <h2>Invite Codes</h2>
-              <p>Codes are stored as hashes, so the dashboard can verify them without showing the original code later.</p>
-              <div class="mini-table">${inviteRows || '<div class="empty">No invite codes created yet.</div>'}</div>
-            </article>
-          ` : ''}
         </div>
       `;
 
-      const createBtn = document.getElementById('create-admin-code-btn');
-      if (createBtn) createBtn.addEventListener('click', createAdminCodeFromDashboard);
-      const redeemBtn = document.getElementById('redeem-admin-code-btn');
-      if (redeemBtn) redeemBtn.addEventListener('click', redeemAdminCodeFromDashboard);
+      const createAccountBtn = document.getElementById('create-admin-account-btn');
+      if (createAccountBtn) createAccountBtn.addEventListener('click', createAdminAccountFromDashboard);
+      contentEl.querySelectorAll('[data-admin-save]').forEach((button) => {
+        button.addEventListener('click', () => updateAdminFromDashboard(button.dataset.adminSave, button));
+      });
+      contentEl.querySelectorAll('[data-admin-code]').forEach((button) => {
+        button.addEventListener('click', () => resetAdminCodeFromDashboard(button.dataset.adminCode, button));
+      });
+      contentEl.querySelectorAll('[data-admin-remove]').forEach((button) => {
+        button.addEventListener('click', () => removeAdminFromDashboard(button.dataset.adminRemove, button));
+      });
     }
 
     function renderGradesView() {
       renderStats(state.rows);
-      resultsLineEl.textContent = isAdmin()
-        ? `Showing ${state.grades.length} Firestore grade mirror item${state.grades.length === 1 ? '' : 's'}.`
-        : 'Grades currently live in Formspree. The dashboard can also show new results after Firestore mirroring is active.';
+      resultsLineEl.textContent = `Showing ${state.grades.length} Firestore grade item${state.grades.length === 1 ? '' : 's'}.`;
 
-      if (!state.user) {
-        contentEl.innerHTML = `
-          <div class="admin-grid">
-            <article class="admin-card">
-              <h2>Student Grades</h2>
-              <p>Right now your existing student results are in Formspree. This dashboard can show new results once they are mirrored into Firestore, but it will not pull old Formspree inbox items directly from a public GitHub page.</p>
-              <div class="form-row">
-                <button class="primary-btn" data-sign-in-cta type="button">Sign In with Google</button>
-                <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Open Formspree Results</a>
-              </div>
-            </article>
-          </div>
-        `;
-        bindSignInCtas();
-        return;
-      }
-      if (!isAdmin()) {
-        contentEl.innerHTML = `
-          <div class="admin-grid">
-            <article class="admin-card">
-              <h2>Admin Access Needed</h2>
-              <p>You are signed in, but this Google account is not an admin yet. Redeem an admin code in Admin Accounts to view the Firestore grade mirror.</p>
-              <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Open Formspree Results</a>
-            </article>
-          </div>
-        `;
-        return;
-      }
       if (!state.grades.length) {
         contentEl.innerHTML = `
           <div class="admin-grid">
             <article class="admin-card">
               <h2>Student Grades</h2>
-              <p>No Firestore grade mirror items are available yet. Existing results remain in Formspree. New non-practice quiz results will appear here after Firestore rules are deployed and students finish a quiz.</p>
+              <p>No Firestore grade items are available yet. New non-practice quiz results will appear here after students finish a quiz.</p>
               <div class="form-row">
                 <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh Grades</button>
                 <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Open Formspree Results</a>
@@ -1403,7 +1421,7 @@
           <div class="grades-grid">
             <article class="admin-card">
               <h2>Student Grades</h2>
-              <p>These are the Firestore copies of quiz results. Formspree is still the inbox for existing submissions and email delivery.</p>
+              <p>These are quiz results from Firestore.</p>
               <div class="form-row">
                 <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh Grades</button>
                 <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Open Formspree Results</a>
@@ -1437,35 +1455,80 @@
       });
     }
 
-    async function createAdminCodeFromDashboard() {
-      const input = document.getElementById('new-admin-code');
-      const status = document.getElementById('create-admin-code-status');
-      if (!input || !status || !state.firebase) return;
-      status.textContent = 'Creating code...';
+    async function createAdminAccountFromDashboard() {
+      const nameInput = document.getElementById('new-admin-name');
+      const codeInput = document.getElementById('new-admin-code');
+      const roleInput = document.getElementById('new-admin-role');
+      const status = document.getElementById('create-admin-account-status');
+      if (!nameInput || !codeInput || !roleInput || !status || !state.firebase || !canManageAdmins()) return;
+      status.textContent = 'Creating account...';
       try {
-        await state.firebase.createAdminInvite(input.value);
-        status.textContent = 'Admin code created. Give that exact code to the new admin.';
-        input.value = '';
+        await state.firebase.createAdminAccount({
+          name: nameInput.value,
+          code: codeInput.value,
+          level: roleInput.value,
+        });
+        status.textContent = 'Admin account created.';
+        nameInput.value = '';
+        codeInput.value = '';
+        roleInput.value = 'standard';
         await refreshAdminData();
         render();
       } catch (error) {
-        status.textContent = error.message || 'Could not create that admin code.';
+        status.textContent = error.message || 'Could not create that admin account.';
       }
     }
 
-    async function redeemAdminCodeFromDashboard() {
-      const input = document.getElementById('redeem-admin-code');
-      const status = document.getElementById('redeem-admin-code-status');
-      if (!input || !status || !state.firebase) return;
-      status.textContent = 'Checking code...';
+    async function updateAdminFromDashboard(uid, button) {
+      if (!uid || !state.firebase || !canManageAdmins()) return;
+      const roleInput = contentEl.querySelector(`[data-admin-role="${CSS.escape(uid)}"]`);
+      if (!roleInput) return;
+      const old = button.textContent;
+      button.textContent = 'Saving';
+      button.disabled = true;
       try {
-        state.adminProfile = await state.firebase.redeemAdminInvite(input.value);
-        status.textContent = 'Admin access added.';
+        await state.firebase.updateAdminAccount(uid, { level: roleInput.value });
         await refreshAdminData();
-        updateAuthStatus();
+        button.textContent = 'Saved';
         render();
       } catch (error) {
-        status.textContent = error.message || 'That code did not work.';
+        button.textContent = 'Blocked';
+      } finally {
+        button.disabled = false;
+        setTimeout(() => { button.textContent = old; }, 1200);
+      }
+    }
+
+    async function resetAdminCodeFromDashboard(uid, button) {
+      if (!uid || !state.firebase || !canManageAdmins()) return;
+      const newCode = prompt('Enter a new admin code.');
+      if (!newCode) return;
+      const old = button.textContent;
+      button.textContent = 'Saving';
+      button.disabled = true;
+      try {
+        await state.firebase.updateAdminAccount(uid, { code: newCode });
+        button.textContent = 'Saved';
+      } catch (error) {
+        button.textContent = 'Blocked';
+      } finally {
+        button.disabled = false;
+        setTimeout(() => { button.textContent = old; }, 1200);
+      }
+    }
+
+    async function removeAdminFromDashboard(uid, button) {
+      if (!uid || !state.firebase || !canManageAdmins() || uid === state.adminSession?.id) return;
+      const old = button.textContent;
+      button.textContent = 'Removing';
+      button.disabled = true;
+      try {
+        await state.firebase.deleteAdminAccount(uid);
+        await refreshAdminData();
+        render();
+      } catch (error) {
+        button.textContent = 'Blocked';
+        setTimeout(() => { button.textContent = old; button.disabled = false; }, 1200);
       }
     }
 
@@ -1473,6 +1536,8 @@
       document.querySelectorAll('[data-view]').forEach((button) => {
         button.setAttribute('aria-pressed', String(button.dataset.view === state.activeView));
       });
+      contentControlsEl.hidden = state.activeView !== 'content';
+      updateFirestoreStatus();
 
       if (state.activeView === 'admins') {
         renderAdminView();
@@ -1519,7 +1584,7 @@
                 </label>
                 <div class="row-actions">
                   <button class="copy-btn" data-copy="${escapeHtml(item.refId)}" type="button">Copy ID</button>
-                  <button class="save-btn" data-save="${escapeHtml(item.refId)}" type="button" ${isAdmin() ? '' : 'disabled'}>Save Row</button>
+                  <button class="save-btn" data-save="${escapeHtml(item.refId)}" type="button" ${state.firebase && canEditContent() ? '' : 'disabled'}>Save Row</button>
                 </div>
               </article>
             `).join('')}
@@ -1544,19 +1609,11 @@
     function initFirebase(firebaseApi) {
       if (!firebaseApi || state.firebase) return;
       state.firebase = firebaseApi;
-      updateAuthStatus();
+      updateFirestoreStatus();
       loadFirestoreOverrides();
-      state.firebase.onAuthStateChanged(async (user) => {
-        state.user = user;
-        state.adminProfile = user ? await state.firebase.getAdminProfile(user.uid) : null;
-        if (isAdmin()) {
-          await Promise.all([refreshAdminData(), refreshGrades()]);
-        } else {
-          state.admins = [];
-          state.adminInvites = [];
-          state.grades = [];
-        }
-        updateAuthStatus();
+      Promise.all([refreshAdminData(), refreshGrades()]).then(() => {
+        if (state.adminSession) closeAdminGate();
+        else openAdminGate();
         render();
       });
     }
@@ -1585,21 +1642,14 @@
       render();
     });
 
-    signInBtn.addEventListener('click', () => {
-      signInWithGoogleFromDashboard();
-    });
-
-    signOutBtn.addEventListener('click', () => {
-      if (state.firebase) state.firebase.signOutUser();
-    });
+    adminLoginForm.addEventListener('submit', submitAdminLogin);
+    adminSwitchBtn.addEventListener('click', switchAdmin);
 
     saveAllBtn.addEventListener('click', saveVisibleRows);
 
     window.addEventListener('switchup:firebase-ready', (event) => {
       initFirebase(event.detail);
     });
-
-    setupAccessGate();
 
     fetch('docs/content-reference.md')
       .then((response) => {

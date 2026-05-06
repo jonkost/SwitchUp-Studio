@@ -1,14 +1,8 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
 import { getAnalytics, isSupported as analyticsIsSupported } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js';
 import {
-  GoogleAuthProvider,
-  getAuth,
-  onAuthStateChanged,
-  signInWithPopup,
-  signOut,
-} from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
-import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -35,16 +29,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
-const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
 
 const analyticsPromise = analyticsIsSupported()
   .then((supported) => (supported ? getAnalytics(app) : null))
   .catch(() => null);
-
-function currentUser() {
-  return auth.currentUser;
-}
 
 async function sha256(value) {
   const bytes = new TextEncoder().encode(String(value || '').trim().toUpperCase());
@@ -98,63 +86,68 @@ async function saveContentItems(items) {
   return results;
 }
 
-async function getAdminProfile(uid) {
-  if (!uid) return null;
-  const snapshot = await getDoc(doc(db, 'admins', uid));
-  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+function normalizeAdminLevel(level) {
+  if (level === 'super' || level === 'super_admin') return 'super';
+  if (level === 'full' || level === 'full_access') return 'full';
+  return 'standard';
 }
 
-async function createAdminInvite(code) {
-  const user = currentUser();
-  if (!user) throw new Error('Sign in before creating an invite code.');
-  const trimmedCode = String(code || '').trim();
-  if (trimmedCode.length < 6) throw new Error('Use at least 6 characters for an admin code.');
-  const inviteHash = await sha256(trimmedCode);
+function adminDocId(value) {
+  return String(value || `adm_${Date.now().toString(36)}`)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || `adm_${Date.now().toString(36)}`;
+}
+
+async function createAdminAccount({ id = '', name = '', email = '', code = '', level = 'standard' }) {
+  const cleanName = String(name || '').trim();
+  const cleanCode = String(code || '').trim();
+  if (!cleanName) throw new Error('Admin name is required.');
+  if (cleanCode.length < 4) throw new Error('Use at least 4 characters for an admin code.');
+  const cleanId = adminDocId(id || cleanName);
+  const cleanLevel = normalizeAdminLevel(level);
   const payload = {
-    inviteHash,
-    role: 'admin',
-    active: true,
-    createdBy: user.uid,
-    createdByEmail: user.email || '',
+    id: cleanId,
+    uid: cleanId,
+    name: cleanName,
+    email: String(email || '').trim(),
+    displayName: cleanName,
+    codeHash: await sha256(cleanCode),
+    level: cleanLevel,
+    role: cleanLevel === 'super' ? 'super_admin' : 'admin',
+    createdBy: 'dashboard',
     createdAt: serverTimestamp(),
-    usedBy: '',
-    usedByEmail: '',
+    updatedAt: serverTimestamp(),
   };
-  await setDoc(doc(db, 'admin_invites', inviteHash), payload, { merge: true });
+  await setDoc(doc(db, 'admins', cleanId), payload, { merge: true });
   return payload;
 }
 
-async function redeemAdminInvite(code) {
-  const user = currentUser();
-  if (!user) throw new Error('Sign in before redeeming an admin code.');
-  const inviteHash = await sha256(code);
-  const inviteRef = doc(db, 'admin_invites', inviteHash);
-  const inviteSnapshot = await getDoc(inviteRef);
-  if (!inviteSnapshot.exists()) throw new Error('That admin code was not found.');
-  const invite = inviteSnapshot.data();
-  if (!invite.active || invite.usedBy) throw new Error('That admin code has already been used.');
-  const adminPayload = {
-    uid: user.uid,
-    email: user.email || '',
-    displayName: user.displayName || '',
-    role: 'admin',
-    inviteHash,
-    invitedBy: invite.createdBy || '',
-    createdAt: serverTimestamp(),
+async function updateAdminAccount(id, updates = {}) {
+  const cleanId = String(id || '').trim();
+  if (!cleanId) throw new Error('Admin ID is required.');
+  const payload = {
+    updatedAt: serverTimestamp(),
   };
-  await setDoc(doc(db, 'admins', user.uid), adminPayload, { merge: true });
-  await updateDoc(inviteRef, {
-    active: false,
-    usedBy: user.uid,
-    usedByEmail: user.email || '',
-    usedAt: serverTimestamp(),
-  });
-  return adminPayload;
+  if (updates.level || updates.role) {
+    payload.level = normalizeAdminLevel(updates.level || updates.role);
+    payload.role = payload.level === 'super' ? 'super_admin' : 'admin';
+  }
+  if (updates.name !== undefined) {
+    payload.name = String(updates.name || '').trim();
+    payload.displayName = payload.name;
+  }
+  if (updates.email !== undefined) payload.email = String(updates.email || '').trim();
+  if (updates.code) payload.codeHash = await sha256(updates.code);
+  await updateDoc(doc(db, 'admins', cleanId), payload);
+  return payload;
 }
 
-async function getAdminInvites() {
-  const snapshot = await getDocs(collection(db, 'admin_invites'));
-  return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+async function deleteAdminAccount(id) {
+  const cleanId = String(id || '').trim();
+  if (!cleanId) throw new Error('Admin ID is required.');
+  await deleteDoc(doc(db, 'admins', cleanId));
 }
 
 async function getAdmins() {
@@ -196,17 +189,8 @@ async function getNarration(referenceId, voice, rate, textHash) {
   return data;
 }
 
-function signInWithGoogle() {
-  return signInWithPopup(auth, googleProvider);
-}
-
-function signOutUser() {
-  return signOut(auth);
-}
-
 window.SwitchUpFirebase = {
   app,
-  auth,
   db,
   storage,
   analyticsPromise,
@@ -214,17 +198,14 @@ window.SwitchUpFirebase = {
   getContentCollection,
   saveContentItem,
   saveContentItems,
-  getAdminProfile,
-  createAdminInvite,
-  redeemAdminInvite,
-  getAdminInvites,
+  createAdminAccount,
+  updateAdminAccount,
+  deleteAdminAccount,
   getAdmins,
+  hashAdminCode: sha256,
   saveQuizSubmission,
   getQuizSubmissions,
   getNarration,
-  onAuthStateChanged: (callback) => onAuthStateChanged(auth, callback),
-  signInWithGoogle,
-  signOutUser,
 };
 
 window.dispatchEvent(new CustomEvent('switchup:firebase-ready', {

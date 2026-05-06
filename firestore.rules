@@ -2,81 +2,33 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isAdmin() {
-      return isSignedIn()
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
-        && (
-          get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'admin'
-          || get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'super_admin'
-        );
-    }
-
-    function adminRole() {
-      return get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role;
-    }
-
-    function isSuperAdmin() {
-      return isAdmin() && adminRole() == 'super_admin';
-    }
-
     match /content_lessons/{docId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if true;
     }
 
     match /content_quiz_bank/{docId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if true;
     }
 
     match /content_run_the_show/{docId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if true;
     }
 
     match /narration/{docId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if true;
     }
 
     match /admins/{uid} {
-      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
-      allow create: if isSuperAdmin()
-        || (
-          isSignedIn()
-          && request.auth.uid == uid
-          && request.resource.data.uid == request.auth.uid
-          && request.resource.data.role == 'admin'
-          && request.resource.data.inviteHash is string
-          && exists(/databases/$(database)/documents/admin_invites/$(request.resource.data.inviteHash))
-        );
-      allow update, delete: if isSuperAdmin();
-    }
-
-    match /admin_invites/{inviteHash} {
-      allow get: if isSignedIn();
-      allow list: if isSuperAdmin();
-      allow create: if isSuperAdmin()
-        && request.resource.data.role == 'admin'
-        && request.resource.data.active == true
-        && request.resource.data.createdBy == request.auth.uid;
-      allow update: if isSuperAdmin()
-        || (
-          isSignedIn()
-          && resource.data.active == true
-          && request.resource.data.usedBy == request.auth.uid
-          && request.resource.data.active == false
-        );
-      allow delete: if isSuperAdmin();
+      allow read, write: if true;
     }
 
     match /quiz_submissions/{docId} {
       allow create: if true;
-      allow read: if isAdmin();
+      allow read: if true;
       allow update, delete: if false;
     }
   }

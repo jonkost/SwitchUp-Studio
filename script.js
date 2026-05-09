@@ -2588,11 +2588,7 @@
     const borderMarkup = borderEnabled
       ? `<div aria-hidden="true" style="position:absolute;inset:0;clip-path:${cropInset};-webkit-clip-path:${cropInset};box-sizing:border-box;border:${borderWidth}px solid ${borderColor};pointer-events:none;"></div>`
       : '';
-    const hasCrop = parseFloat(insetX) > 0 || parseFloat(insetY) > 0;
-    const cropBorderMarkup = hasCrop
-      ? `<div aria-hidden="true" style="position:absolute;top:${insetY}%;left:${insetX}%;right:${insetX}%;bottom:${insetY}%;border:2px dashed rgba(255,200,0,0.75);pointer-events:none;z-index:10;box-sizing:border-box;"></div>`
-      : '';
-    return `</div>${borderMarkup}${cropBorderMarkup}</div></div>`;
+    return `</div>${borderMarkup}</div></div>`;
   }
 
   function applyLumaKey(data) {

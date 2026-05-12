@@ -2374,7 +2374,7 @@
   }
 
   function setDVESize(value) {
-    const size = clamp(parseInt(value, 10) || 0, 1, 100);
+    const size = snapDVEScale(clamp(parseInt(value, 10) || 0, 1, 100));
     if (size === currentDsk().dveSize) return;
     pushDVEUndoState();
     currentDsk().dveSize = size;
@@ -2384,6 +2384,11 @@
     updateDVESlot();
     updateDSKOverlays();
     maybeResolveRunTheShow();
+  }
+
+  function snapDVEScale(raw) {
+    const size = Math.round(raw);
+    return Math.abs(size - 50) <= 5 ? 50 : size;
   }
 
   function setDVEBorderEnabled(enabled) {
@@ -4567,7 +4572,8 @@ function bindQuizDialogFocusLoop() {
 
     // Scale: pct 0-100 maps directly to dveSize 1-100
     setupDveSlider('scale', pct => {
-      const size = Math.max(1, Math.round(pct));
+      const size = Math.max(1, snapDVEScale(pct));
+      dveSetTrack('scale', size);
       const scaleEl = document.getElementById('dve-ed-scale-val');
       if (scaleEl) scaleEl.innerHTML = `${size}<span class="u">%</span>`;
       if (currentDsk().dveSize !== size) { currentDsk().dveSize = size; updateDVESlot(); updateDSKOverlays(); }

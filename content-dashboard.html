@@ -1178,13 +1178,17 @@
             adminLoginErrorEl.textContent = 'Please enter your name.';
             return;
           }
+          if (code !== OWNER_ADMIN_CODE) {
+            adminLoginErrorEl.textContent = 'Incorrect owner code. Try again.';
+            return;
+          }
           await state.firebase.createAdminAccount({ name, code, level: 'super' });
           await refreshAdminData();
           const created = state.admins.find((admin) => adminName(admin) === name && adminLevel(admin) === 'super');
           if (created) saveAdminSession(created);
         } else {
           const codeHash = await state.firebase.hashAdminCode(code);
-          const admin = state.admins.find((item) => item.codeHash === codeHash);
+          let admin = state.admins.find((item) => item.codeHash === codeHash);
           if (!admin) {
             if (code === OWNER_ADMIN_CODE) {
               await state.firebase.createAdminAccount({ name: OWNER_ADMIN_NAME, code: OWNER_ADMIN_CODE, level: 'super' });

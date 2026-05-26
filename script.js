@@ -1166,6 +1166,7 @@
     dom.mediaModalOverlay.classList.add('show');
     setMediaButtonState(true);
     setTimeout(() => dom.mediaModalDialog && dom.mediaModalDialog.focus(), 30);
+    lessonCheckInteraction();
   }
 
   function closeMediaModal() {
@@ -1173,6 +1174,7 @@
     dom.mediaModalOverlay.classList.remove('show');
     setMediaButtonState(false);
     if (dom.mediaBankButton) dom.mediaBankButton.focus();
+    lessonCheckInteraction();
   }
 
   function toggleMediaModal() {
@@ -1209,6 +1211,7 @@
 
     renderMediaModal();
     refreshAllUI();
+    lessonCheckInteraction();
   }
 
   function assignMediaTransitionToSlot(transitionId, slotName = 'MT1') {
@@ -1745,6 +1748,7 @@
     updateTieButtons();
     updateDSKOverlays();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function togglePreviewKey(index) {
@@ -1759,6 +1763,7 @@
     updateTieButtons();
     updateDSKOverlays();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function selectPgm(index) {
@@ -2354,6 +2359,7 @@
     updateDVECoordLabel();
     updateDSKOverlays();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function resetDVE() {
@@ -2371,6 +2377,7 @@
     updateDVECoordLabel();
     updateDSKOverlays();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function setDVESize(value) {
@@ -2384,6 +2391,7 @@
     updateDVESlot();
     updateDSKOverlays();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function snapDVEScale(raw) {
@@ -2397,6 +2405,7 @@
     currentDsk().dveBorderEnabled = !!enabled;
     updateDSKOverlays();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function setDVEBorderWidth(value) {
@@ -2431,6 +2440,7 @@
     if (dom.dveCropHLabel) dom.dveCropHLabel.innerHTML = `${crop}<span class="u">%</span>`;
     updateDSKOverlays();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function setDVECropV(value) {
@@ -2442,6 +2452,7 @@
     if (dom.dveCropVLabel) dom.dveCropVLabel.innerHTML = `${crop}<span class="u">%</span>`;
     updateDSKOverlays();
     maybeResolveRunTheShow();
+    lessonCheckInteraction();
   }
 
   function adjustDVESize(delta) {
@@ -4905,10 +4916,14 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l2-close-media',
-        watchOnly: true,
-        instruction: 'Good. The Side Graphic should already be loaded in M1. Close the media panel when you\'re ready.',
+        instruction: 'In the Graphics Library, tap Side Graphic to load it into M1, then press DONE to close the panel.',
         highlight: ['media-modal-close'],
-        delay: 0,
+        check: () => {
+          const el = document.getElementById('media-modal-overlay');
+          const isClosed = !el || !el.classList.contains('show');
+          return isClosed && state.mediaBanks && state.mediaBanks.M1 === 'side-graphic-tips';
+        },
+        hint: 'Tap Side Graphic in the Graphics Library, then press DONE.',
       },
       {
         id: 'l2-select-dsk1',
@@ -4984,10 +4999,8 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l2-dsk-auto-intro',
-        watchOnly: true,
-        instruction: 'Good. Now let\'s practice dissolving a key on and off using DSK AUTO.',
+        instruction: 'Good. Now let\'s practice dissolving a key on and off using DSK AUTO. Press NEXT to continue.',
         highlight: ['dsk-auto-1'],
-        delay: 3500,
       },
       {
         id: 'l2-auto-key-on',
@@ -5006,14 +5019,12 @@ function bindQuizDialogFocusLoop() {
       // ── DRIVE: Chroma key ──
       {
         id: 'l2-chroma-intro',
-        watchOnly: true,
-        instruction: 'Now let\'s try a chroma key. Open MEDIA SEL and load Live Bug into M1.',
+        instruction: 'Now let\'s try a chroma key. Next you\'ll open MEDIA SEL and load Live Bug into M1. Press NEXT to continue.',
         highlight: ['media-bank-btn'],
-        delay: 0,
       },
       {
         id: 'l2-chroma-open-media',
-        instruction: 'Open Media Resources.',
+        instruction: 'Open Media Resources using the MEDIA SEL button.',
         highlight: ['media-bank-btn'],
         check: () => {
           const el = document.getElementById('media-modal-overlay');
@@ -5023,10 +5034,14 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l2-chroma-close-media',
-        watchOnly: true,
-        instruction: 'Load Live Bug to M1, then close the panel.',
+        instruction: 'Tap Live Bug in the Graphics Library to load it into M1, then press DONE.',
         highlight: ['media-modal-close'],
-        delay: 0,
+        check: () => {
+          const el = document.getElementById('media-modal-overlay');
+          const isClosed = !el || !el.classList.contains('show');
+          return isClosed && state.mediaBanks && state.mediaBanks.M1 === 'live-bug';
+        },
+        hint: 'Tap Live Bug in the Graphics Library, then press DONE.',
       },
       {
         id: 'l2-set-chr-key',
@@ -5143,10 +5158,13 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l3-open-dve-editor',
-        watchOnly: true,
-        instruction: 'The DVE slot will now show "tap to configure." Tap it and use the Scale slider and D-pad to size it down and move it to the bottom-right corner.',
+        instruction: 'Tap the DVE slot to open the editor. Use the Scale slider to size it down (around 50%), then use the D-pad to move it to the bottom-right corner. Close the editor when done.',
         highlight: ['dve-slot'],
-        delay: 0,
+        check: () => {
+          const dsk = state.dskState[0];
+          return dsk && dsk.dveEnabled && dsk.dveSize < 80 && dsk.dveX >= 58 && dsk.dveY >= 58;
+        },
+        hint: 'Tap the DVE slot. Drag Scale down toward 50%, then use the D-pad to move bottom-right.',
       },
       {
         id: 'l3-preview-dve-key',
@@ -5200,10 +5218,8 @@ function bindQuizDialogFocusLoop() {
       // ── DRIVE: ME 1 composite ──
       {
         id: 'l3-me1-intro',
-        watchOnly: true,
-        instruction: 'Now let\'s build a composite on ME 1. First, switch the surface to ME 1.',
+        instruction: 'Now let\'s build a composite on ME 1. Press NEXT, then switch the surface to ME 1.',
         highlight: ['surface-me1'],
-        delay: 0,
       },
       {
         id: 'l3-switch-to-me1',
@@ -5221,10 +5237,8 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l3-me1-build-intro',
-        watchOnly: true,
-        instruction: 'Now build a side-by-side composite: two sources in DVE PIP boxes, side by side with borders and crop. Use Key 1 for one source and Key 2 for the other.',
+        instruction: 'On ME 1, build a side-by-side composite: two sources in DVE PIP boxes, side by side with borders and crop. Use Key 1 for one source and Key 2 for the other. (Lesson 4 walks through this step by step — for now, build what you can, then press NEXT to continue.)',
         highlight: [],
-        delay: 0,
       },
       {
         id: 'l3-switch-back-mepp',
@@ -5264,10 +5278,8 @@ function bindQuizDialogFocusLoop() {
       // ── DRIVE: ME1 as key source ──
       {
         id: 'l3-me1-as-key-intro',
-        watchOnly: true,
-        instruction: 'Great. Now we\'ll use that ME 1 composite as a DVE key source — like a picture-in-picture of the whole composite.',
+        instruction: 'Great. Next, you\'ll use that ME 1 composite as a DVE key source — like a picture-in-picture of the whole composite. Press NEXT to continue.',
         highlight: [],
-        delay: 3500,
       },
       {
         id: 'l3-sel-dsk1-for-me1',
@@ -5292,10 +5304,13 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l3-position-dve-me1',
-        watchOnly: true,
-        instruction: 'Open the DVE editor and size it down and move it to the bottom-right corner, then close the editor.',
+        instruction: 'Tap the DVE slot to open the editor. Size it down and move it to the bottom-right corner, then close the editor.',
         highlight: ['dve-slot'],
-        delay: 0,
+        check: () => {
+          const dsk = state.dskState[0];
+          return dsk && dsk.dveEnabled && dsk.dveSize < 80 && dsk.dveX >= 58 && dsk.dveY >= 58;
+        },
+        hint: 'Tap the DVE slot. Lower Scale and use the D-pad to move bottom-right.',
       },
       {
         id: 'l3-preview-me1-key',
@@ -5378,10 +5393,8 @@ function bindQuizDialogFocusLoop() {
       // ── DRIVE: Build side-by-side step by step ──
       {
         id: 'l4-sbs-intro',
-        watchOnly: true,
-        instruction: 'Build the side-by-side: DSK 1 = CAM 3 on the left, DSK 2 = CAM 1 on the right. Both need DVE on at ~95% scale with H crop ~40% and a border.',
+        instruction: 'Build the side-by-side: DSK 1 = CAM 3 on the left, DSK 2 = CAM 1 on the right. Both need DVE on at ~95% scale with H crop ~40% and a border. Press NEXT to begin.',
         highlight: [],
-        delay: 4000,
       },
       {
         id: 'l4-sbs-sel-dsk1',
@@ -5413,10 +5426,18 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l4-sbs-config-dve1',
-        watchOnly: true,
-        instruction: 'Open the DVE editor for DSK 1. Set size to ~95%, H crop to ~40%, move X all the way left (~15%), and enable the border. Close when done.',
+        instruction: 'Tap the DVE slot to open the editor for DSK 1. Set Scale to about 95%, H crop to about 40%, move X all the way left (~15%), and turn the Border on. Close when done.',
         highlight: ['dve-slot'],
-        delay: 0,
+        check: () => {
+          const dsk = state.dskState[0];
+          return dsk
+            && dsk.dveEnabled
+            && dsk.dveBorderEnabled
+            && dsk.dveSize >= 92
+            && dsk.dveX <= 30
+            && getDskCropHValue(dsk) >= 35;
+        },
+        hint: 'Tap the DVE slot. Scale up to ~95%, H crop ~40%, drag X left to ~15%, enable Border. Then close.',
       },
       {
         id: 'l4-sbs-sel-dsk2',
@@ -5448,10 +5469,18 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l4-sbs-config-dve2',
-        watchOnly: true,
-        instruction: 'Open the DVE editor for DSK 2. Same size and H crop as DSK 1, but move X all the way right (~85%), and enable the border. Close when done.',
+        instruction: 'Tap the DVE slot to open the editor for DSK 2. Same Scale (~95%) and H crop (~40%) as DSK 1, but move X all the way right (~85%) and turn the Border on. Close when done.',
         highlight: ['dve-slot'],
-        delay: 0,
+        check: () => {
+          const dsk = state.dskState[1];
+          return dsk
+            && dsk.dveEnabled
+            && dsk.dveBorderEnabled
+            && dsk.dveSize >= 92
+            && dsk.dveX >= 70
+            && getDskCropHValue(dsk) >= 35;
+        },
+        hint: 'Tap the DVE slot. Scale ~95%, H crop ~40%, drag X right to ~85%, enable Border. Then close.',
       },
       {
         id: 'l4-store-macro1',
@@ -5471,10 +5500,8 @@ function bindQuizDialogFocusLoop() {
       // ── DRIVE: Build quad step by step ──
       {
         id: 'l4-quad-intro',
-        watchOnly: true,
-        instruction: 'Build the quad: four DVE keys at ~50% scale, each cropped into a corner with H and V crop and borders. CAM 1 top-left, CAM 2 top-right, CAM 3 bottom-left, CPU bottom-right.',
+        instruction: 'Build the quad: four DVE keys at ~50% scale, each cropped into a corner with H and V crop and borders. CAM 1 top-left, CAM 2 top-right, CAM 3 bottom-left, CPU bottom-right. Press NEXT to begin.',
         highlight: [],
-        delay: 4500,
       },
       {
         id: 'l4-quad-sel-dsk1',
@@ -5506,10 +5533,18 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l4-quad-config-dve1',
-        watchOnly: true,
-        instruction: 'Open the DVE editor for DSK 1. Set size to ~50%, add H and V crop, move to the top-left corner, enable the border. Close when done.',
+        instruction: 'Tap the DVE slot to open the editor for DSK 1. Set Scale to about 50%, add some H and V crop, move to the top-left corner, and turn the Border on. Close when done.',
         highlight: ['dve-slot'],
-        delay: 0,
+        check: () => {
+          const dsk = state.dskState[0];
+          return dsk
+            && dsk.dveEnabled
+            && dsk.dveBorderEnabled
+            && dsk.dveSize >= 40 && dsk.dveSize <= 68
+            && dsk.dveX <= 42 && dsk.dveY <= 42
+            && (getDskCropHValue(dsk) > 0 || getDskCropVValue(dsk) > 0);
+        },
+        hint: 'Tap the DVE slot. Scale ~50%, add H and V crop, drag to the top-left corner, enable Border.',
       },
       {
         id: 'l4-quad-sel-dsk2',
@@ -5541,10 +5576,18 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l4-quad-config-dve2',
-        watchOnly: true,
-        instruction: 'DVE editor for DSK 2: same size and crop, move to top-right corner, enable border. Close when done.',
+        instruction: 'Tap the DVE slot to open the editor for DSK 2. Same Scale (~50%) and crop as DSK 1, but move to the top-right corner. Turn the Border on. Close when done.',
         highlight: ['dve-slot'],
-        delay: 0,
+        check: () => {
+          const dsk = state.dskState[1];
+          return dsk
+            && dsk.dveEnabled
+            && dsk.dveBorderEnabled
+            && dsk.dveSize >= 40 && dsk.dveSize <= 68
+            && dsk.dveX >= 58 && dsk.dveY <= 42
+            && (getDskCropHValue(dsk) > 0 || getDskCropVValue(dsk) > 0);
+        },
+        hint: 'Tap the DVE slot. Scale ~50%, add crop, drag to top-right, enable Border.',
       },
       {
         id: 'l4-quad-sel-dsk3',
@@ -5576,10 +5619,18 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l4-quad-config-dve3',
-        watchOnly: true,
-        instruction: 'DVE editor for DSK 3: same size and crop, move to bottom-left corner, enable border. Close when done.',
+        instruction: 'Tap the DVE slot to open the editor for DSK 3. Same Scale (~50%) and crop, move to the bottom-left corner. Turn the Border on. Close when done.',
         highlight: ['dve-slot'],
-        delay: 0,
+        check: () => {
+          const dsk = state.dskState[2];
+          return dsk
+            && dsk.dveEnabled
+            && dsk.dveBorderEnabled
+            && dsk.dveSize >= 40 && dsk.dveSize <= 68
+            && dsk.dveX <= 42 && dsk.dveY >= 58
+            && (getDskCropHValue(dsk) > 0 || getDskCropVValue(dsk) > 0);
+        },
+        hint: 'Tap the DVE slot. Scale ~50%, add crop, drag to bottom-left, enable Border.',
       },
       {
         id: 'l4-quad-sel-dsk4',
@@ -5611,10 +5662,18 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l4-quad-config-dve4',
-        watchOnly: true,
-        instruction: 'DVE editor for DSK 4: same size and crop, move to bottom-right corner, enable border. Close when done.',
+        instruction: 'Tap the DVE slot to open the editor for DSK 4. Same Scale (~50%) and crop, move to the bottom-right corner. Turn the Border on. Close when done.',
         highlight: ['dve-slot'],
-        delay: 0,
+        check: () => {
+          const dsk = state.dskState[3];
+          return dsk
+            && dsk.dveEnabled
+            && dsk.dveBorderEnabled
+            && dsk.dveSize >= 40 && dsk.dveSize <= 68
+            && dsk.dveX >= 58 && dsk.dveY >= 58
+            && (getDskCropHValue(dsk) > 0 || getDskCropVValue(dsk) > 0);
+        },
+        hint: 'Tap the DVE slot. Scale ~50%, add crop, drag to bottom-right, enable Border.',
       },
       {
         id: 'l4-store-macro2',
@@ -5626,10 +5685,8 @@ function bindQuizDialogFocusLoop() {
       // ── DRIVE: Recall workflow ──
       {
         id: 'l4-recall-intro',
-        watchOnly: true,
-        instruction: 'Both composites are stored. Now practice recalling them on demand — like you would live during a show.',
+        instruction: 'Both composites are stored. Now you\'ll practice recalling them on demand — like you would live during a show. Press NEXT to continue.',
         highlight: [],
-        delay: 3500,
       },
       {
         id: 'l4-recall-macro1',
@@ -5698,10 +5755,13 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l4-position-dve-bottom-right',
-        watchOnly: true,
-        instruction: 'Open the DVE editor, size it down, and move it to the bottom-right corner. Close when done.',
+        instruction: 'Tap the DVE slot to open the editor. Size it down and move it to the bottom-right corner. Close when done.',
         highlight: ['dve-slot'],
-        delay: 0,
+        check: () => {
+          const dsk = state.dskState[0];
+          return dsk && dsk.dveEnabled && dsk.dveSize < 80 && dsk.dveX >= 58 && dsk.dveY >= 58;
+        },
+        hint: 'Tap the DVE slot. Lower Scale and drag to bottom-right.',
       },
       {
         id: 'l4-preview-key1-me1',
@@ -5734,10 +5794,8 @@ function bindQuizDialogFocusLoop() {
       // ── DRIVE: Recall Macro 2 and dissolve it to air ──
       {
         id: 'l4-recall-macro2-prep',
-        watchOnly: true,
-        instruction: 'Final challenge: recall the quad composite from ME 1 Macro 2 and dissolve it to air.',
+        instruction: 'Final challenge: recall the quad composite from ME 1 Macro 2 and dissolve it to air. Press NEXT to begin.',
         highlight: [],
-        delay: 3500,
       },
       {
         id: 'l4-switch-to-me1-recall2',
@@ -5912,6 +5970,11 @@ function bindQuizDialogFocusLoop() {
       nextBtn.textContent = 'NEXT ›';
       nextBtn.style.display = 'inline-flex';
       hintBtn.style.display = 'none';
+    } else if (!lessonState.watchMode && !step.watchOnly && !step.check) {
+      // Drive-mode info step — no check, advance with NEXT
+      nextBtn.textContent = 'NEXT ›';
+      nextBtn.style.display = 'inline-flex';
+      hintBtn.style.display = 'none';
     } else if (!lessonState.watchMode && !step.watchOnly) {
       nextBtn.style.display = 'none';
       hintBtn.style.display = step.hint ? 'inline-flex' : 'none';
@@ -5972,8 +6035,22 @@ function bindQuizDialogFocusLoop() {
 
     lessonState.stepIndex += 1;
 
+    // In drive mode, NEXT should also skip any subsequent watchOnly steps
+    if (!lessonState.watchMode) {
+      while (
+        lessonState.stepIndex < lessonState.steps.length &&
+        lessonState.steps[lessonState.stepIndex].watchOnly
+      ) {
+        lessonState.stepIndex += 1;
+      }
+    }
+
     if (lessonState.stepIndex >= lessonState.steps.length) {
-      endLesson();
+      if (!lessonState.watchMode) {
+        completeLessonDrive();
+      } else {
+        endLesson();
+      }
       return;
     }
 
@@ -6053,6 +6130,14 @@ function bindQuizDialogFocusLoop() {
           completeLessonDrive();
         } else {
           updateLessonBar();
+          // If the new step's condition is already satisfied (e.g., prior
+          // state already meets the check), advance through it.
+          const newStep = currentLessonStep();
+          if (newStep && !newStep.watchOnly && typeof newStep.check === 'function') {
+            try {
+              if (newStep.check()) lessonCheckInteraction();
+            } catch (e) { /* ignore */ }
+          }
         }
       }, 600);
     } else {

@@ -61,7 +61,8 @@ Notes:
 | `L2-l2-take-cam1.hint` | Hint | Select CAM 1 in Preview, then press CUT. |
 | `L2-l2-open-media.instruction` | Drive | Open Media Resources using the MEDIA SEL button. |
 | `L2-l2-open-media.hint` | Hint | Press the MEDIA SEL button. |
-| `L2-l2-close-media.instruction` | Watch | Good. The Side Graphic should already be loaded in M1. Close the media panel when you're ready. |
+| `L2-l2-close-media.instruction` | Drive | In the Graphics Library, tap Side Graphic to load it into M1, then press DONE to close the panel. |
+| `L2-l2-close-media.hint` | Hint | Tap Side Graphic in the Graphics Library, then press DONE. |
 | `L2-l2-select-dsk1.instruction` | Drive | Select DSK channel 1 using the SEL 1 button. |
 | `L2-l2-select-dsk1.hint` | Hint | Press SEL 1 in the DSK section. |
 | `L2-l2-set-key-source-m1.instruction` | Drive | Set the Key Source to M1. |
@@ -82,15 +83,16 @@ Notes:
 | `L2-l2-cut-cam2-under-key.hint` | Hint | Press CUT. The background changes but Key 1 remains on air. |
 | `L2-l2-cut-key-off.instruction` | Drive | Take Key 1 off using DSK CUT 1. |
 | `L2-l2-cut-key-off.hint` | Hint | Press CUT in the DSK 1 row to take the key off. |
-| `L2-l2-dsk-auto-intro.instruction` | Watch | Good. Now let's practice dissolving a key on and off using DSK AUTO. |
+| `L2-l2-dsk-auto-intro.instruction` | Drive | Good. Now let's practice dissolving a key on and off using DSK AUTO. Press NEXT to continue. |
 | `L2-l2-auto-key-on.instruction` | Drive | Dissolve Key 1 back on using DSK AUTO 1. |
 | `L2-l2-auto-key-on.hint` | Hint | Press AUTO in the DSK 1 row. |
 | `L2-l2-auto-key-off.instruction` | Drive | Now dissolve Key 1 off using DSK AUTO 1. |
 | `L2-l2-auto-key-off.hint` | Hint | Press AUTO in the DSK 1 row again to dissolve the key off. |
-| `L2-l2-chroma-intro.instruction` | Watch | Now let's try a chroma key. Open MEDIA SEL and load Live Bug into M1. |
-| `L2-l2-chroma-open-media.instruction` | Drive | Open Media Resources. |
+| `L2-l2-chroma-intro.instruction` | Drive | Now let's try a chroma key. Next you'll open MEDIA SEL and load Live Bug into M1. Press NEXT to continue. |
+| `L2-l2-chroma-open-media.instruction` | Drive | Open Media Resources using the MEDIA SEL button. |
 | `L2-l2-chroma-open-media.hint` | Hint | Press MEDIA SEL. |
-| `L2-l2-chroma-close-media.instruction` | Watch | Load Live Bug to M1, then close the panel. |
+| `L2-l2-chroma-close-media.instruction` | Drive | Tap Live Bug in the Graphics Library to load it into M1, then press DONE. |
+| `L2-l2-chroma-close-media.hint` | Hint | Tap Live Bug in the Graphics Library, then press DONE. |
 | `L2-l2-set-chr-key.instruction` | Drive | Set the key type to CHR (chroma key). |
 | `L2-l2-set-chr-key.hint` | Hint | Press CHR in the Type of Key row. |
 | `L2-l2-set-chr-blue.instruction` | Drive | Set the chroma color to BLUE (Live Bug uses a blue screen). |
@@ -120,7 +122,8 @@ Notes:
 | `L3-l3-set-cpu-source.hint` | Hint | Find CPU in the Key Source row. |
 | `L3-l3-enable-dve.instruction` | Drive | Enable DVE on this key using the DVE button. |
 | `L3-l3-enable-dve.hint` | Hint | Press DVE in the Type of Key row. |
-| `L3-l3-open-dve-editor.instruction` | Watch | The DVE slot will now show "tap to configure." Tap it and use the Scale slider and D-pad to size it down and move it to the bottom-right corner. |
+| `L3-l3-open-dve-editor.instruction` | Drive | Tap the DVE slot to open the editor. Use the Scale slider to size it down (around 50%), then use the D-pad to move it to the bottom-right corner. Close the editor when done. |
+| `L3-l3-open-dve-editor.hint` | Hint | Tap the DVE slot. Drag Scale down toward 50%, then use the D-pad to move bottom-right. |
 | `L3-l3-preview-dve-key.instruction` | Drive | When positioned, arm KEY 1 in the Preview/Tie row. |
 | `L3-l3-preview-dve-key.hint` | Hint | Press KEY 1 in the Preview/Tie row. |
 | `L3-l3-ready-cam2.instruction` | Drive | Ready CAM 2 on Preview. |
@@ -135,12 +138,12 @@ Notes:
 | `L3-l3-cut-cpu-under-key.hint` | Hint | Press CUT. |
 | `L3-l3-auto-key-off.instruction` | Drive | Auto Key 1 off using DSK AUTO 1. |
 | `L3-l3-auto-key-off.hint` | Hint | Press AUTO in the DSK 1 row. |
-| `L3-l3-me1-intro.instruction` | Watch | Now let's build a composite on ME 1. First, switch the surface to ME 1. |
+| `L3-l3-me1-intro.instruction` | Drive | Now let's build a composite on ME 1. Press NEXT, then switch the surface to ME 1. |
 | `L3-l3-switch-to-me1.instruction` | Drive | Switch the active surface to ME 1. |
 | `L3-l3-switch-to-me1.hint` | Hint | Press ME 1 in the Surface selector. |
 | `L3-l3-take-blk-me1.instruction` | Drive | Take BLK on ME 1 - this gives us a clean black canvas to build on. |
 | `L3-l3-take-blk-me1.hint` | Hint | Ready BLK on Preview then press CUT. |
-| `L3-l3-me1-build-intro.instruction` | Watch | Now build a side-by-side composite: two sources in DVE PIP boxes, side by side with borders and crop. Use Key 1 for one source and Key 2 for the other. |
+| `L3-l3-me1-build-intro.instruction` | Drive | On ME 1, build a side-by-side composite: two sources in DVE PIP boxes, side by side with borders and crop. Use Key 1 for one source and Key 2 for the other. (Lesson 4 walks through this step by step - for now, build what you can, then press NEXT to continue.) |
 | `L3-l3-switch-back-mepp.instruction` | Drive | When your side-by-side composite is complete, switch back to ME P/P. |
 | `L3-l3-switch-back-mepp.hint` | Hint | Press ME P/P in the Surface selector. |
 | `L3-l3-ready-me1.instruction` | Drive | Ready ME1 as a source on Preview. |
@@ -151,14 +154,15 @@ Notes:
 | `L3-l3-ready-cam2-from-me1.hint` | Hint | Select CAM 2 in the Preview row. |
 | `L3-l3-take-cam2-from-me1.instruction` | Drive | CUT to CAM 2. |
 | `L3-l3-take-cam2-from-me1.hint` | Hint | Press CUT. |
-| `L3-l3-me1-as-key-intro.instruction` | Watch | Great. Now we'll use that ME 1 composite as a DVE key source - like a picture-in-picture of the whole composite. |
+| `L3-l3-me1-as-key-intro.instruction` | Drive | Great. Next, you'll use that ME 1 composite as a DVE key source - like a picture-in-picture of the whole composite. Press NEXT to continue. |
 | `L3-l3-sel-dsk1-for-me1.instruction` | Drive | Select DSK 1. |
 | `L3-l3-sel-dsk1-for-me1.hint` | Hint | Press SEL 1. |
 | `L3-l3-set-me1-source.instruction` | Drive | Set the Key Source to ME1. |
 | `L3-l3-set-me1-source.hint` | Hint | Find ME1 in the Key Source row. |
 | `L3-l3-enable-dve-me1.instruction` | Drive | Enable DVE for this key. |
 | `L3-l3-enable-dve-me1.hint` | Hint | Press DVE in the Type of Key row. |
-| `L3-l3-position-dve-me1.instruction` | Watch | Open the DVE editor and size it down and move it to the bottom-right corner, then close the editor. |
+| `L3-l3-position-dve-me1.instruction` | Drive | Tap the DVE slot to open the editor. Size it down and move it to the bottom-right corner, then close the editor. |
+| `L3-l3-position-dve-me1.hint` | Hint | Tap the DVE slot. Lower Scale and use the D-pad to move bottom-right. |
 | `L3-l3-preview-me1-key.instruction` | Drive | Arm KEY 1 in the Preview/Tie row. |
 | `L3-l3-preview-me1-key.hint` | Hint | Press KEY 1 in the Preview/Tie row. |
 | `L3-l3-ready-cam1-for-me1-key.instruction` | Drive | Ready CAM 1 on Preview. |
@@ -180,7 +184,7 @@ Notes:
 | `L4-l4-switch-to-me1-build1.hint` | Hint | Press ME 1 in the Surface selector. |
 | `L4-l4-blk-me1-build1.instruction` | Drive | Take BLK on ME 1. |
 | `L4-l4-blk-me1-build1.hint` | Hint | Ready BLK then CUT. |
-| `L4-l4-sbs-intro.instruction` | Watch | Build the side-by-side: DSK 1 = CAM 3 on the left, DSK 2 = CAM 1 on the right. Both need DVE on at ~95% scale with H crop ~40% and a border. |
+| `L4-l4-sbs-intro.instruction` | Drive | Build the side-by-side: DSK 1 = CAM 3 on the left, DSK 2 = CAM 1 on the right. Both need DVE on at ~95% scale with H crop ~40% and a border. Press NEXT to begin. |
 | `L4-l4-sbs-sel-dsk1.instruction` | Drive | Select DSK 1. |
 | `L4-l4-sbs-sel-dsk1.hint` | Hint | Press SEL 1. |
 | `L4-l4-sbs-src-cam3.instruction` | Drive | Set the Key Source to CAM 3 - the left side of the frame. |
@@ -189,7 +193,8 @@ Notes:
 | `L4-l4-sbs-dve1.hint` | Hint | Press DVE in the Type of Key row. |
 | `L4-l4-sbs-cut1-on.instruction` | Drive | Cut DSK 1 on to activate it. |
 | `L4-l4-sbs-cut1-on.hint` | Hint | Press CUT in the DSK 1 column. |
-| `L4-l4-sbs-config-dve1.instruction` | Watch | Open the DVE editor for DSK 1. Set size to ~95%, H crop to ~40%, move X all the way left (~15%), and enable the border. Close when done. |
+| `L4-l4-sbs-config-dve1.instruction` | Drive | Tap the DVE slot to open the editor for DSK 1. Set Scale to about 95%, H crop to about 40%, move X all the way left (~15%), and turn the Border on. Close when done. |
+| `L4-l4-sbs-config-dve1.hint` | Hint | Tap the DVE slot. Scale up to ~95%, H crop ~40%, drag X left to ~15%, enable Border. Then close. |
 | `L4-l4-sbs-sel-dsk2.instruction` | Drive | Select DSK 2. |
 | `L4-l4-sbs-sel-dsk2.hint` | Hint | Press SEL 2. |
 | `L4-l4-sbs-src-cam1.instruction` | Drive | Set the Key Source to CAM 1 - the right side of the frame. |
@@ -198,12 +203,13 @@ Notes:
 | `L4-l4-sbs-dve2.hint` | Hint | Press DVE in the Type of Key row. |
 | `L4-l4-sbs-cut2-on.instruction` | Drive | Cut DSK 2 on. |
 | `L4-l4-sbs-cut2-on.hint` | Hint | Press CUT in the DSK 2 column. |
-| `L4-l4-sbs-config-dve2.instruction` | Watch | Open the DVE editor for DSK 2. Same size and H crop as DSK 1, but move X all the way right (~85%), and enable the border. Close when done. |
+| `L4-l4-sbs-config-dve2.instruction` | Drive | Tap the DVE slot to open the editor for DSK 2. Same Scale (~95%) and H crop (~40%) as DSK 1, but move X all the way right (~85%) and turn the Border on. Close when done. |
+| `L4-l4-sbs-config-dve2.hint` | Hint | Tap the DVE slot. Scale ~95%, H crop ~40%, drag X right to ~85%, enable Border. Then close. |
 | `L4-l4-store-macro1.instruction` | Drive | Store this side-by-side to ME 1 Macro 1 - press STORE next to the ME1 memory bank, then press slot 1. |
 | `L4-l4-store-macro1.hint` | Hint | Press STORE in the ME1 memory row, then press slot button 1. |
 | `L4-l4-blk-me1-build2.instruction` | Drive | Take BLK on ME 1 again to clear the canvas. |
 | `L4-l4-blk-me1-build2.hint` | Hint | Ready BLK then CUT. |
-| `L4-l4-quad-intro.instruction` | Watch | Build the quad: four DVE keys at ~50% scale, each cropped into a corner with H and V crop and borders. CAM 1 top-left, CAM 2 top-right, CAM 3 bottom-left, CPU bottom-right. |
+| `L4-l4-quad-intro.instruction` | Drive | Build the quad: four DVE keys at ~50% scale, each cropped into a corner with H and V crop and borders. CAM 1 top-left, CAM 2 top-right, CAM 3 bottom-left, CPU bottom-right. Press NEXT to begin. |
 | `L4-l4-quad-sel-dsk1.instruction` | Drive | Select DSK 1. |
 | `L4-l4-quad-sel-dsk1.hint` | Hint | Press SEL 1. |
 | `L4-l4-quad-src-cam1.instruction` | Drive | Set DSK 1 Key Source to CAM 1 - top-left corner. |
@@ -212,7 +218,8 @@ Notes:
 | `L4-l4-quad-dve1.hint` | Hint | Press DVE in the Type of Key row. |
 | `L4-l4-quad-cut1-on.instruction` | Drive | Cut DSK 1 on. |
 | `L4-l4-quad-cut1-on.hint` | Hint | Press CUT in the DSK 1 column. |
-| `L4-l4-quad-config-dve1.instruction` | Watch | Open the DVE editor for DSK 1. Set size to ~50%, add H and V crop, move to the top-left corner, enable the border. Close when done. |
+| `L4-l4-quad-config-dve1.instruction` | Drive | Tap the DVE slot to open the editor for DSK 1. Set Scale to about 50%, add some H and V crop, move to the top-left corner, and turn the Border on. Close when done. |
+| `L4-l4-quad-config-dve1.hint` | Hint | Tap the DVE slot. Scale ~50%, add H and V crop, drag to the top-left corner, enable Border. |
 | `L4-l4-quad-sel-dsk2.instruction` | Drive | Select DSK 2. |
 | `L4-l4-quad-sel-dsk2.hint` | Hint | Press SEL 2. |
 | `L4-l4-quad-src-cam2.instruction` | Drive | Set DSK 2 Key Source to CAM 2 - top-right corner. |
@@ -221,7 +228,8 @@ Notes:
 | `L4-l4-quad-dve2.hint` | Hint | Press DVE in the Type of Key row. |
 | `L4-l4-quad-cut2-on.instruction` | Drive | Cut DSK 2 on. |
 | `L4-l4-quad-cut2-on.hint` | Hint | Press CUT in the DSK 2 column. |
-| `L4-l4-quad-config-dve2.instruction` | Watch | DVE editor for DSK 2: same size and crop, move to top-right corner, enable border. Close when done. |
+| `L4-l4-quad-config-dve2.instruction` | Drive | Tap the DVE slot to open the editor for DSK 2. Same Scale (~50%) and crop as DSK 1, but move to the top-right corner. Turn the Border on. Close when done. |
+| `L4-l4-quad-config-dve2.hint` | Hint | Tap the DVE slot. Scale ~50%, add crop, drag to top-right, enable Border. |
 | `L4-l4-quad-sel-dsk3.instruction` | Drive | Select DSK 3. |
 | `L4-l4-quad-sel-dsk3.hint` | Hint | Press SEL 3. |
 | `L4-l4-quad-src-cam3.instruction` | Drive | Set DSK 3 Key Source to CAM 3 - bottom-left corner. |
@@ -230,7 +238,8 @@ Notes:
 | `L4-l4-quad-dve3.hint` | Hint | Press DVE in the Type of Key row. |
 | `L4-l4-quad-cut3-on.instruction` | Drive | Cut DSK 3 on. |
 | `L4-l4-quad-cut3-on.hint` | Hint | Press CUT in the DSK 3 column. |
-| `L4-l4-quad-config-dve3.instruction` | Watch | DVE editor for DSK 3: same size and crop, move to bottom-left corner, enable border. Close when done. |
+| `L4-l4-quad-config-dve3.instruction` | Drive | Tap the DVE slot to open the editor for DSK 3. Same Scale (~50%) and crop, move to the bottom-left corner. Turn the Border on. Close when done. |
+| `L4-l4-quad-config-dve3.hint` | Hint | Tap the DVE slot. Scale ~50%, add crop, drag to bottom-left, enable Border. |
 | `L4-l4-quad-sel-dsk4.instruction` | Drive | Select DSK 4. |
 | `L4-l4-quad-sel-dsk4.hint` | Hint | Press SEL 4. |
 | `L4-l4-quad-src-cpu.instruction` | Drive | Set DSK 4 Key Source to CPU - bottom-right corner. |
@@ -239,10 +248,11 @@ Notes:
 | `L4-l4-quad-dve4.hint` | Hint | Press DVE in the Type of Key row. |
 | `L4-l4-quad-cut4-on.instruction` | Drive | Cut DSK 4 on. |
 | `L4-l4-quad-cut4-on.hint` | Hint | Press CUT in the DSK 4 column. |
-| `L4-l4-quad-config-dve4.instruction` | Watch | DVE editor for DSK 4: same size and crop, move to bottom-right corner, enable border. Close when done. |
+| `L4-l4-quad-config-dve4.instruction` | Drive | Tap the DVE slot to open the editor for DSK 4. Same Scale (~50%) and crop, move to the bottom-right corner. Turn the Border on. Close when done. |
+| `L4-l4-quad-config-dve4.hint` | Hint | Tap the DVE slot. Scale ~50%, add crop, drag to bottom-right, enable Border. |
 | `L4-l4-store-macro2.instruction` | Drive | Store the quad to ME 1 Macro 2. |
 | `L4-l4-store-macro2.hint` | Hint | Press STORE in the ME1 row, then press slot 2. |
-| `L4-l4-recall-intro.instruction` | Watch | Both composites are stored. Now practice recalling them on demand - like you would live during a show. |
+| `L4-l4-recall-intro.instruction` | Drive | Both composites are stored. Now you'll practice recalling them on demand - like you would live during a show. Press NEXT to continue. |
 | `L4-l4-recall-macro1.instruction` | Drive | Recall ME 1 Macro 1 to load the side-by-side back onto ME 1. |
 | `L4-l4-recall-macro1.hint` | Hint | Press RECALL then slot 1 in the ME1 memory row. |
 | `L4-l4-switch-to-mepp.instruction` | Drive | Switch back to ME P/P. |
@@ -261,7 +271,8 @@ Notes:
 | `L4-l4-set-me1-key-source.hint` | Hint | Find ME1 in the Key Source row. |
 | `L4-l4-enable-dve-key.instruction` | Drive | Enable DVE for Key 1. |
 | `L4-l4-enable-dve-key.hint` | Hint | Press DVE in the Type of Key row. |
-| `L4-l4-position-dve-bottom-right.instruction` | Watch | Open the DVE editor, size it down, and move it to the bottom-right corner. Close when done. |
+| `L4-l4-position-dve-bottom-right.instruction` | Drive | Tap the DVE slot to open the editor. Size it down and move it to the bottom-right corner. Close when done. |
+| `L4-l4-position-dve-bottom-right.hint` | Hint | Tap the DVE slot. Lower Scale and drag to bottom-right. |
 | `L4-l4-preview-key1-me1.instruction` | Drive | Arm KEY 1 in the Preview/Tie row. |
 | `L4-l4-preview-key1-me1.hint` | Hint | Press KEY 1 in the Preview/Tie row. |
 | `L4-l4-ready-cam1-for-key.instruction` | Drive | Ready CAM 1 on Preview. |
@@ -270,7 +281,7 @@ Notes:
 | `L4-l4-dissolve-cam1-with-me1-key.hint` | Hint | Press AUTO. |
 | `L4-l4-auto-off-final.instruction` | Drive | Dissolve Key 1 off. |
 | `L4-l4-auto-off-final.hint` | Hint | Press AUTO in the DSK 1 row. |
-| `L4-l4-recall-macro2-prep.instruction` | Watch | Final challenge: recall the quad composite from ME 1 Macro 2 and dissolve it to air. |
+| `L4-l4-recall-macro2-prep.instruction` | Drive | Final challenge: recall the quad composite from ME 1 Macro 2 and dissolve it to air. Press NEXT to begin. |
 | `L4-l4-switch-to-me1-recall2.instruction` | Drive | Switch to ME 1. |
 | `L4-l4-switch-to-me1-recall2.hint` | Hint | Press ME 1. |
 | `L4-l4-recall-macro2.instruction` | Drive | Recall ME 1 Macro 2. |

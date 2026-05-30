@@ -158,10 +158,22 @@ async function getAdmins() {
 async function saveQuizSubmission(summary) {
   if (!summary || !summary.confirmation_code) throw new Error('Quiz submission needs a confirmation code.');
   const payload = {
+    result_type: 'quiz',
     ...summary,
     createdAt: serverTimestamp(),
   };
   await setDoc(doc(db, 'quiz_submissions', summary.confirmation_code), payload, { merge: true });
+  return payload;
+}
+
+async function saveLessonSubmission(summary) {
+  if (!summary || !summary.confirmation_code) throw new Error('Lesson submission needs a confirmation code.');
+  const payload = {
+    result_type: 'lesson',
+    ...summary,
+    createdAt: serverTimestamp(),
+  };
+  await setDoc(doc(db, 'lesson_submissions', summary.confirmation_code), payload, { merge: true });
   return payload;
 }
 
@@ -173,6 +185,42 @@ async function getQuizSubmissions(maxCount = 100) {
   );
   const snapshot = await getDocs(submissionQuery);
   return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+}
+
+async function getLessonSubmissions(maxCount = 100) {
+  const submissionQuery = query(
+    collection(db, 'lesson_submissions'),
+    orderBy('createdAt', 'desc'),
+    limit(maxCount)
+  );
+  const snapshot = await getDocs(submissionQuery);
+  return snapshot.docs.map((item) => ({ id: item.id, result_type: 'lesson', ...item.data() }));
+}
+
+function submissionTimeMs(item) {
+  const value = item && (item.createdAt || item.date);
+  if (!value) return 0;
+  if (typeof value.toDate === 'function') return value.toDate().getTime();
+  if (typeof value === 'string') return Date.parse(value) || 0;
+  if (value.seconds) return value.seconds * 1000;
+  return 0;
+}
+
+async function getStudentResults(maxCount = 100) {
+  const results = await Promise.allSettled([
+    getQuizSubmissions(maxCount),
+    getLessonSubmissions(maxCount),
+  ]);
+  const fulfilledResults = results.filter((result) => result.status === 'fulfilled');
+  const successfulResults = results
+    .filter((result) => result.status === 'fulfilled')
+    .flatMap((result) => result.value);
+  if (!fulfilledResults.length && results.some((result) => result.status === 'rejected')) {
+    throw results.find((result) => result.status === 'rejected').reason;
+  }
+  return successfulResults
+    .sort((a, b) => submissionTimeMs(b) - submissionTimeMs(a))
+    .slice(0, maxCount);
 }
 
 async function getNarration(referenceId, voice, rate, textHash) {
@@ -204,7 +252,10 @@ window.SwitchUpFirebase = {
   getAdmins,
   hashAdminCode: sha256,
   saveQuizSubmission,
+  saveLessonSubmission,
   getQuizSubmissions,
+  getLessonSubmissions,
+  getStudentResults,
   getNarration,
 };
 

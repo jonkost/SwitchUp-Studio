@@ -1543,6 +1543,10 @@
       .toUpperCase();
   }
 
+  function lessonCodeFrom() {
+    return `LSN-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`.toUpperCase();
+  }
+
   function buildQuizBreakdownText() {
     return state.quizResults
       .map((result, index) => {
@@ -4040,9 +4044,11 @@ const RUN_THE_SHOW = {
       : `${state.quizScore}/${total}`;
 
     const formData = {
+      result_type: 'quiz',
       _subject: `SwitchUp Studio — ${state.practiceQuiz ? 'Practice ' : ''}${level} — ${state.quizName}${state.quizClass ? ` — ${state.quizClass}` : ''} — ${scoreText}`,
       student_name: state.quizName,
       class_name: state.quizClass || 'Not provided',
+      activity: level,
       quiz_level: level,
       score: scoreText,
       time: summary.timeString,
@@ -6372,15 +6378,27 @@ function bindQuizDialogFocusLoop() {
     }).join('\n');
 
     const body = {
+      result_type: 'lesson',
       _subject: `SwitchUp Lesson Results — ${lessonState.studentName || 'Student'} — ${lessonName}`,
       student_name: lessonState.studentName || 'Anonymous',
       class_name: lessonState.studentClass || '—',
+      activity: lessonName,
       lesson: lessonName,
+      score: `${lessonState.stepLog.length} steps, ${totalMistakes} mistake${totalMistakes === 1 ? '' : 's'}`,
       time: `${mm}:${ss}`,
       total_mistakes: String(totalMistakes),
       steps_completed: String(lessonState.stepLog.length),
+      date: new Date().toLocaleString(),
+      confirmation_code: lessonCodeFrom(),
       breakdown,
     };
+
+    if (window.SwitchUpFirebase && typeof window.SwitchUpFirebase.saveLessonSubmission === 'function') {
+      window.SwitchUpFirebase.saveLessonSubmission(body)
+        .catch((error) => {
+          console.error('Firestore lesson submission failed:', error);
+        });
+    }
 
     fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',

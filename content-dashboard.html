@@ -6,24 +6,24 @@
   <title>SwitchUp Studio Content Dashboard</title>
   <style>
     :root {
-      --page: #0a0a0c;
-      --page-2: #101116;
-      --ink: #f2f2f6;
-      --muted: #9a9da8;
-      --panel: #15161d;
-      --panel-soft: #101116;
-      --line: #31323c;
-      --chrome: #0d0e13;
-      --chrome-2: #191a22;
-      --blue: #6aa9ff;
-      --blue-deep: #1f65d6;
+      --page: #f4f7fb;
+      --page-2: #eaf0f7;
+      --ink: #16202c;
+      --muted: #667386;
+      --panel: #ffffff;
+      --panel-soft: #f7f9fc;
+      --line: #d9e1ec;
+      --chrome: #ffffff;
+      --chrome-2: #eef4fb;
+      --blue: #256bd8;
+      --blue-deep: #174ea6;
       --green: #24b36b;
       --green-deep: #128047;
-      --purple: #a891ff;
-      --amber: #f4b63f;
-      --red: #ef4a4a;
-      --shadow: 0 16px 38px rgba(0, 0, 0, 0.34);
-      --button-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 8px 18px rgba(0, 0, 0, 0.22);
+      --purple: #7758d6;
+      --amber: #b56b00;
+      --red: #c93636;
+      --shadow: 0 14px 34px rgba(20, 34, 55, 0.1);
+      --button-shadow: 0 1px 2px rgba(20, 34, 55, 0.08);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
@@ -33,7 +33,8 @@
       margin: 0;
       min-height: 100vh;
       background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 260px),
+        radial-gradient(circle at top left, rgba(125, 179, 255, 0.13), transparent 360px),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0) 320px),
         var(--page);
       color: var(--ink);
     }
@@ -60,16 +61,28 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 0 12px;
-      background: linear-gradient(180deg, #1b1c24, #111218);
+      background: linear-gradient(180deg, #202636, #151a25);
       color: var(--ink);
       font-size: 13px;
       font-weight: 900;
       box-shadow: var(--button-shadow);
+      transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease, opacity 0.12s ease;
+    }
+
+    .primary-btn:hover,
+    .ghost-btn:hover,
+    .ghost-link-btn:hover,
+    .filter-btn:hover,
+    .copy-btn:hover,
+    .save-btn:hover,
+    .dashboard-tab:hover {
+      transform: translateY(-1px);
+      border-color: #4a5a72;
     }
 
     .primary-btn {
-      background: linear-gradient(180deg, #2f7ef0, #174aaf);
-      border-color: #2f7ef0;
+      background: linear-gradient(180deg, #3d8bff, #215ec3);
+      border-color: #3d8bff;
       color: #fff;
     }
 
@@ -241,10 +254,10 @@
 
     .topbar {
       background:
-        linear-gradient(90deg, rgba(30, 141, 245, 0.12), transparent 42%, rgba(239, 74, 74, 0.1)),
-        linear-gradient(180deg, var(--chrome-2), var(--chrome));
+        linear-gradient(135deg, rgba(61, 139, 255, 0.16), transparent 42%),
+        linear-gradient(180deg, #151a24, #0b0e14);
       color: #fff;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .topbar-inner,
@@ -255,8 +268,8 @@
 
     .topbar-inner {
       display: grid;
-      gap: 18px;
-      padding: 20px 0;
+      gap: 16px;
+      padding: 28px 0 30px;
     }
 
     .nav-row {
@@ -289,30 +302,44 @@
 
     .hero-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 330px;
-      gap: 18px;
-      align-items: end;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 22px;
+      align-items: center;
     }
 
     h1 {
-      margin: 12px 0 8px;
-      font-size: clamp(34px, 5vw, 58px);
-      line-height: 0.95;
+      margin: 9px 0 8px;
+      font-size: clamp(34px, 4vw, 46px);
+      line-height: 1;
       letter-spacing: 0;
+    }
+
+    .page-kicker {
+      width: fit-content;
+      border: 1px solid rgba(125, 179, 255, 0.28);
+      border-radius: 999px;
+      padding: 5px 9px;
+      color: #bdd8ff;
+      background: rgba(125, 179, 255, 0.09);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
     }
 
     .hero-copy {
       max-width: 720px;
-      color: #c9ced8;
+      color: #c7d0dd;
       font-size: 15px;
       line-height: 1.5;
     }
 
     .workflow-card {
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.11);
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.06);
-      padding: 14px;
+      background: rgba(255, 255, 255, 0.055);
+      padding: 16px;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
     }
 
     .workflow-title {
@@ -353,31 +380,31 @@
     }
 
     main {
-      padding: 18px 0 46px;
+      padding: 0 0 46px;
     }
 
     .control-panel {
       display: grid;
-      gap: 12px;
-      margin-top: -4px;
+      gap: 14px;
+      margin-top: -18px;
       padding: 14px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: rgba(21, 22, 29, 0.92);
+      background: rgba(20, 24, 33, 0.94);
       backdrop-filter: blur(12px);
       box-shadow: var(--shadow);
     }
 
     .toolbar {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(280px, 1fr) auto auto;
       gap: 12px;
       align-items: center;
     }
 
     .content-controls {
       display: grid;
-      gap: 12px;
+      gap: 10px;
     }
 
     .content-controls[hidden] {
@@ -386,25 +413,32 @@
 
     .dashboard-tabs {
       display: flex;
-      gap: 10px;
+      gap: 6px;
       flex-wrap: wrap;
+      width: fit-content;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-soft);
     }
 
     .dashboard-tab {
-      min-height: 40px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
+      min-height: 36px;
+      border: 1px solid transparent;
+      border-radius: 7px;
       padding: 0 14px;
-      background: linear-gradient(180deg, #1b1c24, #111218);
+      background: transparent;
       color: var(--ink);
       font-size: 13px;
       font-weight: 950;
+      box-shadow: none;
     }
 
     .dashboard-tab[aria-pressed="true"] {
       color: #fff;
-      background: linear-gradient(180deg, #2f7ef0, #174aaf);
-      border-color: #0f67d7;
+      background: linear-gradient(180deg, #2f7ef0, #1d55b7);
+      border-color: #327de8;
+      box-shadow: var(--button-shadow);
     }
 
     .search-wrap {
@@ -450,19 +484,19 @@
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 12px;
-      margin: 18px 0;
+      margin: 18px 0 12px;
     }
 
     .stat {
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 14px;
-      background: linear-gradient(180deg, #171820, #101116);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+      padding: 16px;
+      background: linear-gradient(180deg, #171c27, #10141d);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
     }
 
     .stat-value {
-      font-size: 28px;
+      font-size: 30px;
       font-weight: 950;
       line-height: 1;
     }
@@ -477,19 +511,19 @@
     }
 
     .results-line {
-      margin-bottom: 12px;
+      margin: 0 0 12px;
       color: var(--muted);
       font-size: 13px;
       font-weight: 850;
     }
 
     .section {
-      margin-top: 16px;
+      margin-top: 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--panel);
       overflow: hidden;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
     }
 
     .section[open] {
@@ -505,9 +539,9 @@
       justify-content: space-between;
       gap: 12px;
       align-items: center;
-      padding: 14px 16px;
+      padding: 13px 16px;
       border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, #1b1c24, #12131a);
+      background: linear-gradient(180deg, #1a202b, #121721);
       cursor: pointer;
       list-style: none;
     }
@@ -560,8 +594,9 @@
       grid-template-columns: 290px minmax(0, 1fr) 112px;
       gap: 14px;
       align-items: stretch;
-      padding: 14px 16px;
+      padding: 16px;
       border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.01);
     }
 
     .item:last-child { border-bottom: none; }
@@ -676,9 +711,9 @@
     .grade-card {
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 16px;
-      background: var(--panel);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+      padding: 18px;
+      background: linear-gradient(180deg, #171c27, #121722);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
     }
 
     .admin-card h2,
@@ -721,6 +756,118 @@
       font-weight: 800;
     }
 
+    .gradebook-toolbar {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) 160px auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .grade-search,
+    .grade-filter-select {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      background: #0d1119;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .grade-search {
+      width: 100%;
+    }
+
+    .grade-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+    }
+
+    .grade-table {
+      width: 100%;
+      min-width: 860px;
+      border-collapse: collapse;
+    }
+
+    .grade-table th,
+    .grade-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    .grade-table th {
+      color: var(--muted);
+      background: #0d1119;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .grade-table tbody tr {
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .grade-table tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .grade-table tbody tr:hover {
+      background: rgba(125, 179, 255, 0.055);
+    }
+
+    .grade-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .grade-kind {
+      width: fit-content;
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: rgba(106, 169, 255, 0.16);
+      color: #9ec5ff;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .grade-kind.lesson {
+      background: rgba(244, 182, 63, 0.16);
+      color: #ffd475;
+    }
+
+    .grade-detail {
+      margin-top: 8px;
+    }
+
+    .grade-detail summary {
+      color: var(--blue);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .grade-breakdown {
+      max-height: 170px;
+      overflow: auto;
+      margin: 8px 0 0;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0d0e13;
+      color: #d7dbe6;
+      font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      white-space: pre-wrap;
+    }
+
     .mini-table {
       display: grid;
       gap: 8px;
@@ -734,7 +881,7 @@
       align-items: center;
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 12px;
       background: var(--panel-soft);
     }
 
@@ -806,11 +953,290 @@
       font-weight: 900;
     }
 
+    /* Clean admin UI layer */
+    body {
+      background: linear-gradient(180deg, #f8fbff 0, var(--page) 280px);
+      color: var(--ink);
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .ghost-link-btn,
+    .filter-btn,
+    .copy-btn,
+    .save-btn,
+    .dashboard-tab {
+      border-color: var(--line);
+      background: #fff;
+      color: #253247;
+      box-shadow: var(--button-shadow);
+    }
+
+    .primary-btn,
+    .dashboard-tab[aria-pressed="true"],
+    .filter-btn[aria-pressed="true"] {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .ghost-btn,
+    .ghost-link-btn,
+    .copy-btn,
+    .save-btn {
+      color: var(--blue);
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, #fff, #edf4ff);
+      color: var(--ink);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar-inner {
+      padding: 26px 0 42px;
+    }
+
+    .hero-row {
+      grid-template-columns: minmax(0, 1fr) minmax(290px, 360px);
+      align-items: center;
+    }
+
+    .page-kicker {
+      border-color: #bdd4f6;
+      background: #eef5ff;
+      color: #285da8;
+    }
+
+    h1 {
+      color: #111827;
+      text-shadow: none;
+    }
+
+    .hero-copy {
+      color: #4f5e72;
+    }
+
+    .workflow-card,
+    .control-panel,
+    .stat,
+    .admin-card,
+    .grade-card,
+    .section,
+    .grade-table-wrap {
+      border-color: var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .workflow-title,
+    .admin-login-kicker,
+    .admin-session-kicker,
+    .stat-label,
+    .edit-label,
+    .grade-table th {
+      color: var(--muted);
+    }
+
+    .workflow-step {
+      color: #253247;
+    }
+
+    .step-num,
+    .section-caret {
+      border: 1px solid var(--line);
+      background: #eef5ff;
+      color: var(--blue);
+    }
+
+    .control-panel {
+      margin-top: -22px;
+      padding: 14px;
+    }
+
+    .admin-session-row {
+      border-color: var(--line);
+      background: var(--panel-soft);
+    }
+
+    .dashboard-tabs {
+      border-color: var(--line);
+      background: var(--panel-soft);
+    }
+
+    .dashboard-tab {
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .content-controls {
+      gap: 10px;
+    }
+
+    .toolbar {
+      grid-template-columns: minmax(280px, 1fr) auto auto;
+    }
+
+    .search-wrap::before {
+      color: #7b8797;
+    }
+
+    input[type="search"],
+    .admin-field input,
+    .form-row input,
+    .grade-search,
+    .grade-filter-select,
+    .role-select,
+    textarea.text-edit {
+      border-color: var(--line);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    input[type="search"]::placeholder,
+    .grade-search::placeholder {
+      color: #99a4b3;
+    }
+
+    .stats {
+      gap: 10px;
+    }
+
+    .stat {
+      padding: 14px;
+    }
+
+    .stat-value {
+      color: #111827;
+      font-size: 28px;
+    }
+
+    .section {
+      box-shadow: 0 1px 2px rgba(20, 34, 55, 0.06);
+    }
+
+    .section-head {
+      background: #fff;
+      border-bottom-color: var(--line);
+    }
+
+    .section-title {
+      color: #1f2937;
+      font-size: 16px;
+    }
+
+    .item {
+      background: #fff;
+    }
+
+    code {
+      color: #1f3f74;
+      background: #eef5ff;
+      border-color: #cfe0f8;
+    }
+
+    .type,
+    .source-pill {
+      background: #eef2f7;
+      color: #627086;
+    }
+
+    .source-pill.firestore,
+    .level-chip.standard,
+    .grade-pill.pass {
+      background: #e8f7ef;
+      color: #137545;
+    }
+
+    .level-chip.full,
+    .grade-pill.full,
+    .grade-kind {
+      background: #eaf3ff;
+      color: #225eb0;
+    }
+
+    .level-chip.super,
+    .grade-pill.review,
+    .grade-kind.lesson {
+      background: #fff3db;
+      color: #8a5200;
+    }
+
+    .empty,
+    .error {
+      background: #fff;
+      border-color: var(--line);
+      color: var(--muted);
+    }
+
+    .gradebook-toolbar {
+      grid-template-columns: minmax(280px, 1fr) 160px auto;
+    }
+
+    .grade-table {
+      min-width: 900px;
+    }
+
+    .grade-table th {
+      background: #f7f9fc;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .grade-table td {
+      border-bottom-color: var(--line);
+      color: #253247;
+    }
+
+    .grade-table tbody tr,
+    .grade-table tbody tr:nth-child(even) {
+      background: #fff;
+    }
+
+    .grade-table tbody tr:hover {
+      background: #f5f9ff;
+    }
+
+    .grade-breakdown {
+      border-color: var(--line);
+      background: #f7f9fc;
+      color: #253247;
+    }
+
+    .mini-copy {
+      color: var(--muted);
+    }
+
+    .mini-row {
+      background: #fff;
+    }
+
+    .admin-login-card {
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .admin-login-top {
+      background: #f7f9fc;
+    }
+
+    .admin-login-copy {
+      color: #4f5e72;
+    }
+
     @media (max-width: 940px) {
       .hero-row,
       .toolbar,
+      .gradebook-toolbar,
       .item {
         grid-template-columns: 1fr;
+      }
+
+      .dashboard-tabs {
+        width: 100%;
+      }
+
+      .dashboard-tab {
+        flex: 1 1 140px;
       }
 
       .workflow-card {
@@ -877,15 +1303,16 @@
       <div class="topbar-inner">
         <div class="hero-row">
           <div>
-            <h1>Content Dashboard</h1>
-            <div class="hero-copy">A clean control room for every lesson line, hint, quiz prompt, and Run the Show step. Search by reference ID, make edits, then save the exact text the simulator should use.</div>
+            <div class="page-kicker">SwitchUp Studio Admin</div>
+            <h1>Dashboard</h1>
+            <div class="hero-copy">Manage simulator content, review the grade book, and control dashboard access from one clean workspace.</div>
           </div>
           <div class="workflow-card" aria-label="Dashboard workflow">
-            <div class="workflow-title">Recommended Flow</div>
+            <div class="workflow-title">Daily Flow</div>
             <div class="workflow-list">
-              <div class="workflow-step"><span class="step-num">1</span><span>Find the line by lesson, quiz bank, or reference ID.</span></div>
-              <div class="workflow-step"><span class="step-num">2</span><span>Edit the text directly in the field.</span></div>
-              <div class="workflow-step"><span class="step-num">3</span><span>Firestore keeps content, grades, and admin access in sync.</span></div>
+              <div class="workflow-step"><span class="step-num">1</span><span>Review new grade book submissions.</span></div>
+              <div class="workflow-step"><span class="step-num">2</span><span>Search and update content by reference ID.</span></div>
+              <div class="workflow-step"><span class="step-num">3</span><span>Keep admin access current.</span></div>
             </div>
           </div>
         </div>
@@ -906,22 +1333,20 @@
         </div>
         <div class="dashboard-tabs" aria-label="Dashboard sections">
           <button class="dashboard-tab" data-view="content" type="button" aria-pressed="true">Content</button>
-          <button class="dashboard-tab" data-view="grades" type="button" aria-pressed="false">Student Grades</button>
+          <button class="dashboard-tab" data-view="grades" type="button" aria-pressed="false">Grade book</button>
           <button class="dashboard-tab" data-view="admins" type="button" aria-pressed="false">Admin Accounts</button>
         </div>
         <div class="content-controls" id="content-controls">
           <div class="toolbar">
-          <div class="search-wrap">
-            <input id="search" type="search" placeholder="Type a reference ID, lesson name, or exact text..." autocomplete="off">
-          </div>
-          <div class="filters" aria-label="Content filters">
-            <button class="filter-btn" data-filter="all" aria-pressed="true">All</button>
-            <button class="filter-btn" data-filter="lesson" aria-pressed="false">Lessons</button>
-            <button class="filter-btn" data-filter="quiz" aria-pressed="false">Quiz Banks</button>
-            <button class="filter-btn" data-filter="rts" aria-pressed="false">Run The Show</button>
-          </div>
-          </div>
-          <div class="form-row">
+            <div class="search-wrap">
+              <input id="search" type="search" placeholder="Type a reference ID, lesson name, or exact text..." autocomplete="off">
+            </div>
+            <div class="filters" aria-label="Content filters">
+              <button class="filter-btn" data-filter="all" aria-pressed="true">All</button>
+              <button class="filter-btn" data-filter="lesson" aria-pressed="false">Lessons</button>
+              <button class="filter-btn" data-filter="quiz" aria-pressed="false">Quiz Banks</button>
+              <button class="filter-btn" data-filter="rts" aria-pressed="false">Run The Show</button>
+            </div>
             <button class="primary-btn" id="save-all-btn" type="button" disabled>Save Visible</button>
           </div>
         </div>
@@ -933,7 +1358,7 @@
     </main>
   </div>
 
-  <script type="module" src="firebase-client.js?v=4"></script>
+  <script type="module" src="firebase-client.js?v=5"></script>
   <script>
     const ADMIN_SESSION_KEY = 'switchup_admin_session_v1';
     const OWNER_ADMIN_NAME = 'Jon Kost';
@@ -951,8 +1376,12 @@
       query: '',
       firebase: null,
       admins: [],
+      adminDataError: null,
       adminSession: null,
       grades: [],
+      gradeFilter: 'all',
+      gradeQuery: '',
+      gradeStatus: '',
       loadedFirestore: false,
       activeView: 'content',
     };
@@ -977,6 +1406,26 @@
     const adminSwitchBtn = document.getElementById('admin-switch-btn');
     function stripCode(value) {
       return value.replace(/^`|`$/g, '').replace(/\\\|/g, '|').trim();
+    }
+
+    function normalizeAdminCode(value) {
+      return String(value || '').trim().toUpperCase();
+    }
+
+    function isOwnerAdminCode(value) {
+      return normalizeAdminCode(value) === normalizeAdminCode(OWNER_ADMIN_CODE);
+    }
+
+    function isFirestorePermissionError(error) {
+      const message = `${error?.code || ''} ${error?.message || ''}`;
+      return /permission|insufficient/i.test(message);
+    }
+
+    function adminLoginFailureMessage(error) {
+      if (isFirestorePermissionError(error)) {
+        return 'Firestore permissions are blocking admin login. Publish the Firestore rules, then try again.';
+      }
+      return error.message || 'Could not complete admin sign in.';
     }
 
     function escapeHtml(value) {
@@ -1129,7 +1578,9 @@
 
     function renderAdminSession() {
       if (!state.adminSession) {
-        adminSessionNameEl.textContent = state.firebase ? 'Admin code required' : 'Loading admins...';
+        adminSessionNameEl.textContent = state.adminDataError
+          ? 'Admin database blocked'
+          : state.firebase ? 'Admin code required' : 'Loading admins...';
         adminSessionLevelEl.textContent = 'LOCKED';
         adminSessionLevelEl.className = 'level-chip standard';
         adminSwitchBtn.textContent = 'Sign In';
@@ -1143,9 +1594,12 @@
     }
 
     function openAdminGate() {
-      const firstRun = state.firebase && !hasSuperAdmin();
-      adminLoginTitleEl.textContent = firstRun ? 'Create Super Admin' : 'Admin Sign In';
-      adminLoginCopyEl.textContent = firstRun
+      const adminBlocked = !!state.adminDataError;
+      const firstRun = state.firebase && !adminBlocked && !hasSuperAdmin();
+      adminLoginTitleEl.textContent = adminBlocked ? 'Admin Access Blocked' : firstRun ? 'Create Super Admin' : 'Admin Sign In';
+      adminLoginCopyEl.textContent = adminBlocked
+        ? 'Firestore is blocking the admin list. Publish the Firestore rules, then refresh this page.'
+        : firstRun
         ? 'No super admin exists yet. Enter the owner code to create the owner account.'
         : 'Enter your admin code to manage content, grades, and dashboard accounts.';
       adminSetupNameField.hidden = !firstRun;
@@ -1178,22 +1632,24 @@
             adminLoginErrorEl.textContent = 'Please enter your name.';
             return;
           }
-          if (code !== OWNER_ADMIN_CODE) {
+          if (!isOwnerAdminCode(code)) {
             adminLoginErrorEl.textContent = 'Incorrect owner code. Try again.';
             return;
           }
-          await state.firebase.createAdminAccount({ name, code, level: 'super' });
+          const ownerAdmin = await state.firebase.createAdminAccount({ name, code, level: 'super' });
+          saveAdminSession(ownerAdmin);
           await refreshAdminData();
-          const created = state.admins.find((admin) => adminName(admin) === name && adminLevel(admin) === 'super');
-          if (created) saveAdminSession(created);
+          const created = state.admins.find((admin) => adminName(admin) === name && adminLevel(admin) === 'super') || ownerAdmin;
+          saveAdminSession(created);
         } else {
           const codeHash = await state.firebase.hashAdminCode(code);
           let admin = state.admins.find((item) => item.codeHash === codeHash);
           if (!admin) {
-            if (code === OWNER_ADMIN_CODE) {
-              await state.firebase.createAdminAccount({ name: OWNER_ADMIN_NAME, code: OWNER_ADMIN_CODE, level: 'super' });
+            if (isOwnerAdminCode(code)) {
+              const ownerAdmin = await state.firebase.createAdminAccount({ name: OWNER_ADMIN_NAME, code: OWNER_ADMIN_CODE, level: 'super' });
+              saveAdminSession(ownerAdmin);
               await refreshAdminData();
-              admin = state.admins.find((item) => adminName(item) === OWNER_ADMIN_NAME && adminLevel(item) === 'super');
+              admin = state.admins.find((item) => adminName(item) === OWNER_ADMIN_NAME && adminLevel(item) === 'super') || ownerAdmin;
             }
             if (!admin) {
               adminLoginErrorEl.textContent = 'Incorrect code. Try again.';
@@ -1206,7 +1662,7 @@
         renderAdminSession();
         render();
       } catch (error) {
-        adminLoginErrorEl.textContent = error.message || 'Could not complete admin sign in.';
+        adminLoginErrorEl.textContent = adminLoginFailureMessage(error);
       } finally {
         adminLoginSubmitEl.disabled = false;
       }
@@ -1307,10 +1763,12 @@
       try {
         const admins = await state.firebase.getAdmins();
         state.admins = admins;
+        state.adminDataError = null;
         syncStoredAdminSession();
         renderAdminSession();
       } catch (error) {
         state.admins = [];
+        state.adminDataError = error;
         state.adminSession = null;
         renderAdminSession();
       }
@@ -1319,10 +1777,13 @@
     async function refreshGrades() {
       if (!state.firebase) return;
       try {
-        state.grades = await state.firebase.getQuizSubmissions(100);
+        state.grades = typeof state.firebase.getStudentResults === 'function'
+          ? await state.firebase.getStudentResults(200)
+          : await state.firebase.getQuizSubmissions(200);
+        state.gradeStatus = `Updated ${new Date().toLocaleTimeString()}.`;
       } catch (error) {
         state.grades = [];
-        resultsLineEl.textContent = 'Student grades could not load. Check Firestore rules and indexes.';
+        state.gradeStatus = 'Student grades could not load. Check Firestore rules and indexes.';
       }
     }
 
@@ -1332,6 +1793,115 @@
       if (typeof value === 'string') return value;
       if (value.seconds) return new Date(value.seconds * 1000).toLocaleString();
       return 'No date';
+    }
+
+    function firestoreDateMs(value) {
+      if (!value) return 0;
+      if (typeof value.toDate === 'function') return value.toDate().getTime();
+      if (typeof value === 'string') return Date.parse(value) || 0;
+      if (value.seconds) return value.seconds * 1000;
+      return 0;
+    }
+
+    function gradeKind(grade) {
+      return String(grade?.result_type || (grade?.lesson ? 'lesson' : 'quiz')).toLowerCase();
+    }
+
+    function gradeStudentName(grade) {
+      return grade?.student_name || grade?.studentName || 'Unnamed student';
+    }
+
+    function gradeClassName(grade) {
+      return grade?.class_name || grade?.className || 'No class';
+    }
+
+    function gradeActivity(grade) {
+      return grade?.activity || grade?.quiz_level || grade?.lesson || 'Activity';
+    }
+
+    function gradeScore(grade) {
+      if (grade?.score) return grade.score;
+      if (gradeKind(grade) === 'lesson') {
+        const steps = grade?.steps_completed || '0';
+        const mistakes = grade?.total_mistakes || '0';
+        return `${steps} steps, ${mistakes} mistakes`;
+      }
+      return 'Score';
+    }
+
+    function gradeTone(grade) {
+      const score = gradeScore(grade);
+      const mistakes = Number(grade?.total_mistakes || 0);
+      if (/NEEDS REVIEW/i.test(score) || mistakes > 0) return 'review';
+      if (/PASS/i.test(score) || gradeKind(grade) === 'lesson') return 'pass';
+      return 'full';
+    }
+
+    function gradeSearchText(grade) {
+      return [
+        gradeKind(grade),
+        gradeStudentName(grade),
+        gradeClassName(grade),
+        gradeActivity(grade),
+        gradeScore(grade),
+        grade?.confirmation_code || grade?.id || '',
+        grade?.breakdown || '',
+        formatFirestoreDate(grade?.createdAt || grade?.date),
+      ].join(' ').toLowerCase();
+    }
+
+    function getVisibleGrades() {
+      const query = state.gradeQuery.trim().toLowerCase();
+      return state.grades
+        .filter((grade) => state.gradeFilter === 'all' || gradeKind(grade) === state.gradeFilter)
+        .filter((grade) => !query || gradeSearchText(grade).includes(query))
+        .sort((a, b) => firestoreDateMs(b.createdAt || b.date) - firestoreDateMs(a.createdAt || a.date));
+    }
+
+    function renderGradeStats(grades) {
+      const reviews = grades.filter((grade) => gradeTone(grade) === 'review').length;
+      const stats = [
+        ['Results', grades.length],
+        ['Quizzes', grades.filter((grade) => gradeKind(grade) === 'quiz').length],
+        ['Lessons', grades.filter((grade) => gradeKind(grade) === 'lesson').length],
+        ['Needs Review', reviews],
+      ];
+      statsEl.innerHTML = stats.map(([label, value]) => `
+        <div class="stat">
+          <div class="stat-value">${value}</div>
+          <div class="stat-label">${label}</div>
+        </div>
+      `).join('');
+    }
+
+    function csvValue(value) {
+      const text = String(value ?? '');
+      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }
+
+    function downloadGradesCsv(grades) {
+      const headers = ['Type', 'Student', 'Class', 'Activity', 'Score', 'Time', 'Date', 'Confirmation', 'Breakdown'];
+      const rows = grades.map((grade) => [
+        gradeKind(grade),
+        gradeStudentName(grade),
+        gradeClassName(grade),
+        gradeActivity(grade),
+        gradeScore(grade),
+        grade?.time || '',
+        formatFirestoreDate(grade?.createdAt || grade?.date),
+        grade?.confirmation_code || grade?.id || '',
+        grade?.breakdown || '',
+      ]);
+      const csv = [headers, ...rows].map((row) => row.map(csvValue).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `switchup-grades-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
     }
 
     function renderAdminView() {
@@ -1404,59 +1974,107 @@
     }
 
     function renderGradesView() {
-      renderStats(state.rows);
-      resultsLineEl.textContent = `Showing ${state.grades.length} Firestore grade item${state.grades.length === 1 ? '' : 's'}.`;
+      const keepSearchFocus = document.activeElement?.id === 'grade-search';
+      const searchStart = keepSearchFocus ? document.activeElement.selectionStart : null;
+      const searchEnd = keepSearchFocus ? document.activeElement.selectionEnd : null;
+      const visibleGrades = getVisibleGrades();
+      renderGradeStats(visibleGrades);
+      resultsLineEl.textContent = `Showing ${visibleGrades.length} of ${state.grades.length} student result${state.grades.length === 1 ? '' : 's'}.`;
 
-      if (!state.grades.length) {
-        contentEl.innerHTML = `
-          <div class="admin-grid">
-            <article class="admin-card">
-              <h2>Student Grades</h2>
-              <p>No Firestore grade items are available yet. New non-practice quiz results will appear here after students finish a quiz.</p>
+      const gradeRows = visibleGrades.length ? visibleGrades.map((grade) => `
+        <tr>
+          <td><span class="grade-kind ${gradeKind(grade)}">${escapeHtml(gradeKind(grade))}</span></td>
+          <td>
+            <strong>${escapeHtml(gradeStudentName(grade))}</strong>
+            <div class="mini-copy">${escapeHtml(gradeClassName(grade))}</div>
+          </td>
+          <td>${escapeHtml(gradeActivity(grade))}</td>
+          <td><span class="grade-pill ${gradeTone(grade)}">${escapeHtml(gradeScore(grade))}</span></td>
+          <td>
+            ${escapeHtml(grade.time || '')}
+            <div class="mini-copy">${escapeHtml(formatFirestoreDate(grade.createdAt || grade.date))}</div>
+          </td>
+          <td>
+            <code>${escapeHtml(grade.confirmation_code || grade.id || '')}</code>
+            ${grade.breakdown ? `
+              <details class="grade-detail">
+                <summary>View breakdown</summary>
+                <pre class="grade-breakdown">${escapeHtml(grade.breakdown)}</pre>
+              </details>
+            ` : ''}
+          </td>
+        </tr>
+      `).join('') : `
+        <tr>
+          <td colspan="6">
+            <div class="empty">No matching student results yet. New submitted quiz and lesson results will appear here.</div>
+          </td>
+        </tr>
+      `;
+
+      contentEl.innerHTML = `
+        <div class="grades-grid">
+          <article class="admin-card">
+            <h2>Grade book</h2>
+            <p>Review submitted quiz and lesson results from Firestore, filter the grade book, and export a CSV when you need a spreadsheet. Older Formspree-only submissions stay in Formspree unless we import them.</p>
+            <div class="gradebook-toolbar">
+              <input class="grade-search" id="grade-search" type="search" placeholder="Search student, class, score, activity, or confirmation" value="${escapeHtml(state.gradeQuery)}">
+              <select class="grade-filter-select" id="grade-filter" aria-label="Filter student results">
+                <option value="all" ${state.gradeFilter === 'all' ? 'selected' : ''}>All results</option>
+                <option value="quiz" ${state.gradeFilter === 'quiz' ? 'selected' : ''}>Quizzes</option>
+                <option value="lesson" ${state.gradeFilter === 'lesson' ? 'selected' : ''}>Lessons</option>
+              </select>
               <div class="form-row">
-                <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh Grades</button>
-                <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Open Formspree Results</a>
+                <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh</button>
+                <button class="ghost-btn" id="download-grades-btn" type="button" ${visibleGrades.length ? '' : 'disabled'}>Download CSV</button>
+                <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Formspree</a>
               </div>
-            </article>
+            </div>
+            <div class="status-note">${escapeHtml(state.gradeStatus || 'Waiting for submitted student results.')}</div>
+          </article>
+          <div class="grade-table-wrap">
+            <table class="grade-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Student</th>
+                  <th>Activity</th>
+                  <th>Score</th>
+                  <th>Time</th>
+                  <th>Confirmation</th>
+                </tr>
+              </thead>
+              <tbody>${gradeRows}</tbody>
+            </table>
           </div>
-        `;
-      } else {
-        contentEl.innerHTML = `
-          <div class="grades-grid">
-            <article class="admin-card">
-              <h2>Student Grades</h2>
-              <p>These are quiz results from Firestore.</p>
-              <div class="form-row">
-                <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh Grades</button>
-                <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Open Formspree Results</a>
-              </div>
-            </article>
-            ${state.grades.map((grade) => {
-              const passed = /PASS|^\d+\s*\/\s*\d+/.test(grade.score || '') && !/NEEDS REVIEW/i.test(grade.score || '');
-              return `
-                <article class="grade-card">
-                  <div class="mini-row">
-                    <div class="mini-main">
-                      <div class="mini-title">${escapeHtml(grade.student_name || 'Unnamed student')}</div>
-                      <div class="mini-copy">${escapeHtml(grade.class_name || 'No class')} • ${escapeHtml(grade.quiz_level || 'Quiz')} • ${escapeHtml(formatFirestoreDate(grade.createdAt || grade.date))}</div>
-                    </div>
-                    <div class="grade-pill ${passed ? 'pass' : 'review'}">${escapeHtml(grade.score || 'Score')}</div>
-                  </div>
-                  <p style="margin-top:12px;">Confirmation: <strong>${escapeHtml(grade.confirmation_code || grade.id)}</strong></p>
-                  <textarea class="text-edit" readonly>${escapeHtml(grade.breakdown || '')}</textarea>
-                </article>
-              `;
-            }).join('')}
-          </div>
-        `;
-      }
+        </div>
+      `;
 
       const refreshBtn = document.getElementById('refresh-grades-btn');
       if (refreshBtn) refreshBtn.addEventListener('click', async () => {
-        refreshBtn.textContent = 'Refreshing';
+        state.gradeStatus = 'Refreshing student results...';
+        renderGradesView();
         await refreshGrades();
         render();
       });
+      const gradeSearch = document.getElementById('grade-search');
+      if (gradeSearch) gradeSearch.addEventListener('input', () => {
+        state.gradeQuery = gradeSearch.value;
+        renderGradesView();
+      });
+      const gradeFilter = document.getElementById('grade-filter');
+      if (gradeFilter) gradeFilter.addEventListener('change', () => {
+        state.gradeFilter = gradeFilter.value;
+        renderGradesView();
+      });
+      const downloadBtn = document.getElementById('download-grades-btn');
+      if (downloadBtn) downloadBtn.addEventListener('click', () => {
+        downloadGradesCsv(getVisibleGrades());
+      });
+      if (keepSearchFocus && gradeSearch) {
+        gradeSearch.focus();
+        if (searchStart !== null && searchEnd !== null) gradeSearch.setSelectionRange(searchStart, searchEnd);
+      }
     }
 
     async function createAdminAccountFromDashboard() {

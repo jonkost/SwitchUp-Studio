@@ -31,5 +31,11 @@ service cloud.firestore {
       allow read: if true;
       allow update, delete: if false;
     }
+
+    match /lesson_submissions/{docId} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if false;
+    }
   }
 }

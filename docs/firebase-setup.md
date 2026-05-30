@@ -106,6 +106,7 @@ Suggested additional collections:
 admins/{uid}
 admin_invites/{codeHash}
 quiz_submissions/{confirmationCode}
+lesson_submissions/{confirmationCode}
 ```
 
 ## 6. Storage Rules
@@ -134,7 +135,7 @@ Project files added:
 `index.html` loads:
 
 ```html
-<script type="module" src="firebase-client.js?v=1"></script>
+<script type="module" src="firebase-client.js?v=2"></script>
 ```
 
 That module exposes:
@@ -147,6 +148,9 @@ Available helpers:
 
 - `getContentItem(collectionName, referenceId)`
 - `getContentCollection(collectionName)`
+- `saveQuizSubmission(summary)`
+- `saveLessonSubmission(summary)`
+- `getStudentResults(maxCount)`
 - `getNarration(referenceId, voice, rate, textHash)`
 
 The simulator does not require Firebase to open. If Firebase fails to load, the static app should still run with local lesson and quiz text.
@@ -173,12 +177,13 @@ Recommended first pass:
 6. Keep browser speech as fallback.
 7. Add admin editing screen after content loading is stable.
 
-## 10. Student Grades
+## 10. Grade Book
 
-The simulator still sends non-practice quiz results to Formspree, but it also writes the same result payload to Firestore:
+The simulator still sends non-practice quiz and guided lesson results to Formspree, but it also writes the same result payloads to Firestore:
 
 ```text
 quiz_submissions/{confirmationCode}
+lesson_submissions/{confirmationCode}
 ```
 
-The dashboard **Student Grades** tab reads that collection for signed-in admins. This avoids putting a private Formspree API token into GitHub Pages. If you later want true Formspree inbox sync, use a small server-side function or scheduled job so the Formspree API token stays private.
+The dashboard **Grade book** tab reads those collections for signed-in admins. This avoids putting a private Formspree API token into GitHub Pages. If you later want true Formspree inbox sync, use a small server-side function or scheduled job so the Formspree API token stays private.

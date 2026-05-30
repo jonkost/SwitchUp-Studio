@@ -2661,6 +2661,45 @@
 			outline: none;
 		}
 
+		#media-modal-lesson-banner {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 10px;
+			padding: 10px 14px;
+			margin: -6px -6px 14px;
+			background: linear-gradient(90deg, rgba(245, 166, 35, 0.18), rgba(245, 166, 35, 0.06));
+			border: 1px solid rgba(245, 166, 35, 0.55);
+			border-radius: 10px;
+			color: #ffd591;
+			font-family: 'Inter', sans-serif;
+		}
+
+		#media-modal-lesson-banner[hidden] {
+			display: none;
+		}
+
+		#media-modal-lesson-banner .media-modal-lesson-label {
+			font-size: 11px;
+			letter-spacing: 0.18em;
+			text-transform: uppercase;
+			padding: 3px 8px;
+			background: rgba(245, 166, 35, 0.22);
+			border-radius: 999px;
+			color: #ffd591;
+			font-weight: 700;
+			white-space: nowrap;
+		}
+
+		#media-modal-lesson-banner .media-modal-lesson-text {
+			flex: 1 1 240px;
+			min-width: 0;
+			font-size: 14px;
+			line-height: 1.4;
+			font-weight: 500;
+			color: #fff5e0;
+		}
+
 		#media-bank-status {
 			font-family: 'Inter', sans-serif;
 			font-size: 13px;

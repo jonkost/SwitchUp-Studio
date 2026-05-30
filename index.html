@@ -11,7 +11,7 @@
 	<meta name="theme-color" content="#0a0a0c">
 
 	<title>SwitchUp Studio</title>
-	  <link rel="stylesheet" href="styles.css?v=7">
+	  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 
 <body>
@@ -733,6 +733,10 @@
 
 	<div id="media-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="media-modal-title" aria-describedby="media-modal-copy">
 		<div id="media-modal-dialog" tabindex="-1">
+			<div id="media-modal-lesson-banner" hidden aria-live="polite">
+				<span class="media-modal-lesson-label" id="media-modal-lesson-progress">Lesson task</span>
+				<span class="media-modal-lesson-text" id="media-modal-lesson-instruction"></span>
+			</div>
 			<div class="media-modal-topbar media-modal-topbar-tight">
 								<div class="media-modal-title-wrap">
 					<div class="dialog-heading" id="media-modal-title">MEDIA RESOURCES</div>
@@ -771,7 +775,7 @@
 	</div>
 
 	  <script type="module" src="firebase-client.js?v=1"></script>
-	  <script src="script.js?v=3"></script>
+	  <script src="script.js?v=6"></script>
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
   </script>

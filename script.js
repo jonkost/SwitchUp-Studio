@@ -1163,10 +1163,50 @@
   function openMediaModal() {
     if (!dom.mediaModalOverlay) return;
     renderMediaModal();
+    updateMediaModalTaskBanner();
     dom.mediaModalOverlay.classList.add('show');
     setMediaButtonState(true);
     setTimeout(() => dom.mediaModalDialog && dom.mediaModalDialog.focus(), 30);
     lessonCheckInteraction();
+  }
+
+  function updateMediaModalTaskBanner() {
+    const banner = document.getElementById('media-modal-lesson-banner');
+    const text = document.getElementById('media-modal-lesson-instruction');
+    const label = document.getElementById('media-modal-lesson-progress');
+    if (!banner || !text || !label) return;
+
+    // Lesson drive sessions: surface the current step instruction so it isn't
+    // hidden behind the modal overlay when narration is off.
+    if (lessonState && lessonState.active) {
+      const step = currentLessonStep();
+      if (step && step.instruction) {
+        const total = lessonState.steps.length;
+        const current = lessonState.stepIndex + 1;
+        label.textContent = `Step ${current} of ${total}`;
+        text.textContent = step.hint && !lessonState.watchMode && !step.watchOnly
+          ? `${step.instruction} (Hint: ${step.hint})`
+          : step.instruction;
+        banner.hidden = false;
+        return;
+      }
+    }
+
+    // Quiz mode: same idea — keep the prompt visible while the modal is open.
+    if (state.quizMode && state.quizQuestions && state.quizQuestions.length) {
+      const question = state.quizQuestions[state.quizCurrent];
+      if (question && question.prompt) {
+        const total = state.quizQuestions.length;
+        const current = Math.min(state.quizCurrent + 1, total);
+        label.textContent = `Question ${current} of ${total}`;
+        text.textContent = question.prompt;
+        banner.hidden = false;
+        return;
+      }
+    }
+
+    banner.hidden = true;
+    text.textContent = '';
   }
 
   function closeMediaModal() {
@@ -1201,11 +1241,10 @@
 
     state.dskState.forEach((dsk, index) => {
       if (getSourceName(dsk.sourceIndex) !== bankName) return;
-      dsk.active = false;
       dsk.transitioning = false;
-      dsk.keyMode = -1;
-      dsk.dveEnabled = false;
-      state.previewKeyState[index] = false;
+      if (!applyPreferredKeySettingsToDsk(dsk, getSourceName(dsk.sourceIndex))) {
+        dsk.keyMode = -1;
+      }
       if (index === state.activeDSK) syncActiveDskState();
     });
 
@@ -2484,13 +2523,16 @@
     if (sourceName === 'M1' || sourceName === 'M2') {
       currentDsk().active = false;
       currentDsk().transitioning = false;
-      currentDsk().keyMode = -1;
       currentDsk().dveEnabled = false;
       state.previewKeyState[state.activeDSK] = false;
+      if (!applyPreferredKeySettingsToDsk(currentDsk(), sourceName)) {
+        currentDsk().keyMode = -1;
+      }
     } else {
       applyPreferredKeySettingsToDsk(currentDsk(), sourceName);
     }
     syncActiveDskState();
+    refreshKeyTypeButtons();
     updateDVEControlsVisibility();
     updateCHRControlsVisibility();
     updateDSKUI();
@@ -3899,6 +3941,11 @@ const RUN_THE_SHOW = {
     dom.quizPrompt.textContent = getQuizPromptText(question);
     dom.quizPrompt.style.color = '#f5a623';
     ttsCancelAndSpeak(getQuizPromptText(question), question.refId);
+
+    // Keep the media modal's task banner in sync if it's open.
+    if (dom.mediaModalOverlay && dom.mediaModalOverlay.classList.contains('show')) {
+      updateMediaModalTaskBanner();
+    }
   }
 
   function checkAnswer() {
@@ -5985,6 +6032,12 @@ function bindQuizDialogFocusLoop() {
     }
 
     lessonHighlightElements(step.highlight || []);
+
+    // If the media modal is open, mirror the current task into its banner so
+    // it isn't hidden behind the modal overlay during a drive session.
+    if (dom.mediaModalOverlay && dom.mediaModalOverlay.classList.contains('show')) {
+      updateMediaModalTaskBanner();
+    }
   }
 
   function clearLessonTimer() {

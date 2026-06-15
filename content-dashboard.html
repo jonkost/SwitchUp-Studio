@@ -1361,8 +1361,6 @@
   <script type="module" src="firebase-client.js?v=5"></script>
   <script>
     const ADMIN_SESSION_KEY = 'switchup_admin_session_v1';
-    const OWNER_ADMIN_NAME = 'Jon Kost';
-    const OWNER_ADMIN_CODE = 'Kost7';
     const FORMSPREE_SUBMISSIONS_URL = 'https://formspree.io/forms/xdawpdkp/submissions';
     const CONTENT_COLLECTIONS = {
       lesson: 'content_lessons',
@@ -1406,14 +1404,6 @@
     const adminSwitchBtn = document.getElementById('admin-switch-btn');
     function stripCode(value) {
       return value.replace(/^`|`$/g, '').replace(/\\\|/g, '|').trim();
-    }
-
-    function normalizeAdminCode(value) {
-      return String(value || '').trim().toUpperCase();
-    }
-
-    function isOwnerAdminCode(value) {
-      return normalizeAdminCode(value) === normalizeAdminCode(OWNER_ADMIN_CODE);
     }
 
     function isFirestorePermissionError(error) {
@@ -1600,10 +1590,9 @@
       adminLoginCopyEl.textContent = adminBlocked
         ? 'Firestore is blocking the admin list. Publish the Firestore rules, then refresh this page.'
         : firstRun
-        ? 'No super admin exists yet. Enter the owner code to create the owner account.'
+        ? 'No super admin exists yet. Enter your name and choose an admin code to create the owner account.'
         : 'Enter your admin code to manage content, grades, and dashboard accounts.';
       adminSetupNameField.hidden = !firstRun;
-      if (firstRun && !adminSetupNameInput.value) adminSetupNameInput.value = OWNER_ADMIN_NAME;
       adminLoginSubmitEl.textContent = firstRun ? 'Create Super Admin' : 'Sign In';
       adminLoginErrorEl.textContent = '';
       adminCodeInput.value = '';
@@ -1627,13 +1616,13 @@
       adminLoginSubmitEl.disabled = true;
       try {
         if (firstRun) {
-          const name = adminSetupNameInput.value.trim() || OWNER_ADMIN_NAME;
+          const name = adminSetupNameInput.value.trim();
           if (!name) {
             adminLoginErrorEl.textContent = 'Please enter your name.';
             return;
           }
-          if (!isOwnerAdminCode(code)) {
-            adminLoginErrorEl.textContent = 'Incorrect owner code. Try again.';
+          if (code.length < 6) {
+            adminLoginErrorEl.textContent = 'Choose an admin code of at least 6 characters.';
             return;
           }
           const ownerAdmin = await state.firebase.createAdminAccount({ name, code, level: 'super' });
@@ -1643,18 +1632,10 @@
           saveAdminSession(created);
         } else {
           const codeHash = await state.firebase.hashAdminCode(code);
-          let admin = state.admins.find((item) => item.codeHash === codeHash);
+          const admin = state.admins.find((item) => item.codeHash === codeHash);
           if (!admin) {
-            if (isOwnerAdminCode(code)) {
-              const ownerAdmin = await state.firebase.createAdminAccount({ name: OWNER_ADMIN_NAME, code: OWNER_ADMIN_CODE, level: 'super' });
-              saveAdminSession(ownerAdmin);
-              await refreshAdminData();
-              admin = state.admins.find((item) => adminName(item) === OWNER_ADMIN_NAME && adminLevel(item) === 'super') || ownerAdmin;
-            }
-            if (!admin) {
-              adminLoginErrorEl.textContent = 'Incorrect code. Try again.';
-              return;
-            }
+            adminLoginErrorEl.textContent = 'Incorrect code. Try again.';
+            return;
           }
           saveAdminSession(admin);
         }

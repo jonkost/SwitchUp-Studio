@@ -11,9 +11,23 @@ service firebase.storage {
         && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
     }
 
+    // Narration audio. Public read so the player can stream it; writes are
+    // limited to admins AND to reasonably-sized audio files. Today no Firebase
+    // Auth is enabled, so client writes are blocked outright (only the Admin-SDK
+    // script uploads, which bypasses these rules). If you later enable Auth,
+    // note that the admins doc is world-writable in Firestore (see
+    // firestore.rules) — tighten that first, or an attacker could self-promote
+    // into admins/$(uid) and satisfy isAdmin() here.
     match /narration/{allPaths=**} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin()
+        && request.resource.size < 25 * 1024 * 1024
+        && request.resource.contentType.matches('audio/.*');
+    }
+
+    // Everything else is denied.
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }

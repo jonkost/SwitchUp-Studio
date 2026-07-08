@@ -5023,10 +5023,10 @@ function bindQuizDialogFocusLoop() {
       // ── DRIVE: Lose the tie, switch background under the key ──
       {
         id: 'l2-lose-tie',
-        instruction: 'Now lose the KEY 1 tie by pressing KEY 1 in the Preview/Tie row again. The key stays live but will no longer ride with the next transition.',
-        highlight: ['tie-key-1'],
+        instruction: 'Now lose the KEY 1 tie by pressing BKGD in the Preview/Tie row. Key 1 stays live, but it will no longer ride with the next transition.',
+        highlight: ['tie-bg'],
         check: () => state.dskState[0].active === true && state.previewKeyState[0] === false,
-        hint: 'Press KEY 1 in the Preview/Tie row to toggle the tie off.',
+        hint: 'Press BKGD in the Preview/Tie row to leave the background tied and clear the Key 1 tie.',
       },
       {
         id: 'l2-ready-cam2',

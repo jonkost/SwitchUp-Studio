@@ -75,8 +75,8 @@ Notes:
 | `L2-l2-ready-cam1-again.hint` | Hint | Select CAM 1 in the Preview row. |
 | `L2-l2-dissolve-cam1-with-key.instruction` | Drive | Dissolve to CAM 1 with Key 1 using AUTO. The graphic rides onto air with the background. |
 | `L2-l2-dissolve-cam1-with-key.hint` | Hint | Press AUTO. Both the background and Key 1 will come on together. |
-| `L2-l2-lose-tie.instruction` | Drive | Now lose the KEY 1 tie by pressing KEY 1 in the Preview/Tie row again. The key stays live but will no longer ride with the next transition. |
-| `L2-l2-lose-tie.hint` | Hint | Press KEY 1 in the Preview/Tie row to toggle the tie off. |
+| `L2-l2-lose-tie.instruction` | Drive | Now lose the KEY 1 tie by pressing BKGD in the Preview/Tie row. Key 1 stays live, but it will no longer ride with the next transition. |
+| `L2-l2-lose-tie.hint` | Hint | Press BKGD in the Preview/Tie row to leave the background tied and clear the Key 1 tie. |
 | `L2-l2-ready-cam2.instruction` | Drive | Ready CAM 2 on Preview. |
 | `L2-l2-ready-cam2.hint` | Hint | Select CAM 2 in the Preview row. |
 | `L2-l2-cut-cam2-under-key.instruction` | Drive | CUT to CAM 2. The background switches but the key stays on - that's "under the key." |

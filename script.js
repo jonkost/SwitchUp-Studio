@@ -6575,6 +6575,8 @@ function bindQuizDialogFocusLoop() {
   function ttsExpand(text) {
     const inLesson = lessonState.active;
     return text
+      // "~40" means "about 40" — spell it out so TTS doesn't say "tilde"
+      .replace(/~\s*/g, 'about ')
       // Multi-word phrases first
       .replace(/\bMEDIA\s+SEL\b/g, 'Media Select')
       .replace(/\bME\s*P\/P\b/g, inLesson ? 'Mix Effect Preview Program' : 'M.E. program preview')

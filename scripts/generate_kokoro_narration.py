@@ -28,6 +28,8 @@ LANG_CODE = "a"
 def normalize_narration_text(text: str) -> str:
     """Improve pronunciation while leaving the on-screen/reference copy unchanged."""
     replacements = [
+        # "~40" means "about 40" — spell it out so TTS doesn't say "tilde".
+        (r"~\s*", "about "),
         # Multi-word phrases first so they win over single-word substitutions below.
         (r"\bMEDIA\s+SEL\b", "Media Select"),
         (r"\bMULTIVIEWER\b", "multi viewer"),

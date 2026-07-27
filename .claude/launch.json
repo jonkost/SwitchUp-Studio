@@ -12,12 +12,6 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "-p", "3000", "."],
       "port": 3000
-    },
-    {
-      "name": "Cueola",
-      "runtimeExecutable": "/usr/local/bin/python3",
-      "runtimeArgs": ["-m", "http.server", "3001", "--directory", "/Users/jonkost/Documents/GitHub/Cueola"],
-      "port": 3001
     }
   ]
 }

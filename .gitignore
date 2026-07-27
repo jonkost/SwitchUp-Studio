@@ -1,3 +1,40 @@
-.venv-kokoro/
-__pycache__/
+# macOS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Python (scripts/generate_kokoro_narration.py)
+.venv-kokoro/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Node (npx serve, tooling)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Firebase
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
+# Logs / locks
+*.log
+scheduled_tasks.lock

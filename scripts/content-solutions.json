@@ -1,0 +1,26 @@
+{
+  "lessons": {
+    "1": {
+      "drive-intro-cam1-pvw": ["selectPvw(0)"],
+      "drive-cut-cam1": ["doCut()"],
+      "drive-cam2-pvw": ["selectPvw(1)"],
+      "drive-dissolve-cam2": ["doDissolve()"],
+      "drive-cam3-pvw": ["selectPvw(2)"],
+      "drive-cut-cam3": ["doCut()"],
+      "drive-blk-pvw": ["selectPvw(8)"],
+      "drive-dissolve-blk": ["doDissolve()"]
+    }
+  },
+  "banks": {
+    "bank-1": [
+      { "actions": ["selectPvw(4)", "doCut()"], "overdo": ["selectPvw(0)", "doDissolve()"] },
+      { "actions": ["selectPvw(4)", "doDissolve()"] }
+    ]
+  },
+  "rts": {
+    "rts-1": [
+      { "actions": ["selectPvw(4)", "doDissolve()"] },
+      { "actions": ["selectPvw(3)", "doCut()"] }
+    ]
+  }
+}

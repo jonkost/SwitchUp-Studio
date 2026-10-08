@@ -1,0 +1,15 @@
+{
+  "name": "switchup-studio",
+  "version": "6.5.19",
+  "private": true,
+  "description": "Browser-based broadcast switcher trainer. Static site; the only tooling is the content-reference generator.",
+  "type": "module",
+  "scripts": {
+    "content-reference": "node scripts/build_content_reference.mjs",
+    "serve": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.3"
+  },
+  "license": "CC-BY-NC-ND-4.0"
+}

@@ -29,10 +29,11 @@
     green: Object.freeze({ hardMin: 72, softMin: 44, hardRatio: 1.22, softRatio: 1.08, fadeScale: 880 }),
     blue: Object.freeze({ hardMin: 72, softMin: 44, hardRatio: 1.2, softRatio: 1.05, fadeScale: 900 }),
   });
+  // Matte = clamp(1 - gain * (keyChannel - max(otherChannels))). Any pixel that
+  // is not dominated by the key colour stays fully opaque; the key colour and
+  // strongly key-tinted pixels drop out. Higher gain = tighter edge.
   const CHROMA_FILTER_SETTINGS = Object.freeze({
-    competingChannelWeight: 0.82,
-    alphaExponent: 1.25,
-    alphaAmplitude: 1,
+    matteGain: 2.5,
   });
   const EXACT_BLACK_DISCRETE_TABLE = `0 ${Array.from({ length: 255 }, () => '1').join(' ')}`;
   const FULLSCREEN_LABEL = '⛶ FULLSCREEN';
@@ -105,6 +106,20 @@
   const DEFAULT_MEDIA_BANKS = Object.freeze({
     M1: 'stock-m1',
     M2: 'stock-m2',
+  });
+
+  // Quizzes start with nothing loaded: the student must load every graphic.
+  const EMPTY_MEDIA_BANKS = Object.freeze({
+    M1: null,
+    M2: null,
+  });
+
+  const EMPTY_MEDIA_OPTION = Object.freeze({
+    name: 'Empty',
+    fill: '',
+    alpha: '',
+    keyType: null,
+    keyLabel: 'No graphic loaded',
   });
 
   const DEFAULT_MEDIA_TRANSITION_SLOTS = Object.freeze({
@@ -287,14 +302,32 @@
     };
   }
 
+  function getStartingMediaBanks() {
+    return state.quizMode ? { ...EMPTY_MEDIA_BANKS } : { ...DEFAULT_MEDIA_BANKS };
+  }
+
+  // Leaving a quiz: any bank the quiz emptied gets its freeplay default back.
+  function restoreEmptyMediaBanks() {
+    Object.keys(DEFAULT_MEDIA_BANKS).forEach((bankName) => {
+      if (!state.mediaBanks[bankName]) state.mediaBanks[bankName] = DEFAULT_MEDIA_BANKS[bankName];
+    });
+    refreshAllUI();
+  }
+
   function resetMediaResourcesToDefaults() {
-    state.mediaBanks = { ...DEFAULT_MEDIA_BANKS };
+    state.mediaBanks = getStartingMediaBanks();
     state.activeMediaBank = 'M1';
     state.mediaTransitionSlots = { ...DEFAULT_MEDIA_TRANSITION_SLOTS };
     state.activeMediaTransitionSlot = DEFAULT_ACTIVE_MEDIA_TRANSITION_SLOT;
   }
 
+  // Lessons and quizzes leave key type / chroma colour to the student.
+  function isGuidedModeActive() {
+    return !!state.quizMode || !!(lessonState && lessonState.active);
+  }
+
   function applyPreferredKeySettingsToDsk(dsk, sourceName) {
+    if (isGuidedModeActive()) return false;
     const preferred = getPreferredSourceKeySettings(sourceName);
     if (!preferred || !dsk) return false;
     dsk.keyMode = preferred.keyMode;
@@ -427,7 +460,14 @@
     });
   }
 
+  function ensureTieEngaged(bus) {
+    if (!bus) return bus;
+    if (!bus.tieBackground && !(bus.previewKeyState || []).some(Boolean)) bus.tieBackground = true;
+    return bus;
+  }
+
   function applyBusSnapshot(bus) {
+    ensureTieEngaged(bus);
     state.pgmIndex = bus.pgmIndex;
     state.pvwIndex = bus.pvwIndex;
     state.transitioning = false;
@@ -453,7 +493,7 @@
       }));
     }
     normalized.transitioning = false;
-    return normalized;
+    return ensureTieEngaged(normalized);
   }
 
   function getSurfaceSnapshot(surfaceName) {
@@ -705,11 +745,16 @@
 
 
   function getMediaOption(mediaId) {
-    return MEDIA_LIBRARY[mediaId] || MEDIA_LIBRARY[DEFAULT_MEDIA_BANKS.M1];
+    return (mediaId && MEDIA_LIBRARY[mediaId]) || EMPTY_MEDIA_OPTION;
   }
 
   function getBankMediaId(bankName) {
-    return state.mediaBanks[bankName] || DEFAULT_MEDIA_BANKS[bankName] || DEFAULT_MEDIA_BANKS.M1;
+    const mediaId = state.mediaBanks ? state.mediaBanks[bankName] : null;
+    return mediaId && MEDIA_LIBRARY[mediaId] ? mediaId : null;
+  }
+
+  function isBankEmpty(bankName) {
+    return !getBankMediaId(bankName);
   }
 
   function getMediaTransitionOption(transitionId) {
@@ -1176,30 +1221,26 @@
     const label = document.getElementById('media-modal-lesson-progress');
     if (!banner || !text || !label) return;
 
-    // Lesson drive sessions: surface the current step instruction so it isn't
-    // hidden behind the modal overlay when narration is off.
+    // The banner mirrors the lesson bar / quiz bar word for word so the command
+    // never changes when the media panel opens.
     if (lessonState && lessonState.active) {
-      const step = currentLessonStep();
-      if (step && step.instruction) {
-        const total = lessonState.steps.length;
-        const current = lessonState.stepIndex + 1;
-        label.textContent = `Step ${current} of ${total}`;
-        text.textContent = step.hint && !lessonState.watchMode && !step.watchOnly
-          ? `${step.instruction} (Hint: ${step.hint})`
-          : step.instruction;
+      const instruction = document.getElementById('lesson-instruction');
+      const progress = document.getElementById('lesson-progress');
+      if (instruction && instruction.textContent.trim()) {
+        label.textContent = progress && progress.textContent.trim() ? progress.textContent.trim() : 'Lesson';
+        text.textContent = instruction.textContent;
         banner.hidden = false;
         return;
       }
     }
 
-    // Quiz mode: same idea — keep the prompt visible while the modal is open.
     if (state.quizMode && state.quizQuestions && state.quizQuestions.length) {
-      const question = state.quizQuestions[state.quizCurrent];
-      if (question && question.prompt) {
+      const promptText = dom.quizPrompt ? dom.quizPrompt.textContent : '';
+      if (promptText && promptText.trim()) {
         const total = state.quizQuestions.length;
         const current = Math.min(state.quizCurrent + 1, total);
         label.textContent = `Question ${current} of ${total}`;
-        text.textContent = question.prompt;
+        text.textContent = promptText;
         banner.hidden = false;
         return;
       }
@@ -1284,6 +1325,9 @@
     if (image) {
       return `<img src="${image}" style="${SOURCE_IMAGE_STYLE}" alt="${sourceName}">`;
     }
+    if ((sourceName === 'M1' || sourceName === 'M2') && isBankEmpty(sourceName)) {
+      return `<span class="mv-fallback-label mv-empty-media" style="font-size:${size}px;" aria-label="${sourceName} has no graphic loaded"><span class="mv-empty-media-name">${escapeHtml(sourceName)}</span><span class="mv-empty-media-note">NO MEDIA</span></span>`;
+    }
     return `<span class="mv-fallback-label" style="font-size:${size}px;color:#555;">${escapeHtml(sourceName)}</span>`;
   }
 
@@ -1359,28 +1403,25 @@
 
     if (keyMode === 'CHR') {
       const isBlue = chrColor === 'blue';
-      const competingWeight = CHROMA_FILTER_SETTINGS.competingChannelWeight;
-      const redComponentMatrix = `${competingWeight} 0 0 0 0  ${competingWeight} 0 0 0 0  ${competingWeight} 0 0 0 0  0 0 0 1 0`;
-      const secondaryChannelMatrix = isBlue
-        ? `0 ${competingWeight} 0 0 0  0 ${competingWeight} 0 0 0  0 ${competingWeight} 0 0 0  0 0 0 1 0`
-        : `0 0 ${competingWeight} 0 0  0 0 ${competingWeight} 0 0  0 0 ${competingWeight} 0 0  0 0 0 1 0`;
-      const inverseKeyMatrix = isBlue
-        ? '0 0 -1 0 1  0 0 -1 0 1  0 0 -1 0 1  0 0 0 1 0'
-        : '0 -1 0 0 1  0 -1 0 0 1  0 -1 0 0 1  0 0 0 1 0';
+      const gain = CHROMA_FILTER_SETTINGS.matteGain;
+      const toGray = (channel) => {
+        const row = channel === 'R' ? '1 0 0 0 0' : channel === 'G' ? '0 1 0 0 0' : '0 0 1 0 0';
+        return `${row}  ${row}  ${row}  0 0 0 1 0`;
+      };
+      const keyChannel = isBlue ? 'B' : 'G';
+      const otherA = 'R';
+      const otherB = isBlue ? 'G' : 'B';
 
       return `
         <svg class="mv-keyed-svg" viewBox="0 0 1920 1080" preserveAspectRatio="none" role="img" aria-label="${escapedLabel}" xmlns:xlink="http://www.w3.org/1999/xlink">
           <defs>
             <filter id="${filterId}" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
-              <feColorMatrix in="SourceGraphic" type="matrix" values="${redComponentMatrix}" result="redComponent"></feColorMatrix>
-              <feColorMatrix in="SourceGraphic" type="matrix" values="${secondaryChannelMatrix}" result="secondaryComponent"></feColorMatrix>
-              <feColorMatrix in="SourceGraphic" type="matrix" values="${inverseKeyMatrix}" result="inverseKeyComponent"></feColorMatrix>
-              <feBlend in="redComponent" in2="secondaryComponent" mode="lighten" result="maxColorChannels"></feBlend>
-              <feBlend in="maxColorChannels" in2="inverseKeyComponent" mode="lighten" result="rawMatte"></feBlend>
-              <feColorMatrix in="rawMatte" type="luminanceToAlpha" result="alphaBase"></feColorMatrix>
-              <feComponentTransfer in="alphaBase" result="alphaMatte">
-                <feFuncA type="gamma" amplitude="${CHROMA_FILTER_SETTINGS.alphaAmplitude}" exponent="${CHROMA_FILTER_SETTINGS.alphaExponent}" offset="0"></feFuncA>
-              </feComponentTransfer>
+              <feColorMatrix in="SourceGraphic" type="matrix" values="${toGray(otherA)}" result="otherA"></feColorMatrix>
+              <feColorMatrix in="SourceGraphic" type="matrix" values="${toGray(otherB)}" result="otherB"></feColorMatrix>
+              <feColorMatrix in="SourceGraphic" type="matrix" values="${toGray(keyChannel)}" result="keyGray"></feColorMatrix>
+              <feBlend in="otherA" in2="otherB" mode="lighten" result="maxOther"></feBlend>
+              <feComposite in="keyGray" in2="maxOther" operator="arithmetic" k1="0" k2="${-gain}" k3="${gain}" k4="1" result="matte"></feComposite>
+              <feColorMatrix in="matte" type="luminanceToAlpha" result="alphaMatte"></feColorMatrix>
               <feComposite in="SourceGraphic" in2="alphaMatte" operator="in"></feComposite>
             </filter>
           </defs>
@@ -1429,7 +1470,7 @@
 
   function buildBusCompositeMarkup(busSnapshot, viewType, canvasPrefix, size = 14) {
     const baseIndex = viewType === 'pvw' ? busSnapshot.pvwIndex : busSnapshot.pgmIndex;
-    const activeStates = viewType === 'pvw' ? busSnapshot.previewKeyState : busSnapshot.dskState.map((dsk) => dsk.active);
+    const activeStates = viewType === 'pvw' ? getNextTransitionKeyStates(busSnapshot) : busSnapshot.dskState.map((dsk) => dsk.active);
     const overlays = busSnapshot.dskState
       .map((dsk, index) => activeStates[index]
         ? `<div class="mv-composite-overlay">${buildOverlayMarkup(dsk, index, `${canvasPrefix}-${viewType}-${index}`)}</div>`
@@ -1779,14 +1820,28 @@
     });
   }
 
+  function countActiveTies() {
+    return (state.tieBackground ? 1 : 0) + state.previewKeyState.filter(Boolean).length;
+  }
+
+  // Preview/Tie row rules, modelled on a hardware next-transition selector:
+  //  - pressing an unlit tie adds it to the next transition
+  //  - pressing a lit tie while others are lit makes it the only selection
+  //  - pressing the only lit tie does nothing: one tie is always engaged
+  function rejectSoleTiePress(button) {
+    lessonWiggle(button);
+  }
+
   function toggleBackgroundTie() {
-    const activeCount = (state.tieBackground ? 1 : 0) + state.previewKeyState.filter(Boolean).length;
+    if (state.tieBackground && countActiveTies() <= 1) {
+      rejectSoleTiePress(dom.tieBackgroundButton);
+      return;
+    }
     pushActionUndoState();
-    if (state.tieBackground && activeCount > 1) {
-      state.tieBackground = true;
+    if (state.tieBackground) {
       state.previewKeyState = state.previewKeyState.map(() => false);
     } else {
-      state.tieBackground = !state.tieBackground;
+      state.tieBackground = true;
     }
     updateTieButtons();
     updateDSKOverlays();
@@ -1795,13 +1850,16 @@
   }
 
   function togglePreviewKey(index) {
-    const activeCount = (state.tieBackground ? 1 : 0) + state.previewKeyState.filter(Boolean).length;
+    if (state.previewKeyState[index] && countActiveTies() <= 1) {
+      rejectSoleTiePress(dom.tieKeyButtons[index]);
+      return;
+    }
     pushActionUndoState();
-    if (state.previewKeyState[index] && activeCount > 1) {
+    if (state.previewKeyState[index]) {
       state.tieBackground = false;
       state.previewKeyState = state.previewKeyState.map((_, keyIndex) => keyIndex === index);
     } else {
-      state.previewKeyState[index] = !state.previewKeyState[index];
+      state.previewKeyState[index] = true;
     }
     updateTieButtons();
     updateDSKOverlays();
@@ -1863,6 +1921,12 @@
 
   function setMixLayerTransitions(durationMs = 0) {
     getMixLayerEls().forEach((element) => setOpacityTransition(element, durationMs));
+  }
+
+  // Look-ahead preview: a key belongs in PREVIEW when it will be on air after
+  // the next transition. Tied keys flip state; untied keys keep their state.
+  function getNextTransitionKeyStates(bus = state) {
+    return bus.dskState.map((dsk, index) => (bus.previewKeyState[index] ? !dsk.active : dsk.active));
   }
 
   function getTiedKeyStates() {
@@ -2719,7 +2783,7 @@
 
   function updateDSKOverlays() {
     renderOverlayStack(dom.dskOverlayEls, state.dskState.map((dsk) => dsk.active), 'pgm');
-    renderOverlayStack(dom.pvwOverlayEls, state.previewKeyState, 'pvw');
+    renderOverlayStack(dom.pvwOverlayEls, getNextTransitionKeyStates(), 'pvw');
     if (state.surfaceMode === 'ME1') refreshSourceGridContent();
   }
 
@@ -3339,29 +3403,6 @@ const RUN_THE_SHOW = {
     { prompt: 'Set BLK. Dissolve to BLK.', check: () => backgroundTransitionCheck(idx('BLK'), 'auto') },
   ],
 
-  'rts-3': [
-    { prompt: 'Set CPU. Dissolve to CPU.', check: () => backgroundTransitionCheck(idx('CPU'), 'auto') },
-    { prompt: 'Load Side Graphic to M1. Set Key 1 with M1, self key.', check: () => mediaKeyPreparedCheck(0, 'M1', 'side-graphic-tips', { keyMode: 'SELF' }) },
-    { prompt: 'Preview Key 1.', check: () => mediaKeyPreviewCheck(0, 'M1', 'side-graphic-tips', { keyMode: 'SELF' }) },
-    { prompt: 'Set CAM 1. Dissolve to CAM 1 with Key 1.', check: () => mediaKeyTakeWithBackgroundCheck('CAM 1', 'auto', 0, 'M1', 'side-graphic-tips', { keyMode: 'SELF' }) },
-    { prompt: 'Lose Key 1 tie.', check: () => mediaKeyLiveNoTieCheck(0, 'M1', 'side-graphic-tips', { keyMode: 'SELF' }) },
-    { prompt: 'Ready CAM 3.', check: () => previewSourceCheck('CAM 3') },
-    { prompt: 'Set Key 2 with M2, self key.', check: () => keyPreparedCheck(1, { sourceIndex: idx('M2'), keyMode: 'SELF' }) },
-    { prompt: 'DVE Key 2 on. Move it right.', check: () => keyPreparedCheck(1, { sourceIndex: idx('M2'), keyMode: 'SELF', dveEnabled: true, dveZone: 'right' }) },
-    { prompt: 'Preview Key 2.', check: () => keyPreviewCheck(1, { sourceIndex: idx('M2'), keyMode: 'SELF', dveEnabled: true, dveZone: 'right' }) },
-    { prompt: 'Set CAM 3. Dissolve to CAM 3 with Key 2.', check: () => keyTakeWithBackgroundCheck(idx('CAM 3'), 'auto', 1, { sourceIndex: idx('M2'), keyMode: 'SELF', dveEnabled: true, dveZone: 'right' }) },
-    { prompt: 'Take Key 2 off and lose its tie.', check: () => keyOffCheck(1, 'cut') },
-    { prompt: 'Ready CAM 2.', check: () => previewSourceCheck('CAM 2') },
-    { prompt: 'Set Key 3 with CPU.', check: () => keyPreparedCheck(2, { sourceIndex: idx('CPU') }) },
-    { prompt: 'DVE Key 3 on. Scale up and move left.', check: () => keyPreparedCheck(2, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'left-large' }) },
-    { prompt: 'Preview Key 3.', check: () => keyPreviewCheck(2, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'left-large' }) },
-    { prompt: 'Ready CAM 2. Take CAM 2 with Key 3.', check: () => keyTakeWithBackgroundCheck(idx('CAM 2'), 'cut', 2, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'left-large' }) },
-    { prompt: 'Ready CPU.', check: () => previewSourceCheck('CPU') },
-    { prompt: 'Lose Key 3 tie.', check: () => keyLiveNoTieCheck(2, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'left-large' }) },
-    { prompt: 'Take CPU under Key 3.', check: () => backgroundTransitionCheck(idx('CPU'), 'cut') && keyLiveNoTieCheck(2, { sourceIndex: idx('CPU'), dveEnabled: true, dveZone: 'left-large' }) },
-    { prompt: 'Auto Key 3 off.', check: () => keyOffCheck(2, 'auto') },
-    { prompt: 'Set BLK. Dissolve to BLK.', check: () => backgroundTransitionCheck(idx('BLK'), 'auto') },
-  ],
 };
 
 
@@ -3791,6 +3832,7 @@ const RUN_THE_SHOW = {
     showWhen(dom.freeplayResetButton, true);
     ttsStop();
     dom.quizBar.classList.remove('quiz-visible');
+    restoreEmptyMediaBanks();
     dom.quizNameOverlay.classList.remove('show');
     dom.quizLevelOverlay.classList.remove('show');
     dom.quizResultsOverlay.classList.remove('show');
@@ -5242,10 +5284,10 @@ function bindQuizDialogFocusLoop() {
       },
       {
         id: 'l3-lose-tie-dve',
-        instruction: 'Lose the KEY 1 tie.',
-        highlight: ['tie-key-1'],
+        instruction: 'Lose the KEY 1 tie by pressing BKGD in the Preview/Tie row. Key 1 stays live, but it will no longer ride with the next transition.',
+        highlight: ['tie-bg'],
         check: () => state.dskState[0].active === true && state.previewKeyState[0] === false,
-        hint: 'Press KEY 1 in the Preview/Tie row to toggle the tie off.',
+        hint: 'Press BKGD in the Preview/Tie row. A lit tie only clears when you press a different tie.',
       },
       {
         id: 'l3-ready-cpu-bg',
@@ -6226,6 +6268,7 @@ function bindQuizDialogFocusLoop() {
     if (instruction) {
       instruction.textContent = `💡 ${step.hint}`;
       ttsCancelAndSpeak(step.hint, `L${lessonState.lessonId}-${step.id}.hint`);
+      if (dom.mediaModalOverlay && dom.mediaModalOverlay.classList.contains('show')) updateMediaModalTaskBanner();
     }
     (step.highlight || []).forEach((id) => {
       lessonWiggle(document.getElementById(id));
@@ -6907,6 +6950,88 @@ function bindQuizDialogFocusLoop() {
   }
 
   // ============================================================
+
+  // ── Content reference export ─────────────────────────────────────
+  // docs/content-reference.md and the narration MP3s are generated from these
+  // rows (scripts/build_content_reference.mjs, scripts/generate_kokoro_narration.py).
+  const CONTENT_SECTION_TITLES = Object.freeze({
+    lessons: { 1: 'Lesson 1 - Introduction', 2: 'Lesson 2 - Keying & Graphics', 3: 'Lesson 3 - M/Es & DSK Ties', 4: 'Lesson 4 - Advanced & Review' },
+    banks: { 'bank-1': 'Level 1 - Beginner Bank', 'bank-2': 'Level 2 - Keying & Graphics Bank', 'bank-3': 'Level 3 - Advanced Bank', 'bank-4': 'Level 4 - Expert Bank' },
+    rts: { 'rts-1': 'Run The Show - Level 1', 'rts-2': 'Run The Show - Level 2', 'rts-3': 'Run The Show - Level 3', 'rts-4': 'Run The Show - Level 4' },
+  });
+
+  const CONTENT_UI_PROMPTS = Object.freeze([
+    { refId: 'UI-vo-preview.prompt', text: 'Voice over is on. Heart voice is ready.' },
+    { refId: 'UI-quiz-name.prompt', text: 'Quiz Mode. Enter your name and class, or choose Practice Quiz to continue without submitting results.' },
+    { refId: 'UI-quiz-select.prompt', text: 'Select a quiz. Choose a Quiz Bank level, or choose Run the Show for live director calls.' },
+    { refId: 'UI-lesson-name.prompt', text: 'Guided Lessons. Enter your name and class, or leave either field blank to practice without submitting results.' },
+    { refId: 'UI-lesson-select.prompt', text: 'Guided Lessons. Choose a lesson to begin step-by-step training.' },
+  ]);
+
+  function normalizeContentReferenceText(text) {
+    return String(text || '')
+      .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
+      .replace(/[\u2705\u2713\u2717\u21BA\u2022]/g, '')
+      .replace(/[\u2014\u2013]/g, '-')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/\u2318/g, 'Cmd+')
+      .replace(/\u2192/g, '->')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function getContentReferenceRows() {
+    const rows = [];
+    Object.keys(LESSON_STEPS).forEach((lessonId) => {
+      const section = CONTENT_SECTION_TITLES.lessons[lessonId] || `Lesson ${lessonId}`;
+      LESSON_STEPS[lessonId].forEach((step) => {
+        rows.push({ group: 'lesson', section, refId: `L${lessonId}-${step.id}.instruction`, type: step.watchOnly ? 'Watch' : 'Drive', text: normalizeContentReferenceText(step.instruction) });
+        if (step.hint) rows.push({ group: 'lesson', section, refId: `L${lessonId}-${step.id}.hint`, type: 'Hint', text: normalizeContentReferenceText(step.hint) });
+      });
+    });
+    Object.keys(CONTENT_SECTION_TITLES.banks).forEach((level) => {
+      const section = CONTENT_SECTION_TITLES.banks[level];
+      const prefix = getQuizReferencePrefix(level);
+      (QUIZ_BANK[level] || []).forEach((question, index) => {
+        rows.push({ group: 'quiz', section, refId: `${prefix}-${padQuizRef(index)}.prompt`, type: 'Prompt', text: normalizeContentReferenceText(question.prompt) });
+      });
+    });
+    Object.keys(CONTENT_SECTION_TITLES.rts).forEach((level) => {
+      const section = CONTENT_SECTION_TITLES.rts[level];
+      const prefix = getQuizReferencePrefix(level);
+      (RUN_THE_SHOW[level] || []).forEach((question, index) => {
+        rows.push({ group: 'rts', section, refId: `${prefix}-${padQuizRef(index)}.prompt`, type: 'Prompt', text: normalizeContentReferenceText(question.prompt) });
+      });
+    });
+    CONTENT_UI_PROMPTS.forEach((item) => rows.push({ group: 'ui', section: 'UI Prompts', refId: item.refId, type: 'Prompt', text: item.text }));
+    return rows;
+  }
+
+  window.SwitchUpContent = Object.freeze({ getReferenceRows: getContentReferenceRows });
+
+  // ── Test hooks (scripts/verify_content.mjs drives lessons and quiz checks
+  // headlessly through these; nothing in the UI uses them) ──
+  window.SwitchUpTestHooks = Object.freeze({
+    resetSwitcherState,
+    setQuizMode(enabled) { state.quizMode = !!enabled; },
+    getLessonSteps: (lessonId) => getLessonSteps(lessonId),
+    getQuizItems: (level) => QUIZ_BANK[level] || [],
+    getRtsItems: (level) => RUN_THE_SHOW[level] || [],
+    startLessonDrive(lessonId) {
+      startLesson(lessonId);
+      lessonState.watchCompleted = true;
+      setLessonSubMode(false);
+    },
+    isLessonActive: () => !!lessonState.active,
+    getLessonStepIndex: () => lessonState.stepIndex,
+    currentLessonStepId: () => {
+      const step = lessonState.active ? currentLessonStep() : null;
+      return step ? step.id : null;
+    },
+    getLessonStepLog: () => lessonState.stepLog.map((entry) => ({ ...entry })),
+    getState: () => state,
+  });
 
   Object.assign(window, {
     selectPgm,

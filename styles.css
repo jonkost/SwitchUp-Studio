@@ -1795,6 +1795,26 @@
 			text-align: center;
 		}
 
+		.mv-fallback-label.mv-empty-media {
+			flex-direction: column;
+			gap: 0.2em;
+			background: #0a0a0d;
+			color: #5c6070;
+			font-family: 'Inter', sans-serif;
+			font-weight: 700;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+		}
+
+		.mv-empty-media-name {
+			font-size: 1em;
+		}
+
+		.mv-empty-media-note {
+			font-size: 0.55em;
+			color: #40444f;
+		}
+
 		.mv-cell.is-pgm {
 			border-color: #cc0000;
 		}
@@ -6106,11 +6126,7 @@ body {
   font-weight: 900;
   letter-spacing: -0.01em;
   line-height: 1.1;
-  background: linear-gradient(160deg, #ffffff 20%, rgba(255, 188, 59, 0.9) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 0 28px rgba(255, 188, 59, 0.25));
+  color: #ffffff;
 }
 
 #welcome-sub {

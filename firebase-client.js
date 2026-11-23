@@ -162,7 +162,7 @@ async function saveQuizSubmission(summary) {
     ...summary,
     createdAt: serverTimestamp(),
   };
-  await setDoc(doc(db, 'quiz_submissions', summary.confirmation_code), payload, { merge: true });
+  await setDoc(doc(db, 'quiz_submissions', summary.confirmation_code), payload);
   return payload;
 }
 
@@ -173,7 +173,7 @@ async function saveLessonSubmission(summary) {
     ...summary,
     createdAt: serverTimestamp(),
   };
-  await setDoc(doc(db, 'lesson_submissions', summary.confirmation_code), payload, { merge: true });
+  await setDoc(doc(db, 'lesson_submissions', summary.confirmation_code), payload);
   return payload;
 }
 
@@ -204,6 +204,31 @@ function submissionTimeMs(item) {
   if (typeof value === 'string') return Date.parse(value) || 0;
   if (value.seconds) return value.seconds * 1000;
   return 0;
+}
+
+async function hasSubmission(kind, confirmationCode) {
+  if (!confirmationCode) return false;
+  const collectionName = kind === 'lesson' ? 'lesson_submissions' : 'quiz_submissions';
+  const snapshot = await getDoc(doc(db, collectionName, confirmationCode));
+  return snapshot.exists();
+}
+
+// Like getStudentResults(), but also reports which source (quiz / lesson)
+// failed to load so the grade book can say so instead of silently showing less.
+async function getStudentResultsReport(maxCount = 100) {
+  const sources = ['quiz', 'lesson'];
+  const settled = await Promise.allSettled([
+    getQuizSubmissions(maxCount),
+    getLessonSubmissions(maxCount),
+  ]);
+  const errors = [];
+  const results = [];
+  settled.forEach((outcome, index) => {
+    if (outcome.status === 'fulfilled') results.push(...outcome.value);
+    else errors.push({ source: sources[index], code: outcome.reason?.code || '', message: outcome.reason?.message || String(outcome.reason) });
+  });
+  results.sort((a, b) => submissionTimeMs(b) - submissionTimeMs(a));
+  return { results, errors };
 }
 
 async function getStudentResults(maxCount = 100) {
@@ -256,6 +281,8 @@ window.SwitchUpFirebase = {
   getQuizSubmissions,
   getLessonSubmissions,
   getStudentResults,
+  getStudentResultsReport,
+  hasSubmission,
   getNarration,
 };
 

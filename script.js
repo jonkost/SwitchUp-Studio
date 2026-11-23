@@ -51,6 +51,8 @@
   const LEGACY_MACRO_STORAGE_KEYS = Object.freeze(['virtual_switcher_macro_slots_v642', 'virtual_switcher_macro_slots_v641', 'virtual_switcher_macro_slots_v6218', 'virtual_switcher_macro_slots_v6217']);
   const LOCAL_NARRATION_VOICE = 'af_heart';
   const LOCAL_NARRATION_BASE = `assets/narration/${LOCAL_NARRATION_VOICE}`;
+  // Bump when clips are regenerated — MP3s are cached for a year by hosting.
+  const LOCAL_NARRATION_VERSION = '2';
   const LOCAL_NARRATION_MANIFEST = `${LOCAL_NARRATION_BASE}/manifest.json`;
   const VO_PREVIEW_REF_ID = 'UI-vo-preview.prompt';
 
@@ -265,12 +267,6 @@
   const showWhen = (element, shouldShow) => {
     if (element) element.hidden = !shouldShow;
   };
-  const setPracticeQuizToggle = (pressed) => {
-    if (!dom.quizPracticeToggle) return;
-    const isPressed = !!pressed;
-    dom.quizPracticeToggle.setAttribute('aria-pressed', String(isPressed));
-    dom.quizPracticeToggle.classList.toggle('is-active', isPressed);
-  };
   const getSourceName = (index) => SOURCES[index] || 'BLK';
   const currentDsk = () => state.dskState[state.activeDSK];
   const getSourceIndex = (sourceName) => SOURCES.indexOf(sourceName);
@@ -385,7 +381,7 @@
     quizTimerInterval: null,
     quizAllCorrect: true,
     rtsStepMissed: false,
-    practiceQuiz: false,
+    quizSubmitted: false,
     pseudoFullscreen: false,
     lastBackgroundAction: null,
     lastDskActions: Array.from({ length: DSK_COUNT }, () => null),
@@ -679,8 +675,14 @@
     quizNameOverlay: $('quiz-name-overlay'),
     quizNameDialog: $('quiz-name-dialog'),
     quizNameInput: $('quiz-name-input'),
-    quizClassInput: $('quiz-class-input'),
-    quizPracticeToggle: $('quiz-practice-toggle'),
+    quizClassSelect: $('quiz-class-select'),
+    quizMonthSelect: $('quiz-month-select'),
+    quizYearSelect: $('quiz-year-select'),
+    quizTermPreview: $('quiz-term-preview'),
+    quizSubmitButton: $('quiz-submit-btn'),
+    quizRetryButton: $('quiz-retry-btn'),
+    quizFreeplayButton: $('quiz-freeplay-btn'),
+    quizResultsNote: $('quiz-results-note'),
     quizLevelOverlay: $('quiz-level-overlay'),
     quizLevelDialog: $('quiz-level-dialog'),
     quizResultsOverlay: $('quiz-results-overlay'),
@@ -1577,22 +1579,190 @@
     return Math.max(0, Math.floor((Date.now() - state.quizStartTime) / 1000));
   }
 
-  function quizCodeFrom(timeString) {
-    const level = state.quizLevel || 'unknown';
-    return btoa(`${state.quizName}|${level}|${state.quizScore}|${timeString}|${new Date().toISOString()}`)
-      .slice(0, 12)
-      .toUpperCase();
+  // Confirmation codes double as the Firestore document id, and submissions are
+  // create-only, so every attempt MUST get its own code. (The old quiz code was
+  // derived from the student's name, so a student's 2nd+ quiz collided with their
+  // first and was rejected by Firestore.)
+  function uniqueResultCode(prefix) {
+    const random = Math.random().toString(36).slice(2, 8).padEnd(6, '0');
+    return `${prefix}-${Date.now().toString(36)}-${random}`.toUpperCase();
   }
 
-  function lessonCodeFrom() {
-    return `LSN-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`.toUpperCase();
+  function quizCodeFrom() {
+    return uniqueResultCode('QZ');
+  }
+
+  /* ---- "What went wrong" notes ----
+     While a question's check() runs inside explainCheck(), the low-level
+     matchers below call noteMiss() with a plain-language reason when they fail.
+     Outside explainCheck() noteMiss() is a no-op, so normal checks are unchanged. */
+  let checkNotes = null;
+
+  function noteMiss(text) {
+    if (checkNotes && text && !checkNotes.includes(text)) checkNotes.push(text);
+    return false;
+  }
+
+  function explainCheck(question) {
+    const notes = [];
+    checkNotes = notes;
+    let ok = false;
+    try {
+      ok = !!question.check();
+    } finally {
+      checkNotes = null;
+    }
+    return { ok, note: ok ? '' : (notes[0] || 'The switcher was not in the state this call asked for.') };
+  }
+
+  /* ---- Result delivery (Firestore grade book + Formspree email) ----
+     Every result is written to a localStorage outbox first, then delivered to
+     both destinations independently. Anything that fails (offline, blocked CDN,
+     tab closed early, Formspree hiccup) stays queued and is retried on a timer,
+     when the browser comes back online, and the next time the app is opened. */
+  const RESULT_OUTBOX_KEY = 'switchup.resultOutbox.v1';
+  const RESULT_OUTBOX_MAX_TRIES = 12;
+  const RESULT_OUTBOX_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+  let resultOutboxBusy = false;
+  let resultOutboxTimer = null;
+  const resultStatusListeners = new Map();
+
+  function readResultOutbox() {
+    try {
+      const list = JSON.parse(localStorage.getItem(RESULT_OUTBOX_KEY) || '[]');
+      return Array.isArray(list) ? list : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function writeResultOutbox(list) {
+    try {
+      localStorage.setItem(RESULT_OUTBOX_KEY, JSON.stringify(list));
+    } catch (error) {
+      console.warn('[SwitchUp] Could not persist result outbox:', error);
+    }
+  }
+
+  async function deliverResultToFirestore(entry) {
+    const api = window.SwitchUpFirebase;
+    const save = api && (entry.kind === 'lesson' ? api.saveLessonSubmission : api.saveQuizSubmission);
+    if (typeof save !== 'function') return false; // SDK not loaded (yet) — stay queued.
+    try {
+      // Firestore never settles a write while offline, so cap the wait. If the
+      // write lands later anyway, the retry is caught by hasSubmission() below.
+      await Promise.race([
+        save(entry.payload),
+        new Promise((resolve, reject) => setTimeout(() => reject(new Error('Grade book save timed out')), 15000)),
+      ]);
+      return true;
+    } catch (error) {
+      // Submissions are create-only, so a retry of a write that actually landed
+      // comes back "permission denied". Confirm by looking for the document.
+      try {
+        if (typeof api.hasSubmission === 'function'
+          && await api.hasSubmission(entry.kind, entry.payload.confirmation_code)) return true;
+      } catch (lookupError) { /* fall through */ }
+      console.error(`[SwitchUp] Grade book save failed (${entry.payload.confirmation_code}):`, error);
+      return false;
+    }
+  }
+
+  async function deliverResultToFormspree(entry) {
+    try {
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(entry.payload),
+        keepalive: true,
+      });
+      if (response.ok) return true;
+      console.error(`[SwitchUp] Formspree rejected ${entry.payload.confirmation_code}:`, response.status);
+      // 4xx (other than timeout / rate limit) will never succeed on retry.
+      if (response.status >= 400 && response.status < 500 && response.status !== 408 && response.status !== 429) return 'rejected';
+      return false;
+    } catch (error) {
+      console.error('[SwitchUp] Formspree error:', error);
+      return false;
+    }
+  }
+
+  async function flushResultOutbox() {
+    if (resultOutboxBusy) return;
+    resultOutboxBusy = true;
+    try {
+      const pending = readResultOutbox();
+      for (const entry of pending) {
+        const [fs, fm] = await Promise.all([
+          entry.fs ? true : deliverResultToFirestore(entry),
+          entry.fm ? entry.fm : deliverResultToFormspree(entry),
+        ]);
+        const code = entry.payload.confirmation_code;
+        // Re-read so results queued while we were awaiting are not overwritten.
+        const next = readResultOutbox().map((item) => (item.payload.confirmation_code === code
+          ? { ...item, fs: !!fs, fm, tries: (item.tries || 0) + 1 }
+          : item));
+        const updated = next.find((item) => item.payload.confirmation_code === code);
+        writeResultOutbox(next.filter((item) => {
+          const done = item.fs && item.fm;
+          const expired = (item.tries || 0) >= RESULT_OUTBOX_MAX_TRIES || Date.now() - (item.at || 0) > RESULT_OUTBOX_MAX_AGE_MS;
+          return !done && !expired;
+        }));
+        const listener = resultStatusListeners.get(code);
+        if (listener && updated) {
+          listener({ gradebook: !!updated.fs, email: updated.fm === true });
+          if (updated.fs) resultStatusListeners.delete(code);
+        }
+      }
+    } finally {
+      resultOutboxBusy = false;
+    }
+    clearTimeout(resultOutboxTimer);
+    const remaining = readResultOutbox();
+    if (remaining.length) {
+      const tries = Math.max(...remaining.map((item) => item.tries || 0));
+      resultOutboxTimer = setTimeout(flushResultOutbox, Math.min(5 * 60 * 1000, 15000 * Math.max(1, tries)));
+    }
+  }
+
+  function submitResult(kind, payload, onStatus) {
+    const list = readResultOutbox();
+    list.push({ kind, payload, fs: false, fm: false, tries: 0, at: Date.now() });
+    writeResultOutbox(list);
+    if (typeof onStatus === 'function') resultStatusListeners.set(payload.confirmation_code, onStatus);
+    flushResultOutbox();
+  }
+
+  function resultStatusMessage(status) {
+    if (status.gradebook) return { ok: true, text: '✅ Results sent to instructor' };
+    if (status.email) return { ok: true, text: '✅ Results emailed to instructor — grade book copy will finish syncing automatically' };
+    return { ok: false, text: '⚠️ Not sent yet — saved on this device and will resend automatically. Keep this page open and write down your confirmation code.' };
+  }
+
+  window.addEventListener('online', flushResultOutbox);
+  window.addEventListener('switchup:firebase-ready', flushResultOutbox);
+  setTimeout(flushResultOutbox, 4000);
+
+  function transitionLabel(method) {
+    if (method === 'cut') return 'a Take (CUT)';
+    if (method === 'auto') return 'a Dissolve (AUTO)';
+    if (method === 'media') return 'a media transition';
+    return 'a different transition';
+  }
+
+  function resultTag(result) {
+    if (result === 'CORRECT') return 'CORRECT';
+    if (String(result).startsWith('SKIPPED')) return 'SKIPPED';
+    return 'INCORRECT';
   }
 
   function buildQuizBreakdownText() {
     return state.quizResults
       .map((result, index) => {
-        const icon = result.result === 'CORRECT' ? '[CORRECT]' : result.result === 'SKIPPED' ? '[SKIPPED]' : '[INCORRECT]';
-        return `${index + 1}. ${icon} ${result.prompt} (${result.category})`;
+        const tag = resultTag(result.result);
+        const icon = tag === 'SKIPPED' ? '[SKIPPED — NO CREDIT]' : `[${tag}]`;
+        const line = `${index + 1}. ${icon} ${result.prompt} (${result.category})`;
+        return result.note ? `${line}\n   What went wrong: ${result.note}` : line;
       })
       .join('\n');
   }
@@ -1600,35 +1770,47 @@
   function buildQuizBreakdownMarkup() {
     return state.quizResults
       .map((result, index) => {
-        const icon = result.result === 'CORRECT' ? '✓' : result.result === 'SKIPPED' ? '—' : '✗';
-        const statusClass = result.result === 'CORRECT'
+        const tag = resultTag(result.result);
+        const icon = tag === 'CORRECT' ? '✓' : tag === 'SKIPPED' ? '—' : '✗';
+        const statusClass = tag === 'CORRECT'
           ? 'quiz-breakdown-correct'
-          : result.result === 'SKIPPED'
+          : tag === 'SKIPPED'
             ? 'quiz-breakdown-skipped'
             : 'quiz-breakdown-incorrect';
-        return `<div class="quiz-breakdown-item ${statusClass}">${index + 1}. ${icon} ${result.prompt} (${result.category})</div>`;
+        const note = result.note ? `<div class="quiz-breakdown-note">What went wrong: ${escapeResultHtml(result.note)}</div>` : '';
+        return `<div class="quiz-breakdown-item ${statusClass}">${index + 1}. ${icon} ${escapeResultHtml(result.prompt)} (${escapeResultHtml(result.category)})${note}</div>`;
       })
       .join('');
+  }
+
+  function escapeResultHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
   }
 
   function getQuizSummary() {
     const timeString = formatElapsed(getElapsedQuizSeconds());
     return {
       timeString,
-      code: quizCodeFrom(timeString),
+      code: quizCodeFrom(),
       breakdownText: buildQuizBreakdownText(),
       breakdownMarkup: buildQuizBreakdownMarkup(),
     };
   }
 
   function lastBackgroundMethodIs(method) {
-    return !!(state.lastBackgroundAction && state.lastBackgroundAction.method === method);
+    const action = state.lastBackgroundAction;
+    if (!action) return noteMiss(`No transition was performed — the call was ${transitionLabel(method)}.`);
+    if (action.method !== method) return noteMiss(`Wrong transition — the call was ${transitionLabel(method)}, but ${transitionLabel(action.method)} was used.`);
+    return true;
   }
 
   function lastDskMethodIs(index, method, active = null) {
     const action = state.lastDskActions[index];
-    if (!action || action.method !== method) return false;
-    return active === null ? true : action.active === active;
+    const keyName = `Key ${index + 1}`;
+    if (!action) return noteMiss(`${keyName} was never transitioned — the call was ${transitionLabel(method)}.`);
+    if (action.method !== method) return noteMiss(`Wrong transition on ${keyName} — the call was ${transitionLabel(method)}, but ${transitionLabel(action.method)} was used.`);
+    if (active !== null && action.active !== active) return noteMiss(`${keyName} should have ended up ${active ? 'on air' : 'off air'}.`);
+    return true;
   }
 
   function recordBackgroundAction(method) {
@@ -1682,18 +1864,41 @@
   function dskMatches(index, options = {}) {
     const dsk = state.dskState[index];
     if (!dsk) return false;
-    if (options.sourceIndex !== undefined && dsk.sourceIndex !== options.sourceIndex) return false;
-    if (!keyModeMatches(dsk, options.keyMode)) return false;
-    if (options.dveEnabled !== undefined && dsk.dveEnabled !== options.dveEnabled) return false;
-    if (options.chrColor !== undefined && dsk.chrColor !== options.chrColor) return false;
-    if (options.active !== undefined && dsk.active !== options.active) return false;
-    if (options.preview !== undefined && state.previewKeyState[index] !== options.preview) return false;
-    if (options.dveZone && !dveZoneMatches(dsk, options.dveZone)) return false;
+    const keyName = `Key ${index + 1}`;
+    if (options.sourceIndex !== undefined && dsk.sourceIndex !== options.sourceIndex) {
+      return noteMiss(`${keyName} source was ${getSourceName(dsk.sourceIndex)}; it should have been ${getSourceName(options.sourceIndex)}.`);
+    }
+    if (!keyModeMatches(dsk, options.keyMode)) {
+      const wanted = { SELF: 'self key', LUMA: 'luma key', CHR: 'chroma key', DVE_FULL: 'a full-frame DVE key' }[options.keyMode] || 'a different key type';
+      return noteMiss(`${keyName} was set to the wrong key type — it should have been ${wanted}.`);
+    }
+    if (options.dveEnabled !== undefined && dsk.dveEnabled !== options.dveEnabled) {
+      return noteMiss(`DVE on ${keyName} should have been ${options.dveEnabled ? 'on' : 'off'}.`);
+    }
+    if (options.chrColor !== undefined && dsk.chrColor !== options.chrColor) {
+      return noteMiss(`${keyName} chroma color was ${dsk.chrColor || 'not set'}; it should have been ${options.chrColor}.`);
+    }
+    if (options.active !== undefined && dsk.active !== options.active) {
+      return noteMiss(options.active
+        ? `${keyName} was not on air — it should have been taken to program.`
+        : `${keyName} was on air — it should have been off program.`);
+    }
+    if (options.preview !== undefined && state.previewKeyState[index] !== options.preview) {
+      return noteMiss(options.preview
+        ? `${keyName} was not tied/previewed — it should have been showing in preview.`
+        : `${keyName} was still tied/previewed — its tie should have been off.`);
+    }
+    if (options.dveZone && !dveZoneMatches(dsk, options.dveZone)) {
+      return noteMiss(`The ${keyName} DVE box was not in the right position or size (${String(options.dveZone).replace(/-/g, ' ')}).`);
+    }
     return true;
   }
 
   function backgroundTransitionCheck(sourceIndex, method) {
-    return state.pgmIndex === sourceIndex && lastBackgroundMethodIs(method);
+    if (state.pgmIndex !== sourceIndex) {
+      return noteMiss(`Program ended on ${getSourceName(state.pgmIndex)}; it should have been ${getSourceName(sourceIndex)}.`);
+    }
+    return lastBackgroundMethodIs(method);
   }
 
   function keyTakeWithBackgroundCheck(sourceIndex, method, dskIndex, extra = {}) {
@@ -3216,8 +3421,8 @@
     state.quizType = null;
     state.quizAllCorrect = true;
     state.rtsStepMissed = false;
-    state.practiceQuiz = false;
-    setPracticeQuizToggle(false);
+    state.rtsMissNote = '';
+    state.quizSubmitted = false;
     dom.quizQuestionNum.textContent = '1/10';
     dom.quizScoreDisplay.textContent = 'Score: 0';
     dom.quizTimer.textContent = '0:00';
@@ -3268,7 +3473,10 @@
   }
 
   function mediaBankLoadedCheck(bankName, mediaId) {
-    return getBankMediaId(bankName) === mediaId;
+    const loadedId = getBankMediaId(bankName);
+    if (loadedId === mediaId) return true;
+    const loadedName = loadedId ? getMediaOption(loadedId).name : 'nothing';
+    return noteMiss(`${bankName} had ${loadedName} loaded; it should have been ${getMediaOption(mediaId).name}.`);
   }
 
   function mediaKeyPreparedCheck(dskIndex, bankName, mediaId, options = {}) {
@@ -3543,11 +3751,13 @@ const RUN_THE_SHOW = {
 
   function me1CompositeMatches(kind) {
     const bus = getBusStateForSurface('ME1');
-    return kind === 'quad' ? quadCompositeMatches(bus) : sideBySideCompositeMatches(bus);
+    const ok = kind === 'quad' ? quadCompositeMatches(bus) : sideBySideCompositeMatches(bus);
+    return ok || noteMiss(`ME 1 was not showing the ${kind === 'quad' ? 'quad' : 'side-by-side'} composite — check which macro was recalled.`);
   }
 
   function me1SlotMatches(slotIndex, kind) {
-    return slotBusMatches('ME1', slotIndex, (bus) => (kind === 'quad' ? quadCompositeMatches(bus) : sideBySideCompositeMatches(bus)));
+    const ok = slotBusMatches('ME1', slotIndex, (bus) => (kind === 'quad' ? quadCompositeMatches(bus) : sideBySideCompositeMatches(bus)));
+    return ok || noteMiss(`ME 1 Macro ${slotIndex + 1} did not hold a correct ${kind === 'quad' ? 'quad' : 'side-by-side'} build (sources, DVE, crop, and borders).`);
   }
 
   function getTransitionVerb(method) {
@@ -3577,7 +3787,7 @@ const RUN_THE_SHOW = {
     const prompt = `On ME 1, take BLK. Build a CAM 3 | CAM 1 side-by-side with DVE, crop, and borders. Store it to ME 1 Macro 1. Stay on ME 1, clear it and build a quad of CAM 1, CAM 2, CAM 3, and CPU with DVE, crop, and borders. Store it to ME 1 Macro 2. Recall ME 1 Macro ${recallSlot + 1}. Switch to ME P/P. ${getPreviewVerb(method)} ME1. ${getTransitionVerb(method)} ME1.`;
     return {
       prompt,
-      check: () => state.surfaceMode === 'ME_PP'
+      check: () => (state.surfaceMode === 'ME_PP' || noteMiss('The panel was still on ME 1 — it should have been switched back to ME P/P.'))
         && me1SlotMatches(0, 'side')
         && me1SlotMatches(1, 'quad')
         && me1CompositeMatches(kind)
@@ -3589,7 +3799,7 @@ const RUN_THE_SHOW = {
     const prompt = `On ME 1, take BLK. Build a CAM 3 | CAM 1 side-by-side with DVE, crop, and borders. Store it to ME 1 Macro 1. Stay on ME 1, clear it and build a quad of CAM 1, CAM 2, CAM 3, and CPU with DVE, crop, and borders. Store it to ME 1 Macro 2. Recall ME 1 Macro ${recallSlot + 1}. Switch to ME P/P. Set Key ${dskIndex + 1} with ME1. DVE Key ${dskIndex + 1} on. ${getZonePrompt(zone)}. Preview Key ${dskIndex + 1}. ${getPreviewVerb(method)} ${backgroundSource}. ${getTransitionVerb(method)} ${backgroundSource} with Key ${dskIndex + 1}.`;
     return {
       prompt,
-      check: () => state.surfaceMode === 'ME_PP'
+      check: () => (state.surfaceMode === 'ME_PP' || noteMiss('The panel was still on ME 1 — it should have been switched back to ME P/P.'))
         && me1SlotMatches(0, 'side')
         && me1SlotMatches(1, 'quad')
         && me1CompositeMatches(kind)
@@ -3755,8 +3965,12 @@ const RUN_THE_SHOW = {
     if (!state.rtsStepMissed) state.quizScore += 1;
     else state.quizAllCorrect = false;
 
-    state.quizResults.push({ prompt: question.prompt, category: level, result });
+    const note = state.rtsStepMissed
+      ? `${state.rtsMissNote || 'A wrong action was made on this step.'} (Corrected before moving on.)`
+      : '';
+    state.quizResults.push({ prompt: question.prompt, category: level, result, note });
     state.rtsStepMissed = false;
+    state.rtsMissNote = '';
     state.quizCurrent += 1;
 
     if (state.quizCurrent >= state.quizQuestions.length) {
@@ -3773,12 +3987,14 @@ const RUN_THE_SHOW = {
     const question = state.quizQuestions[state.quizCurrent];
     if (!question) return;
 
-    if (question.check()) {
+    const outcome = explainCheck(question);
+    if (outcome.ok) {
       resolveRunTheShowStep();
       return;
     }
 
     if (markAttempt) {
+      if (!state.rtsMissNote) state.rtsMissNote = outcome.note;
       state.rtsStepMissed = true;
       state.quizAllCorrect = false;
       dom.quizScoreDisplay.textContent = 'NEEDS REVIEW';
@@ -3822,7 +4038,7 @@ const RUN_THE_SHOW = {
       resetSwitcherState();
       dom.quizNameOverlay.classList.add('show');
       if (!tts.muted) initTTS();
-      ttsCancelAndSpeak('Quiz Mode. Enter your name and class, or choose Practice Quiz to continue without submitting results.', 'UI-quiz-name.prompt');
+      ttsCancelAndSpeak('Quiz Mode. Enter your name and choose your term. You decide whether to submit your results when the quiz is finished.', 'UI-quiz-name.prompt');
       updateUtilityMenuActions();
       scheduleLayout();
       if (!isFullscreenActive()) setTimeout(() => dom.quizNameInput.focus(), 50);
@@ -3843,26 +4059,55 @@ const RUN_THE_SHOW = {
     setTimeout(() => dom.modeFreeplayButton.focus(), 50);
   }
 
+  const QUIZ_TERM_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  // Term label, e.g. AVT + December 2026 → "AVT 2612" (CLASS YYMM)
+  function formatQuizTerm(className, year, month) {
+    return `${className} ${String(year).slice(-2)}${String(month).padStart(2, '0')}`;
+  }
+
+  function getSelectedQuizTerm() {
+    return formatQuizTerm(
+      dom.quizClassSelect ? dom.quizClassSelect.value : 'AVT',
+      dom.quizYearSelect ? dom.quizYearSelect.value : new Date().getFullYear(),
+      dom.quizMonthSelect ? dom.quizMonthSelect.value : new Date().getMonth() + 1
+    );
+  }
+
+  function updateQuizTermPreview() {
+    if (dom.quizTermPreview) dom.quizTermPreview.textContent = `Term: ${getSelectedQuizTerm()}`;
+  }
+
+  function initQuizTermChooser() {
+    const now = new Date();
+    if (dom.quizMonthSelect && !dom.quizMonthSelect.options.length) {
+      QUIZ_TERM_MONTHS.forEach((label, index) => {
+        dom.quizMonthSelect.add(new Option(label, String(index + 1)));
+      });
+      dom.quizMonthSelect.value = String(now.getMonth() + 1);
+    }
+    if (dom.quizYearSelect && !dom.quizYearSelect.options.length) {
+      for (let year = now.getFullYear() - 1; year <= now.getFullYear() + 2; year += 1) {
+        dom.quizYearSelect.add(new Option(String(year), String(year)));
+      }
+      dom.quizYearSelect.value = String(now.getFullYear());
+    }
+    [dom.quizClassSelect, dom.quizMonthSelect, dom.quizYearSelect].forEach((el) => {
+      if (el) el.addEventListener('change', updateQuizTermPreview);
+    });
+    updateQuizTermPreview();
+  }
+
   function submitQuizName() {
     const name = dom.quizNameInput.value.trim();
-    const className = dom.quizClassInput.value.trim();
-    const practiceQuiz = !!(dom.quizPracticeToggle && dom.quizPracticeToggle.getAttribute('aria-pressed') === 'true');
-
-    const missingName = !name;
-    const missingClass = !className;
-
-    dom.quizNameInput.classList.toggle('input-error', !practiceQuiz && missingName);
-    dom.quizClassInput.classList.toggle('input-error', !practiceQuiz && missingClass);
-
-    if (!practiceQuiz && (missingName || missingClass)) {
-      if (missingName) dom.quizNameInput.focus();
-      else dom.quizClassInput.focus();
+    dom.quizNameInput.classList.toggle('input-error', !name);
+    if (!name) {
+      dom.quizNameInput.focus();
       return;
     }
 
-    state.quizName = practiceQuiz ? (name || 'Quick Practice') : name;
-    state.quizClass = practiceQuiz ? className : className;
-    state.practiceQuiz = practiceQuiz;
+    state.quizName = name;
+    state.quizClass = getSelectedQuizTerm();
     dom.quizNameOverlay.classList.remove('show');
     dom.quizLevelOverlay.classList.add('show');
     setTimeout(() => dom.quizLevelDialog.focus(), 50);
@@ -3960,6 +4205,7 @@ const RUN_THE_SHOW = {
     state.quizResults = [];
     state.quizAllCorrect = true;
     state.rtsStepMissed = false;
+    state.rtsMissNote = '';
     state.quizStartTime = Date.now();
 
     const showSkip = true;
@@ -3998,7 +4244,8 @@ const RUN_THE_SHOW = {
     if (state.quizCurrent >= state.quizQuestions.length || isRunTheShow()) return;
 
     const question = state.quizQuestions[state.quizCurrent];
-    const correct = question.check();
+    const outcome = explainCheck(question);
+    const correct = outcome.ok;
     const level = LEVEL_LABELS[state.quizLevel] || state.quizLevel;
 
     if (correct) {
@@ -4010,7 +4257,7 @@ const RUN_THE_SHOW = {
       ttsCancelAndSpeak('Correct!');
     } else {
       state.quizAllCorrect = false;
-      state.quizResults.push({ prompt: question.prompt, category: level, result: 'INCORRECT' });
+      state.quizResults.push({ prompt: question.prompt, category: level, result: 'INCORRECT', note: outcome.note });
       dom.panel.classList.add('quiz-wrong');
       dom.quizPrompt.textContent = '✗ INCORRECT';
       dom.quizPrompt.style.color = '#ff4444';
@@ -4051,7 +4298,8 @@ const RUN_THE_SHOW = {
 
     state.quizAllCorrect = false;
     if (isRunTheShow()) state.rtsStepMissed = true;
-    state.quizResults.push({ prompt: question.prompt, category: level, result: 'SKIPPED TWICE — NO CREDIT' });
+    state.quizResults.push({ prompt: question.prompt, category: level, result: 'SKIPPED TWICE — NO CREDIT', note: 'Skipped twice, so it was not attempted.' });
+    state.rtsMissNote = '';
     dom.panel.classList.add('quiz-wrong');
     dom.quizPrompt.textContent = '✗ SKIPPED TWICE — NO CREDIT';
     dom.quizPrompt.style.color = '#ff5d57';
@@ -4077,8 +4325,7 @@ const RUN_THE_SHOW = {
     state.quizTimerInterval = null;
   }
 
-  function emailResults() {
-    const summary = getQuizSummary();
+  function emailResults(summary) {
     const total = state.quizQuestions.length;
     const level = LEVEL_LABELS[state.quizLevel] || state.quizLevel;
     const scoreText = isRunTheShow()
@@ -4087,40 +4334,32 @@ const RUN_THE_SHOW = {
 
     const formData = {
       result_type: 'quiz',
-      _subject: `SwitchUp Studio — ${state.practiceQuiz ? 'Practice ' : ''}${level} — ${state.quizName}${state.quizClass ? ` — ${state.quizClass}` : ''} — ${scoreText}`,
+      _subject: `SwitchUp Studio — ${level} — ${state.quizName} — ${state.quizClass} — ${scoreText}`,
       student_name: state.quizName,
-      class_name: state.quizClass || 'Not provided',
+      class_name: state.quizClass,
+      term: state.quizClass,
       activity: level,
       quiz_level: level,
       score: scoreText,
       time: summary.timeString,
       date: new Date().toLocaleString(),
+      submitted_at: new Date().toISOString(),
       confirmation_code: summary.code,
       breakdown: summary.breakdownText,
     };
 
-    if (window.SwitchUpFirebase && typeof window.SwitchUpFirebase.saveQuizSubmission === 'function') {
-      window.SwitchUpFirebase.saveQuizSubmission(formData)
-        .catch((error) => {
-          console.error('Firestore quiz submission failed:', error);
-        });
-    }
-
-    fetch(FORMSPREE_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => {
-        if (response.ok) console.log('Quiz results sent successfully via Formspree');
-        else console.error('Formspree submission failed:', response.status);
-      })
-      .catch((error) => {
-        console.error('Formspree error:', error);
-      });
+    submitResult('quiz', formData, (status) => {
+      const message = resultStatusMessage(status);
+      let el = document.getElementById('quiz-results-sent-msg');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'quiz-results-sent-msg';
+        el.className = 'lesson-results-sent-msg';
+        dom.quizResultsCode.appendChild(el);
+      }
+      el.textContent = message.text;
+      el.style.color = message.ok ? '' : '#ff6b6b';
+    });
   }
 
   function endQuiz() {
@@ -4137,18 +4376,50 @@ const RUN_THE_SHOW = {
       dom.quizPrompt.style.color = passed ? '#00cc00' : '#f5a623';
       dom.quizResultsScore.textContent = passed ? `PASS (${state.quizScore}/${total})` : `NEEDS REVIEW (${state.quizScore}/${total})`;
     } else {
-      dom.quizPrompt.textContent = `${state.practiceQuiz ? 'Practice Quiz Complete!' : 'Quiz Complete!'} ${state.quizScore}/${total}`;
+      dom.quizPrompt.textContent = `Quiz Complete! ${state.quizScore}/${total}`;
       dom.quizResultsScore.textContent = `${state.quizScore} / ${total}`;
     }
 
-    dom.quizResultsName.textContent = `${state.practiceQuiz ? 'PRACTICE — ' : ''}${state.quizName}${state.quizClass ? ` — ${state.quizClass}` : ''} — ${level}`;
+    dom.quizResultsName.textContent = `${state.quizName} — ${state.quizClass} — ${level}`;
     dom.quizResultsTime.textContent = `Time: ${summary.timeString}`;
     dom.quizResultsCode.innerHTML = `Confirmation Code: <strong>${summary.code}</strong>`;
     dom.quizResultsBreakdown.innerHTML = summary.breakdownMarkup;
 
-    if (!state.practiceQuiz) emailResults();
+    state.quizSummary = summary;
+    state.quizSubmitted = false;
+    setQuizResultsSubmitted(false);
     dom.quizResultsOverlay.classList.add('show');
     setTimeout(() => dom.quizResultsDialog.focus(), 50);
+  }
+
+  function setQuizResultsSubmitted(submitted) {
+    if (dom.quizSubmitButton) {
+      dom.quizSubmitButton.disabled = submitted;
+      dom.quizSubmitButton.textContent = submitted ? '✓ SUBMITTED' : 'SUBMIT RESULTS';
+    }
+    if (dom.quizRetryButton) dom.quizRetryButton.textContent = submitted ? '↺ RETRY' : '↺ RETRY — DON\'T SUBMIT';
+    if (dom.quizFreeplayButton) dom.quizFreeplayButton.textContent = submitted ? 'FREEPLAY' : 'FREEPLAY — DON\'T SUBMIT';
+    if (dom.quizResultsNote) {
+      dom.quizResultsNote.textContent = submitted
+        ? 'Results submitted. Keep your confirmation code.'
+        : 'Submit to send these results to your instructor, or retry / return to Freeplay without submitting.';
+    }
+  }
+
+  function submitQuizResults() {
+    if (state.quizSubmitted || !state.quizSummary) return;
+    state.quizSubmitted = true;
+    setQuizResultsSubmitted(true);
+    emailResults(state.quizSummary);
+  }
+
+  function retryQuiz() {
+    dom.quizResultsOverlay.classList.remove('show');
+    const sentMsg = document.getElementById('quiz-results-sent-msg');
+    if (sentMsg) sentMsg.remove();
+    state.quizSummary = null;
+    state.quizSubmitted = false;
+    startQuiz();
   }
 
   function isTextEntryTarget(target) {
@@ -4326,13 +4597,15 @@ function getActiveFocusTrapContainer() {
 function bindQuizDialogFocusLoop() {
   const dialog = dom.quizNameDialog || dom.quizNameOverlay;
   const nameInput = dom.quizNameInput;
-  const classInput = dom.quizClassInput;
+  const classInput = dom.quizClassSelect;
+  const monthInput = dom.quizMonthSelect;
+  const yearInput = dom.quizYearSelect;
   const continueBtn = document.getElementById('quiz-name-btn');
   const backBtn = document.getElementById('quiz-name-back-btn');
 
-  if (!dialog || !nameInput || !classInput || !continueBtn || !backBtn) return;
+  if (!dialog || !nameInput || !classInput || !monthInput || !yearInput || !continueBtn || !backBtn) return;
 
-  const focusOrder = [nameInput, classInput, continueBtn, backBtn];
+  const focusOrder = [nameInput, classInput, monthInput, yearInput, continueBtn, backBtn];
 
   const moveQuizDialogFocus = (event) => {
     if (event.key !== 'Tab') return;
@@ -4359,13 +4632,15 @@ function bindQuizDialogFocusLoop() {
     }
   }, true);
 
-  classInput.addEventListener('keydown', (event) => {
-    event.stopPropagation();
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      submitQuizName();
-    }
-  }, true);
+  [classInput, monthInput, yearInput].forEach((select) => {
+    select.addEventListener('keydown', (event) => {
+      event.stopPropagation();
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        submitQuizName();
+      }
+    }, true);
+  });
 
   continueBtn.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -4542,18 +4817,7 @@ function bindQuizDialogFocusLoop() {
     });
 
 
-    dom.quizClassInput.addEventListener('input', () => {
-      dom.quizClassInput.classList.remove('input-error');
-    });
-
-    if (dom.quizPracticeToggle) {
-      dom.quizPracticeToggle.addEventListener('click', () => {
-        const nextPressed = dom.quizPracticeToggle.getAttribute('aria-pressed') !== 'true';
-        setPracticeQuizToggle(nextPressed);
-        dom.quizNameInput.classList.remove('input-error');
-        dom.quizClassInput.classList.remove('input-error');
-      });
-    }
+    initQuizTermChooser();
 
 
     // ── DVE editor shell wiring ─────────────────────────────────
@@ -5963,12 +6227,8 @@ function bindQuizDialogFocusLoop() {
     // Progress tracking
     watchCompleted: false,   // true once user has finished Watch
     driveStarted: false,     // true once Drive mode has been entered at least once
-    nameCollected: false,    // true once name overlay was submitted/skipped (session-wide)
     lessonStartTime: null,   // Date.now() when lesson begins (Watch start)
     driveStartTime: null,    // Date.now() when Drive begins (for per-step timing)
-    submitResults: false,    // true if student filled in name (wants to submit)
-    studentName: '',
-    studentClass: '',
     stepLog: [],             // [{ id, attempts, timeMs }] per drive step
     _driveStepStart: null,   // timestamp of current drive step start
     _driveMistakes: {},      // { stepId: count }
@@ -6201,7 +6461,8 @@ function bindQuizDialogFocusLoop() {
     if (!step || step.watchOnly) return;
     if (!step.check) return;
 
-    if (step.check()) {
+    const outcome = explainCheck(step);
+    if (outcome.ok) {
       // ✅ Correct — lock out further checks until stepIndex updates
       lessonState._advancing = true;
       showLessonFeedback(true);
@@ -6214,6 +6475,7 @@ function bindQuizDialogFocusLoop() {
         instruction: step.instruction,
         attempts: 1 + (lessonState._driveMistakes[step.id] || 0),
         mistakes: lessonState._driveMistakes[step.id] || 0,
+        note: (lessonState._driveMissNotes && lessonState._driveMissNotes[step.id]) || '',
         timeMs: elapsed,
       });
       lessonState._driveStepStart = now;
@@ -6245,6 +6507,8 @@ function bindQuizDialogFocusLoop() {
       // ❌ Wrong — track mistake
       if (!lessonState._driveMistakes[step.id]) lessonState._driveMistakes[step.id] = 0;
       lessonState._driveMistakes[step.id] += 1;
+      if (!lessonState._driveMissNotes) lessonState._driveMissNotes = {};
+      if (!lessonState._driveMissNotes[step.id]) lessonState._driveMissNotes[step.id] = outcome.note;
       showLessonFeedback(false);
       lessonWiggle(document.getElementById('lesson-bar'));
     }
@@ -6298,6 +6562,7 @@ function bindQuizDialogFocusLoop() {
     lessonState.driveStartTime = Date.now();
     lessonState._driveStepStart = Date.now();
     lessonState._driveMistakes = {};
+    lessonState._driveMissNotes = {};
     lessonState._advancing = false;
 
     // Jump to first non-watchOnly step
@@ -6311,27 +6576,6 @@ function bindQuizDialogFocusLoop() {
 
     resetSwitcherState();
     updateLessonBar();
-  }
-
-  // Called when user submits name from the upfront form (shown on LESSONS click)
-  function submitLessonName() {
-    const nameEl  = document.getElementById('lesson-name-input');
-    const classEl = document.getElementById('lesson-class-input');
-    const name = nameEl  ? nameEl.value.trim()  : '';
-    const cls  = classEl ? classEl.value.trim() : '';
-
-    // Both fields filled → track and submit results; either blank → practice only
-    lessonState.studentName   = name;
-    lessonState.studentClass  = cls;
-    lessonState.submitResults = !!(name && cls);
-    lessonState.nameCollected = true;
-
-    const ol = document.getElementById('lesson-name-overlay');
-    if (ol) ol.classList.remove('show');
-
-    const select = document.getElementById('lesson-select-overlay');
-    if (select) select.classList.add('show');
-    ttsCancelAndSpeak('Guided Lessons. Choose a lesson to begin step-by-step training.', 'UI-lesson-select.prompt');
   }
 
   function completeLessonDrive() {
@@ -6355,9 +6599,7 @@ function bindQuizDialogFocusLoop() {
     // Subtitle
     const sub = document.getElementById('lesson-results-subtitle');
     if (sub) {
-      sub.textContent = lessonState.studentName
-        ? `Great work, ${lessonState.studentName}!`
-        : 'Drive complete — great work!';
+      sub.textContent = 'Drive complete — great work!';
     }
 
     // Stats row
@@ -6393,77 +6635,12 @@ function bindQuizDialogFocusLoop() {
       breakdown.innerHTML = rows;
     }
 
-    const sentMsg = document.getElementById('lesson-results-sent-msg');
-    if (sentMsg) sentMsg.style.display = 'none';
-
     const ol = document.getElementById('lesson-results-overlay');
     if (ol) {
       ol.classList.add('show');
       const dlg = document.getElementById('lesson-results-dialog');
       if (dlg) dlg.focus();
     }
-
-    // Auto-submit if student provided their name (same pattern as quiz)
-    if (lessonState.submitResults) lessonEmailResults();
-  }
-
-  function lessonEmailResults() {
-    const totalMs = lessonState.lessonStartTime ? Date.now() - lessonState.lessonStartTime : 0;
-    const totalSec = Math.round(totalMs / 1000);
-    const totalMistakes = Object.values(lessonState._driveMistakes).reduce((a, b) => a + b, 0);
-    const lessonName = lessonState.lessonId === 1 ? 'Lesson 1 — Introduction' : `Lesson ${lessonState.lessonId}`;
-    const mm = Math.floor(totalSec / 60);
-    const ss = String(totalSec % 60).padStart(2, '0');
-
-    const breakdown = lessonState.stepLog.map((s) => {
-      const tSec = Math.round(s.timeMs / 1000);
-      return `${s.instruction}: ${s.mistakes} mistake(s), ${tSec}s`;
-    }).join('\n');
-
-    const body = {
-      result_type: 'lesson',
-      _subject: `SwitchUp Lesson Results — ${lessonState.studentName || 'Student'} — ${lessonName}`,
-      student_name: lessonState.studentName || 'Anonymous',
-      class_name: lessonState.studentClass || '—',
-      activity: lessonName,
-      lesson: lessonName,
-      score: `${lessonState.stepLog.length} steps, ${totalMistakes} mistake${totalMistakes === 1 ? '' : 's'}`,
-      time: `${mm}:${ss}`,
-      total_mistakes: String(totalMistakes),
-      steps_completed: String(lessonState.stepLog.length),
-      date: new Date().toLocaleString(),
-      confirmation_code: lessonCodeFrom(),
-      breakdown,
-    };
-
-    if (window.SwitchUpFirebase && typeof window.SwitchUpFirebase.saveLessonSubmission === 'function') {
-      window.SwitchUpFirebase.saveLessonSubmission(body)
-        .catch((error) => {
-          console.error('Firestore lesson submission failed:', error);
-        });
-    }
-
-    fetch(FORMSPREE_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(body),
-    })
-      .then((r) => {
-        if (!r.ok) throw new Error('Network error');
-        const sentMsg = document.getElementById('lesson-results-sent-msg');
-        if (sentMsg) {
-          sentMsg.textContent = '✅ Results sent to instructor';
-          sentMsg.style.display = 'block';
-        }
-      })
-      .catch(() => {
-        const sentMsg = document.getElementById('lesson-results-sent-msg');
-        if (sentMsg) {
-          sentMsg.textContent = '⚠️ Could not send results — check your connection';
-          sentMsg.style.display = 'block';
-          sentMsg.style.color = '#ff6b6b';
-        }
-      });
   }
 
   function retryLessonDrive() {
@@ -6473,6 +6650,7 @@ function bindQuizDialogFocusLoop() {
 
     lessonState.stepLog = [];
     lessonState._driveMistakes = {};
+    lessonState._driveMissNotes = {};
     lessonState.lessonStartTime = Date.now(); // restart total timer on retry
     lessonState.driveStartTime = null;
 
@@ -6498,6 +6676,7 @@ function bindQuizDialogFocusLoop() {
     lessonState.driveStarted = false;
     lessonState.stepLog = [];
     lessonState._driveMistakes = {};
+    lessonState._driveMissNotes = {};
     lessonState.lessonStartTime = Date.now();   // total time includes Watch
     lessonState.driveStartTime = null;
     lessonState._driveStepStart = null;
@@ -6537,22 +6716,9 @@ function bindQuizDialogFocusLoop() {
       );
       return;
     }
-    // First time this session: collect student info before showing lesson list
-    if (!lessonState.nameCollected) {
-      const ol = document.getElementById('lesson-name-overlay');
-      if (ol) {
-        ol.classList.add('show');
-        ttsCancelAndSpeak('Guided Lessons. Enter your name and class, or leave either field blank to practice without submitting results.', 'UI-lesson-name.prompt');
-        setTimeout(() => {
-          const inp = document.getElementById('lesson-name-input');
-          if (inp) inp.focus();
-        }, 50);
-      }
-    } else {
-      const overlay = document.getElementById('lesson-select-overlay');
-      if (overlay) overlay.classList.add('show');
-      ttsCancelAndSpeak('Guided Lessons. Choose a lesson to begin step-by-step training.', 'UI-lesson-select.prompt');
-    }
+    const overlay = document.getElementById('lesson-select-overlay');
+    if (overlay) overlay.classList.add('show');
+    ttsCancelAndSpeak('Guided Lessons. Choose a lesson to begin step-by-step training.', 'UI-lesson-select.prompt');
   }
 
   function _teardownLesson() {
@@ -6563,7 +6729,7 @@ function bindQuizDialogFocusLoop() {
     const bar = document.getElementById('lesson-bar');
     if (bar) bar.classList.remove('lesson-visible');
     scheduleLayout();
-    ['lesson-select-overlay', 'lesson-name-overlay', 'lesson-results-overlay'].forEach((id) => {
+    ['lesson-select-overlay', 'lesson-results-overlay'].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.classList.remove('show');
     });
@@ -6672,7 +6838,7 @@ function bindQuizDialogFocusLoop() {
 
   function getLocalNarrationUrl(refId) {
     if (!refId) return '';
-    return `${LOCAL_NARRATION_BASE}/${encodeURIComponent(refId)}.mp3`;
+    return `${LOCAL_NARRATION_BASE}/${encodeURIComponent(refId)}.mp3?v=${LOCAL_NARRATION_VERSION}`;
   }
 
   function browserCanPlayMp3() {
@@ -6962,9 +7128,8 @@ function bindQuizDialogFocusLoop() {
 
   const CONTENT_UI_PROMPTS = Object.freeze([
     { refId: 'UI-vo-preview.prompt', text: 'Voice over is on. Heart voice is ready.' },
-    { refId: 'UI-quiz-name.prompt', text: 'Quiz Mode. Enter your name and class, or choose Practice Quiz to continue without submitting results.' },
+    { refId: 'UI-quiz-name.prompt', text: 'Quiz Mode. Enter your name and choose your term. You decide whether to submit your results when the quiz is finished.' },
     { refId: 'UI-quiz-select.prompt', text: 'Select a quiz. Choose a Quiz Bank level, or choose Run the Show for live director calls.' },
-    { refId: 'UI-lesson-name.prompt', text: 'Guided Lessons. Enter your name and class, or leave either field blank to practice without submitting results.' },
     { refId: 'UI-lesson-select.prompt', text: 'Guided Lessons. Choose a lesson to begin step-by-step training.' },
   ]);
 
@@ -7080,6 +7245,8 @@ function bindQuizDialogFocusLoop() {
     setMode,
     toggleBannerVisibility,
     submitQuizName,
+    submitQuizResults,
+    retryQuiz,
     backToNameEntry,
     selectQuizLevel,
     startQuiz,
@@ -7092,7 +7259,6 @@ function bindQuizDialogFocusLoop() {
     lessonNextStep,
     lessonShowHint,
     setLessonSubMode,
-    submitLessonName,
     retryLessonDrive,
     hideConfirm,
     toggleTTS,

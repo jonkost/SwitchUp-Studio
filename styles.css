@@ -1416,6 +1416,13 @@
 			color: #ff4444;
 		}
 
+		.quiz-breakdown-note {
+			margin: 2px 0 4px 18px;
+			font-size: 0.88em;
+			font-weight: 500;
+			opacity: 0.85;
+		}
+
 		#quiz-freeplay-btn {
 			font-family: 'Inter', sans-serif;
 			font-size: 15px;
@@ -12010,4 +12017,83 @@ body[data-theme="light"] #media-modal-dialog .media-option-footer {
     max-height: 86vh !important;
     padding: 18px !important;
   }
+}
+
+/* ── Quiz term chooser (Class / Month / Year → "AVT 2612") ── */
+.quiz-term-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+.quiz-term-select {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  text-align: center;
+  text-align-last: center;
+  background: #111;
+  border: 2px solid #666;
+  border-radius: 6px;
+  color: #ffffff;
+  cursor: pointer;
+}
+.quiz-term-select:focus-visible {
+  outline: none;
+  border-color: #f5a623;
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.3);
+}
+#quiz-term-preview {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+body[data-theme="light"] .quiz-term-select {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.15);
+  color: #0d1117;
+}
+
+/* ── Quiz results: submit / retry / freeplay ── */
+.quiz-results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.quiz-results-actions button {
+  flex: 1 1 160px;
+}
+#quiz-submit-btn,
+#quiz-retry-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  min-height: 48px;
+  transition: all 0.15s;
+}
+#quiz-submit-btn {
+  border: 2px solid #f5a623;
+  background: #f5a623;
+  color: #111;
+}
+#quiz-submit-btn:hover:not(:disabled) { background: #ffb940; border-color: #ffb940; }
+#quiz-submit-btn:disabled { opacity: 0.6; cursor: default; }
+#quiz-retry-btn,
+.quiz-results-actions #quiz-freeplay-btn {
+  border: 2px solid #555;
+  background: #1e1e24;
+  color: #ddd;
+}
+#quiz-retry-btn:hover,
+.quiz-results-actions #quiz-freeplay-btn:hover { background: #2a2a32; border-color: #888; color: #fff; box-shadow: none; }
+#quiz-submit-btn:focus-visible,
+#quiz-retry-btn:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
 }

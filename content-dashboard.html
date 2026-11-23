@@ -848,6 +848,20 @@
       margin-top: 8px;
     }
 
+    .grade-incorrect {
+      padding: 0 3px;
+      border-radius: 3px;
+      background: #ffe066;
+      color: #8a0016;
+      font-weight: 900;
+    }
+
+    .grade-copy-btn {
+      margin-top: 8px;
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
     .grade-detail summary {
       color: var(--blue);
       cursor: pointer;
@@ -1358,7 +1372,7 @@
     </main>
   </div>
 
-  <script type="module" src="firebase-client.js?v=5"></script>
+  <script type="module" src="firebase-client.js?v=6"></script>
   <script>
     const ADMIN_SESSION_KEY = 'switchup_admin_session_v1';
     const FORMSPREE_SUBMISSIONS_URL = 'https://formspree.io/forms/xdawpdkp/submissions';
@@ -1758,10 +1772,24 @@
     async function refreshGrades() {
       if (!state.firebase) return;
       try {
-        state.grades = typeof state.firebase.getStudentResults === 'function'
-          ? await state.firebase.getStudentResults(200)
-          : await state.firebase.getQuizSubmissions(200);
+        let errors = [];
+        if (typeof state.firebase.getStudentResultsReport === 'function') {
+          const report = await state.firebase.getStudentResultsReport(1000);
+          state.grades = report.results;
+          errors = report.errors;
+        } else {
+          state.grades = await state.firebase.getStudentResults(1000);
+        }
+        if (errors.length && !state.grades.length && errors.length > 1) throw new Error(errors[0].message);
         state.gradeStatus = `Updated ${new Date().toLocaleTimeString()}.`;
+        if (errors.length) {
+          state.gradeStatus += ' ' + errors.map((item) => {
+            const label = item.source === 'lesson' ? 'Lesson' : 'Quiz';
+            return /permission/i.test(`${item.code} ${item.message}`)
+              ? `⚠️ ${label} results are blocked by the published Firestore rules — deploy firestore.rules (firebase deploy --only firestore:rules).`
+              : `⚠️ ${label} results could not load: ${item.message}`;
+          }).join(' ');
+        }
       } catch (error) {
         state.grades = [];
         state.gradeStatus = 'Student grades could not load. Check Firestore rules and indexes.';
@@ -1853,6 +1881,130 @@
           <div class="stat-label">${label}</div>
         </div>
       `).join('');
+    }
+
+    // ---- Plain-text / LMS copy ----
+    function parseBreakdown(grade) {
+      const activity = gradeActivity(grade);
+      const items = [];
+      String(grade?.breakdown || '').split('\n').forEach((rawLine) => {
+        const line = rawLine.trim();
+        if (!line) return;
+        const noteMatch = line.match(/^What went wrong:\s*(.*)$/i);
+        if (noteMatch && items.length) {
+          items[items.length - 1].note = noteMatch[1];
+          return;
+        }
+        const quizMatch = line.match(/^\d+\.\s*\[([^\]]+)\]\s*(.*)$/);
+        if (quizMatch) {
+          const tag = /^CORRECT/i.test(quizMatch[1]) ? 'CORRECT' : /^SKIPPED/i.test(quizMatch[1]) ? 'SKIPPED' : 'INCORRECT';
+          let text = quizMatch[2];
+          if (text.endsWith(` (${activity})`)) text = text.slice(0, -(` (${activity})`).length);
+          items.push({ tag, text, note: '' });
+          return;
+        }
+        const lessonMatch = line.match(/^(.*):\s*(\d+) mistake\(s\),\s*(\d+)s$/);
+        if (lessonMatch) {
+          const mistakes = Number(lessonMatch[2]);
+          items.push({
+            tag: mistakes ? 'INCORRECT' : 'CORRECT',
+            text: lessonMatch[1],
+            detail: mistakes ? `${mistakes} mistake${mistakes === 1 ? '' : 's'} before getting it` : '',
+            note: '',
+          });
+          return;
+        }
+        items.push({ tag: '', text: line, note: '' });
+      });
+      return items;
+    }
+
+    function gradeHeaderLines(grade) {
+      return [
+        ['Student', gradeStudentName(grade)],
+        ['Class', gradeClassName(grade)],
+        ['Activity', gradeActivity(grade)],
+        ['Score', gradeScore(grade)],
+        ['Time', grade?.time || ''],
+        ['Submitted', formatFirestoreDate(grade?.createdAt || grade?.date)],
+        ['Confirmation', grade?.confirmation_code || grade?.id || ''],
+      ].filter(([, value]) => value);
+    }
+
+    const TAG_PLAIN = { CORRECT: '✅ CORRECT', INCORRECT: '❌ INCORRECT', SKIPPED: '❌ INCORRECT (skipped — no credit)' };
+
+    function gradePlainText(grade) {
+      const title = `SwitchUp Studio — ${gradeKind(grade) === 'lesson' ? 'Lesson' : 'Quiz'} Result`;
+      const lines = [title, ...gradeHeaderLines(grade).map(([label, value]) => `${label}: ${value}`)];
+      const items = parseBreakdown(grade);
+      if (items.length) {
+        lines.push('', 'Breakdown:');
+        items.forEach((item, index) => {
+          const tag = item.tag ? `${TAG_PLAIN[item.tag]}${item.detail ? ` (${item.detail})` : ''} — ` : '';
+          lines.push(`${index + 1}. ${tag}${item.text}`);
+          if (item.note) lines.push(`   What went wrong: ${item.note}`);
+        });
+      }
+      return lines.join('\n');
+    }
+
+    const INCORRECT_MARK = '<strong><span style="background-color:#ffe066;color:#b00020;font-weight:bold;">INCORRECT</span></strong>';
+
+    function gradeRichHtml(grade) {
+      const title = `SwitchUp Studio — ${gradeKind(grade) === 'lesson' ? 'Lesson' : 'Quiz'} Result`;
+      const header = gradeHeaderLines(grade)
+        .map(([label, value]) => `<strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}`)
+        .join('<br>');
+      const items = parseBreakdown(grade).map((item) => {
+        let tag = '';
+        if (item.tag === 'CORRECT') tag = '<span style="color:#1a7f37;font-weight:bold;">CORRECT</span> — ';
+        else if (item.tag === 'INCORRECT') tag = `${INCORRECT_MARK}${item.detail ? ` (${escapeHtml(item.detail)})` : ''} — `;
+        else if (item.tag === 'SKIPPED') tag = `${INCORRECT_MARK} (skipped — no credit) — `;
+        const note = item.note ? `<br><em>What went wrong: ${escapeHtml(item.note)}</em>` : '';
+        return `<li>${tag}${escapeHtml(item.text)}${note}</li>`;
+      }).join('');
+      return `<div><p><strong>${escapeHtml(title)}</strong></p><p>${header}</p>${items ? `<ol>${items}</ol>` : ''}</div>`;
+    }
+
+    function breakdownMarkup(grade) {
+      return escapeHtml(grade.breakdown || '')
+        .replace(/\[(INCORRECT|SKIPPED[^\]]*)\]/g, '<span class="grade-incorrect">[$1]</span>')
+        .replace(/(\d+ mistake\(s\))/g, (match) => (match.startsWith('0 ') ? match : `<span class="grade-incorrect">${match}</span>`));
+    }
+
+    // Copies both a plain-text and a formatted (highlighted) version. Rich-text
+    // LMS editors pick up the formatted one; plain-text boxes get the text one.
+    async function copyGradesForLms(grades, button) {
+      const divider = '\n\n----------------------------------------\n\n';
+      const text = grades.map(gradePlainText).join(divider);
+      const html = grades.map(gradeRichHtml).join('<hr>');
+      const original = button ? button.textContent : '';
+      try {
+        if (navigator.clipboard && window.ClipboardItem) {
+          await navigator.clipboard.write([new ClipboardItem({
+            'text/plain': new Blob([text], { type: 'text/plain' }),
+            'text/html': new Blob([html], { type: 'text/html' }),
+          })]);
+        } else {
+          await navigator.clipboard.writeText(text);
+        }
+        if (button) button.textContent = 'Copied ✓';
+      } catch (error) {
+        try {
+          const area = document.createElement('textarea');
+          area.value = text;
+          area.style.position = 'fixed';
+          area.style.opacity = '0';
+          document.body.appendChild(area);
+          area.select();
+          const ok = document.execCommand('copy');
+          area.remove();
+          if (button) button.textContent = ok ? 'Copied ✓' : 'Copy failed';
+        } catch (fallbackError) {
+          if (button) button.textContent = 'Copy failed';
+        }
+      }
+      if (button) setTimeout(() => { button.textContent = original; }, 1600);
     }
 
     function csvValue(value) {
@@ -1962,7 +2114,7 @@
       renderGradeStats(visibleGrades);
       resultsLineEl.textContent = `Showing ${visibleGrades.length} of ${state.grades.length} student result${state.grades.length === 1 ? '' : 's'}.`;
 
-      const gradeRows = visibleGrades.length ? visibleGrades.map((grade) => `
+      const gradeRows = visibleGrades.length ? visibleGrades.map((grade, gradeIndex) => `
         <tr>
           <td><span class="grade-kind ${gradeKind(grade)}">${escapeHtml(gradeKind(grade))}</span></td>
           <td>
@@ -1980,9 +2132,10 @@
             ${grade.breakdown ? `
               <details class="grade-detail">
                 <summary>View breakdown</summary>
-                <pre class="grade-breakdown">${escapeHtml(grade.breakdown)}</pre>
+                <pre class="grade-breakdown">${breakdownMarkup(grade)}</pre>
               </details>
             ` : ''}
+            <div><button class="ghost-btn grade-copy-btn" data-grade-copy="${gradeIndex}" type="button" title="Copy this result as text for your LMS">Copy for LMS</button></div>
           </td>
         </tr>
       `).join('') : `
@@ -1997,7 +2150,7 @@
         <div class="grades-grid">
           <article class="admin-card">
             <h2>Grade book</h2>
-            <p>Review submitted quiz and lesson results from Firestore, filter the grade book, and export a CSV when you need a spreadsheet. Older Formspree-only submissions stay in Formspree unless we import them.</p>
+            <p>Review submitted quiz and lesson results from Firestore, filter the grade book, and export a CSV when you need a spreadsheet. Use Copy for LMS on a row (or Copy all shown) to paste a result into your LMS with INCORRECT items highlighted.</p>
             <div class="gradebook-toolbar">
               <input class="grade-search" id="grade-search" type="search" placeholder="Search student, class, score, activity, or confirmation" value="${escapeHtml(state.gradeQuery)}">
               <select class="grade-filter-select" id="grade-filter" aria-label="Filter student results">
@@ -2007,6 +2160,7 @@
               </select>
               <div class="form-row">
                 <button class="primary-btn" id="refresh-grades-btn" type="button">Refresh</button>
+                <button class="ghost-btn" id="copy-grades-btn" type="button" title="Copy every result shown below as text for your LMS" ${visibleGrades.length ? '' : 'disabled'}>Copy all shown</button>
                 <button class="ghost-btn" id="download-grades-btn" type="button" ${visibleGrades.length ? '' : 'disabled'}>Download CSV</button>
                 <a class="ghost-link-btn" href="${FORMSPREE_SUBMISSIONS_URL}" target="_blank" rel="noopener noreferrer">Formspree</a>
               </div>
@@ -2051,6 +2205,14 @@
       const downloadBtn = document.getElementById('download-grades-btn');
       if (downloadBtn) downloadBtn.addEventListener('click', () => {
         downloadGradesCsv(getVisibleGrades());
+      });
+      const copyAllBtn = document.getElementById('copy-grades-btn');
+      if (copyAllBtn) copyAllBtn.addEventListener('click', () => copyGradesForLms(getVisibleGrades(), copyAllBtn));
+      contentEl.querySelectorAll('[data-grade-copy]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const grade = visibleGrades[Number(button.dataset.gradeCopy)];
+          if (grade) copyGradesForLms([grade], button);
+        });
       });
       if (keepSearchFocus && gradeSearch) {
         gradeSearch.focus();

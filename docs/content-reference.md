@@ -489,9 +489,8 @@ Notes:
 | Ref ID | Text |
 | --- | --- |
 | `UI-vo-preview.prompt` | Voice over is on. Heart voice is ready. |
-| `UI-quiz-name.prompt` | Quiz Mode. Enter your name and class, or choose Practice Quiz to continue without submitting results. |
+| `UI-quiz-name.prompt` | Quiz Mode. Enter your name and choose your term. You decide whether to submit your results when the quiz is finished. |
 | `UI-quiz-select.prompt` | Select a quiz. Choose a Quiz Bank level, or choose Run the Show for live director calls. |
-| `UI-lesson-name.prompt` | Guided Lessons. Enter your name and class, or leave either field blank to practice without submitting results. |
 | `UI-lesson-select.prompt` | Guided Lessons. Choose a lesson to begin step-by-step training. |
 
 ## Backend Direction

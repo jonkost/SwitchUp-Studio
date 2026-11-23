@@ -246,38 +246,23 @@
 			</div>
 		</div>
 
-		<!-- LESSON NAME INPUT (shown when user enters Lessons) -->
-		<div id="lesson-name-overlay" class="dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="lesson-name-heading" aria-describedby="lesson-name-desc">
-			<div id="lesson-name-dialog" class="dialog-card" tabindex="-1">
-				<div id="lesson-name-heading" class="dialog-heading">GUIDED LESSONS</div>
-				<div id="lesson-name-desc" class="dialog-copy">Enter your name and class so your instructor receives your results. Leave blank to practice without submitting.</div>
-				<div id="lesson-name-form" class="dialog-form" role="group" aria-label="Student information">
-					<input type="text" id="lesson-name-input" name="lessonStudentName" placeholder="Your Name" aria-label="Your name" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" enterkeyhint="next" />
-					<input type="text" id="lesson-class-input" name="lessonCourseSection" placeholder="Class / Section" aria-label="Class or section" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done" data-lpignore="true" data-form-type="other" />
-					<div class="lesson-voice-row">
-						<span class="lesson-voice-label">Voice narration</span>
-						<button type="button" id="lesson-voice-btn" class="lesson-voice-btn" onclick="toggleTTS()" aria-label="Toggle voice narration">OFF</button>
-					</div>
-					<div class="dialog-actions">
-						<button type="button" id="lesson-name-btn" onclick="submitLessonName()">CONTINUE</button>
-						<button type="button" id="lesson-name-back-btn" onclick="exitLessonMode()">← BACK TO FREEPLAY</button>
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<!-- QUIZ NAME INPUT (shown before quiz starts) -->
 		<div id="quiz-name-overlay" class="dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="quiz-name-heading" aria-describedby="quiz-name-desc">
 			<div id="quiz-name-dialog" class="dialog-card" tabindex="-1">
 				<div id="quiz-name-heading" class="dialog-heading">QUIZ MODE</div>
-				<div id="quiz-name-desc" class="dialog-copy">For a scored quiz, enter both name and class. Practice Quiz lets you continue without filling in either field and does not submit results.</div>
+				<div id="quiz-name-desc" class="dialog-copy">Enter your name and choose your term. You decide whether to submit your results when the quiz is finished.</div>
 				<div id="quiz-name-form" class="dialog-form" role="group" aria-label="Student information">
 					<label for="quiz-name-input" class="dialog-label">Your Name</label>
 					<input type="text" id="quiz-name-input" name="quizStudentName" placeholder="e.g. Jane Smith" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" enterkeyhint="next" />
-					<label for="quiz-class-input" class="dialog-label">Class</label>
-					<input type="text" id="quiz-class-input" name="quizCourseSection" placeholder="e.g. AVT / Section A" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done" data-lpignore="true" data-form-type="other" />
-					<button type="button" class="dialog-toggle-btn" id="quiz-practice-toggle" aria-pressed="false">PRACTICE QUIZ — DO NOT SUBMIT RESULTS</button>
-					<div class="dialog-note" id="quiz-name-note">Practice Quiz can start immediately. For a normal quiz, both fields are required.</div>
+					<div class="dialog-label" id="quiz-term-label">Term</div>
+					<div class="quiz-term-row" role="group" aria-labelledby="quiz-term-label">
+						<select id="quiz-class-select" class="quiz-term-select" aria-label="Class">
+							<option value="AVT">AVT</option>
+						</select>
+						<select id="quiz-month-select" class="quiz-term-select" aria-label="Month"></select>
+						<select id="quiz-year-select" class="quiz-term-select" aria-label="Year"></select>
+					</div>
+					<div class="dialog-note" id="quiz-term-preview" aria-live="polite"></div>
 					<div class="dialog-actions">
 						<button type="button" id="quiz-name-btn" onclick="submitQuizName()">CONTINUE</button>
 						<button type="button" id="quiz-name-back-btn" onclick="setMode('freeplay')">← BACK TO FREEPLAY</button>
@@ -343,8 +328,12 @@
 				<div id="quiz-results-time"></div>
 				<div id="quiz-results-code"></div>
 				<div id="quiz-results-breakdown" role="list" aria-label="Question breakdown"></div>
-				<div class="quiz-results-note">Your results have been automatically sent to your instructor.</div>
-				<button id="quiz-freeplay-btn" onclick="setMode('freeplay')">FREEPLAY</button>
+				<div class="quiz-results-note" id="quiz-results-note">Submit to send these results to your instructor, or retry / return to Freeplay without submitting.</div>
+				<div class="quiz-results-actions">
+					<button type="button" id="quiz-submit-btn" onclick="submitQuizResults()">SUBMIT RESULTS</button>
+					<button type="button" id="quiz-retry-btn" onclick="retryQuiz()">↺ RETRY — DON'T SUBMIT</button>
+					<button type="button" id="quiz-freeplay-btn" onclick="setMode('freeplay')">FREEPLAY — DON'T SUBMIT</button>
+				</div>
 			</div>
 		</div>
 
@@ -709,7 +698,6 @@
 				<div id="lesson-results-subtitle" class="dialog-copy"></div>
 				<div id="lesson-results-stats" class="lesson-results-stats"></div>
 				<div id="lesson-results-breakdown" class="lesson-results-breakdown"></div>
-				<div id="lesson-results-sent-msg" class="lesson-results-sent-msg" style="display:none"></div>
 				<div class="dialog-actions">
 					<button type="button" id="lesson-results-freeplay-btn" onclick="exitLessonMode()">← BACK TO FREEPLAY</button>
 					<button type="button" id="lesson-results-retry-btn" onclick="retryLessonDrive()">↺ RETRY DRIVE</button>
@@ -774,8 +762,8 @@
 		</div>
 	</div>
 
-	  <script type="module" src="firebase-client.js?v=2"></script>
-	  <script src="script.js?v=7"></script>
+	  <script type="module" src="firebase-client.js?v=6"></script>
+	  <script src="script.js?v=8"></script>
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
   </script>
